@@ -59,19 +59,8 @@
   <!-- ══ Home. Rendered by js/screen_home.js from the store ══ -->
   <section class="screen" id="screen-home" hidden></section>
 
-  <!-- ══ History ═══════════════════════════════════════════ -->
-  <section class="screen" id="screen-expenses" hidden>
-    <header class="band band--ok">
-      <div class="band-top"><span class="band-who"></span></div>
-      <h1 class="band-title">History</h1>
-    </header>
-    <div class="screen-body">
-      <div class="empty">
-        <h2>No expenses yet</h2>
-        <p>Everything you record shows up here, grouped by day.</p>
-      </div>
-    </div>
-  </section>
+  <!-- ══ History. Rendered by js/screen_expenses.js ══ -->
+  <section class="screen" id="screen-expenses" hidden></section>
 
   <!-- ══ People ════════════════════════════════════════════ -->
   <section class="screen" id="screen-people" hidden>
@@ -171,9 +160,12 @@
 <script src="js/alerts.js"></script>
 <script src="js/validate.js"></script>
 <script src="js/store.js"></script>
+<script src="js/actions.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/onboarding.js"></script>
+<script src="js/sheet_expense.js"></script>
 <script src="js/screen_home.js"></script>
+<script src="js/screen_expenses.js"></script>
 <script src="js/app.js"></script>
 <script>
   document.getElementById("version-line").textContent =

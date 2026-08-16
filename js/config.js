@@ -6,7 +6,7 @@ var CONFIG = {
 
   /* Bump VERSION together with CACHE in sw.js on every deploy. An Android
      versionCode is derived from this, so it must only ever go up. */
-  VERSION: "0.3.0",
+  VERSION: "0.4.0",
 
   /* Bump only when the shape of the stored object changes, and add a
      migration step in store.js at the same time. */

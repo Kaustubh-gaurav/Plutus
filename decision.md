@@ -76,6 +76,9 @@ Status: done. The site is live and the logic layer is built and tested.
 **REQ 015.** "Start the next phase, also in the figma file add all the icons that you will need, I'll give them to you afterwards."
 Status: done. 47 icons drawn into a new "Icons for build" page in the Figma file, and Phase 3 built.
 
+**REQ 016.** "Next phase." Build Phase 4, expenses.
+Status: done. Add, edit, delete, categories and history, with 127 tests passing.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -389,6 +392,28 @@ Why: rule R2. A screen that looks alive and is not is worse than an empty one.
 A page named "Icons for build" holds all 47 icons in five sections, each drawn at 24 by 24 with the id the code uses printed underneath. Categories are shown inside their real tinted badge, since that is the only place they appear.
 Why: naming each cell after the code id means a redrawn icon drops straight in with no mapping table.
 
+### Phase 4, expenses, 16 August 2026
+
+**D075. A new layer, `actions.js`, sits between the screens and the store.**
+Screens never call `Store.insert` directly. Every write goes through an action that validates with the logic layer, mutates through the store, saves, and returns `{ ok, errors }` so a form can show inline messages.
+Why: `store.js` stays a pure data layer with no opinion about what is valid, while there is still exactly one validated path from an intention to a saved record. Architecture had validation living inside the store actions; this is cleaner and keeps the data layer free of logic dependencies.
+
+**D076. Deleting a category reassigns its expenses to Miscellaneous in the same write.**
+A default category is archived rather than deleted, because the seed set is data the app depends on. Miscellaneous itself cannot be removed, since it is where everything else goes.
+Why: there must be no moment where an expense points at a category that is gone. Tested by asserting zero orphans afterwards.
+
+**D077. Setting a budget twice in the same period replaces that record rather than stacking another.**
+Append only across periods, replace within one. Otherwise a user who taps twice leaves two records with the same `effectiveFrom` and the resolver has to break the tie by creation time.
+
+**D078. The category used last is preselected in the add sheet.**
+Why: expense entry is the highest frequency action in the app, and the next expense is very often in the same category as the last one. It saves a tap on the most repeated action there is.
+
+**D079. A category can be created without leaving the add sheet.**
+Someone halfway through recording a coffee should not have to abandon it, go to Settings, make a category, and start again.
+
+**D080. A history row's title is the most specific thing available, and the subtitle carries only what the title did not already say.**
+Found by looking at a render: rows were printing "Lunch at Anand" as the title and "Lunch at Anand · Food · UPI" underneath it. Repeating the note on both lines reads as a bug because it is one.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -470,6 +495,14 @@ Why: naming each cell after the code id means a redrawn icon drops straight in w
 **C038.** Built `js/screen_home.js` so Home reads the store. Verified in all four budget states, and confirmed the band colour and the status bar follow the state, teal to mustard to rose, with the hatch marking overspend.
 
 **C039.** Found and fixed the daily allowance rounding, see D072. 108 tests passing.
+
+**C040.** Built Phase 4: `js/actions.js` the validated write path, `js/sheet_expense.js` the add and edit sheet, `js/screen_expenses.js` the history screen, and the form styles.
+
+**C041.** Verified the whole loop by driving the real interface headless rather than calling functions directly: opened the sheet, typed an amount, picked a category, saved, and watched the Home band fall from ₹25,000 to ₹19,000 to ₹17,500. Then edited an entry from ₹1,500 to ₹12,000 and watched the band drop to ₹7,000 and change colour from teal to mustard. Then deleted one and watched it climb back. Then deleted a category and confirmed zero orphaned expenses.
+
+**C042.** Fixed two rendering defects found in that pass: history rows printed the note twice, and payment methods rendered lowercase.
+
+**C043.** Tests up to **127**, adding the write path: valid writes persist, invalid ones are refused and write nothing, a refused edit leaves the record alone, an edit moves every dependent figure, category deletion never orphans, defaults archive rather than delete, and budgets stay append only.
 
 ## Open questions
 

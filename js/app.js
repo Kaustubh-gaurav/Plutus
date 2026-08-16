@@ -71,6 +71,8 @@ var App = (function () {
       ? CONFIG.APP_NAME
       : route.title + " · " + CONFIG.APP_NAME;
 
+    if (route.id !== "screen-expenses" && typeof ScreenExpenses !== "undefined") ScreenExpenses.reset();
+
     window.scrollTo(0, 0);
     refresh();
   }
@@ -89,6 +91,10 @@ var App = (function () {
        empty state stands. */
     if (current && current.id === "screen-home" && typeof ScreenHome !== "undefined") {
       ScreenHome.render();
+      return;
+    }
+    if (current && current.id === "screen-expenses" && typeof ScreenExpenses !== "undefined") {
+      ScreenExpenses.render();
       return;
     }
     setBandColour();
@@ -141,17 +147,7 @@ var App = (function () {
 
     var add = document.getElementById("add-expense");
     if (add) {
-      add.addEventListener("click", function () {
-        /* The real sheet arrives in Phase 4. Until then this proves the
-           overlay, the focus trap and the back gesture all work. */
-        UI.openSheet({
-          title: "Add an expense",
-          content: UI.el("div.sheet-form",
-            UI.el("p.note", { text: "The expense form lands in Phase 4. This sheet is here to prove the overlay, the focus trap and the Android back gesture behave." }),
-            UI.el("button.btn", { type: "button", onclick: function () { UI.closeSheet(); } }, "Close")
-          )
-        });
-      });
+      add.addEventListener("click", function () { SheetExpense.open(); });
     }
 
     registerServiceWorker();

@@ -345,6 +345,91 @@ a.row { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
+   Forms. Every one of them lives in a sheet, so these styles are
+   written for a cream surface and nothing else.
+   ============================================================ */
+
+.sheet-form { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+/* The amount is the hero of the sheet: it is what the user came to type. */
+.amount-row {
+  display: flex; align-items: baseline; justify-content: center; gap: var(--sp-2);
+  padding: var(--sp-3) 0 var(--sp-1);
+}
+.amount-sym { font-size: 24px; font-weight: 800; opacity: .42; }
+.amount-input {
+  border: 0; background: none; color: var(--ink); font: inherit;
+  font-size: 46px; font-weight: 800; letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums; text-align: center;
+  width: 100%; max-width: 240px; padding: 0; -webkit-appearance: none;
+}
+.amount-input:focus { outline: none; }
+.amount-input::placeholder { color: var(--ink); opacity: .22; }
+
+/* A horizontal scroller, because a wrapping grid of categories pushes the
+   save button off the screen on a small phone. */
+.chip-row {
+  display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: var(--sp-1);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.chip-row::-webkit-scrollbar { display: none; }
+.chip {
+  display: inline-flex; align-items: center; gap: var(--sp-2); flex: none;
+  border-radius: var(--r-pill); padding: 9px 13px; min-height: 40px;
+  background: var(--white); color: var(--ink);
+  font-size: 12.5px; font-weight: 700; white-space: nowrap;
+}
+.chip.is-on { background: var(--ink); color: var(--on-ink); }
+.chip-dot {
+  width: 22px; height: 22px; border-radius: 8px; flex: none;
+  display: grid; place-items: center; color: var(--ink);
+}
+.chip--new { border: 1px dashed rgba(26, 23, 32, .25); background: none; }
+
+.field { display: flex; flex-direction: column; gap: var(--sp-2); }
+.field-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; opacity: .5;
+}
+.field-input {
+  width: 100%; height: 48px; border: 0; border-radius: var(--r-tile);
+  background: var(--white); color: var(--ink);
+  font: inherit; font-size: 15px; font-weight: 600;
+  padding: 0 var(--sp-5); -webkit-appearance: none;
+}
+.field-input::placeholder { color: var(--ink); opacity: .35; font-weight: 600; }
+/* The native date input is kept in the DOM but out of sight: the three quick
+   buttons above it are the interface, and it is only opened when needed. */
+.field-hidden { height: 0; overflow: hidden; }
+
+.more-toggle {
+  align-self: flex-start; font-size: 13px; font-weight: 700;
+  color: var(--ink); opacity: .6; padding: var(--sp-1) 0;
+}
+.more-fields { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+.form-error {
+  margin: 0; font-size: 12.5px; font-weight: 700;
+  color: var(--pl-danger-fg); background: var(--pl-danger-bg);
+  padding: var(--sp-4) var(--sp-5); border-radius: var(--r-tile);
+}
+
+.tint-swatch {
+  width: 34px; height: 34px; border-radius: var(--r-badge); flex: none;
+  border: 2px solid transparent;
+}
+.tint-swatch.is-on { border-color: var(--ink); }
+
+/* ── history ── */
+.day-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px; font-weight: 800; padding-bottom: var(--sp-1);
+}
+.day-head span { font-variant-numeric: tabular-nums; opacity: .55; }
+.row--tap { width: 100%; text-align: left; }
+.row--tap:active { opacity: .6; }
+
+/* ============================================================
    Onboarding. No nav, and the band fills the whole screen, so the
    five questions feel like one continuous thing rather than five
    pages. One question, one field, one button, per design.md.

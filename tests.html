@@ -41,6 +41,7 @@
 <script src="js/alerts.js"></script>
 <script src="js/validate.js"></script>
 <script src="js/store.js"></script>
+<script src="js/actions.js"></script>
 
 <script>
 /* ── a thirty line harness. no npm, no runner, no build ── */
@@ -858,6 +859,158 @@
       eq(Validate.profile({ currencyCode: "XYZ" }).ok, false);
       eq(Validate.profile({ weekStartsOn: 3 }).ok, false);
       eq(Validate.profile({ currencyCode: "INR", weekStartsOn: 1 }).ok, true);
+    });
+  });
+
+  /* ═══════════ Phase 4: the write path ═══════════
+     Actions are the only way anything is written, so this is where invalid
+     data would get in if validation were skipped. UI and App are stubbed,
+     because these tests are about the data, not the screen. */
+
+  window.UI = window.UI || { banner: function () {}, clearBanner: function () {} };
+  window.App = window.App || { refresh: function () {} };
+
+  function seedStore() {
+    var fs = fakeStorage();
+    Store.__setBackend(fs);
+    Store.load();
+    return fs;
+  }
+  function catId(name) {
+    var found = Store.get().categories.filter(function (c) { return c.name === name; });
+    return found.length ? found[0].id : null;
+  }
+
+  describe("actions: writing an expense", function () {
+    seedStore();
+    var food = catId("Food");
+
+    it("writes a valid expense and reports that it persisted", function () {
+      var r = Actions.addExpense({ amount: 42000, categoryId: food, date: Dates.today() });
+      eq(r.ok, true);
+      eq(r.persisted, true);
+      eq(Store.get().expenses.length, 1);
+      eq(Store.get().expenses[0].amount, 42000);
+    });
+    it("refuses an expense with no amount and writes nothing", function () {
+      var before = Store.get().expenses.length;
+      var r = Actions.addExpense({ amount: null, categoryId: food, date: Dates.today() });
+      eq(r.ok, false);
+      ok(r.errors.amount, "there must be a message for the amount field");
+      eq(Store.get().expenses.length, before);
+    });
+    it("refuses a category that does not exist", function () {
+      var r = Actions.addExpense({ amount: 1000, categoryId: "nope", date: Dates.today() });
+      eq(r.ok, false);
+      ok(r.errors.categoryId);
+    });
+    it("refuses a date in the future", function () {
+      var r = Actions.addExpense({ amount: 1000, categoryId: food, date: Dates.addDays(Dates.today(), 1) });
+      eq(r.ok, false);
+      ok(r.errors.date);
+    });
+    it("edits an expense, and validates the result of the edit", function () {
+      var id = Store.get().expenses[0].id;
+      eq(Actions.updateExpense(id, { amount: 90000 }).ok, true);
+      eq(Store.byId("expenses", id).amount, 90000);
+      eq(Actions.updateExpense(id, { amount: 0 }).ok, false);
+      eq(Store.byId("expenses", id).amount, 90000, "a refused edit must leave the record alone");
+    });
+    it("deletes an expense", function () {
+      var id = Store.get().expenses[0].id;
+      eq(Actions.removeExpense(id).ok, true);
+      eq(Store.byId("expenses", id), null);
+    });
+  });
+
+  describe("actions: an edit moves every dependent figure", function () {
+    seedStore();
+    var food = catId("Food");
+    var today = Dates.today();
+    var period = Dates.monthPeriod(today);
+    Actions.setBudget("monthly", 2500000);
+    Actions.addExpense({ amount: 600000, categoryId: food, date: today });
+    var id = Store.get().expenses[0].id;
+
+    function progress() {
+      var s = Store.get();
+      return Budget.progress(Budget.resolveForPeriod(s.budgets, period).amount, s.expenses, period);
+    }
+
+    it("starts where it should", function () {
+      eq(progress().spent, 600000);
+      eq(progress().remaining, 1900000);
+    });
+    it("doubling the expense doubles the spend and halves nothing else silently", function () {
+      Actions.updateExpense(id, { amount: 1200000 });
+      eq(progress().spent, 1200000);
+      eq(progress().remaining, 1300000);
+      eq(Analytics.analyse(Store.get().expenses, period).byCategory[0].total, 1200000);
+    });
+    it("moving it to last month empties this month", function () {
+      Actions.updateExpense(id, { date: Dates.addDays(period.start, -1) });
+      eq(progress().spent, 0);
+      eq(progress().remaining, 2500000);
+    });
+    it("deleting it leaves the budget untouched and the spend at zero", function () {
+      Actions.removeExpense(id);
+      eq(progress().spent, 0);
+      eq(progress().budget, 2500000);
+    });
+  });
+
+  describe("actions: categories", function () {
+    seedStore();
+    var food = catId("Food");
+
+    it("creates a custom category", function () {
+      var r = Actions.addCategory({ name: "Coffee", tint: "clay" });
+      eq(r.ok, true);
+      eq(r.value.isDefault, false);
+    });
+    it("refuses a duplicate name", function () {
+      eq(Actions.addCategory({ name: "coffee" }).ok, false);
+    });
+    it("never orphans an expense when a category goes", function () {
+      var coffee = catId("Coffee");
+      Actions.addExpense({ amount: 24000, categoryId: coffee, date: Dates.today() });
+      Actions.removeCategory(coffee);
+      var orphans = Store.get().expenses.filter(function (e) { return !Store.byId("categories", e.categoryId); });
+      eq(orphans.length, 0);
+      eq(Store.get().expenses[0].categoryId, Actions.miscellaneousId());
+    });
+    it("archives a default category rather than deleting it", function () {
+      Actions.removeCategory(food);
+      var still = Store.byId("categories", food);
+      ok(still, "the seeded record stays");
+      eq(still.isArchived, true);
+      eq(Actions.categories().filter(function (c) { return c.id === food; }).length, 0);
+    });
+    it("refuses to remove Miscellaneous, since it is the fallback", function () {
+      eq(Actions.removeCategory(Actions.miscellaneousId()).ok, false);
+    });
+  });
+
+  describe("actions: budgets stay append only", function () {
+    seedStore();
+    var today = Dates.today();
+
+    it("writes a budget effective from the start of this month", function () {
+      Actions.setBudget("monthly", 2500000);
+      eq(Store.get().budgets.length, 1);
+      eq(Store.get().budgets[0].effectiveFrom, Dates.monthPeriod(today).start);
+    });
+    it("changing it in the same month replaces rather than stacking", function () {
+      Actions.setBudget("monthly", 3000000);
+      eq(Store.get().budgets.length, 1);
+      eq(Store.get().budgets[0].amount, 3000000);
+    });
+    it("keeps monthly and weekly as separate records", function () {
+      Actions.setBudget("weekly", 700000);
+      eq(Store.get().budgets.length, 2);
+    });
+    it("refuses a budget of zero", function () {
+      eq(Actions.setBudget("monthly", 0).ok, false);
     });
   });
 
