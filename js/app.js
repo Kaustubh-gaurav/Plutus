@@ -118,8 +118,9 @@ var App = (function () {
       band.classList.remove("band--ok", "band--warn", "band--danger");
       band.classList.add(cls);
     }
+    /* Only the over budget band is filled, so only it changes the status bar. */
     var colour = getComputedStyle(document.documentElement)
-      .getPropertyValue(state === "danger" ? "--s-danger" : state === "warn" ? "--s-warn" : "--s-ok")
+      .getPropertyValue(state === "danger" ? "--s-danger" : "--canvas")
       .trim();
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta && colour) meta.setAttribute("content", colour);

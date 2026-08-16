@@ -91,6 +91,9 @@ Status: done as 1.2.0. D045 superseded by D095.
 **REQ 020.** "I've pasted new design inspiration in the figma file, please make the new design according to that."
 Four new reference images from the DoMORE case study: near black, one acid lime accent. Status: done as 2.0.0.
 
+**REQ 021.** "The green is too much and too heavy, don't use the earlier inspirations, use only this one now, as you can see it has kind of a brutalism theme to it, you can also change the fonts to fit the theme better."
+Status: done as 2.2.0. Accent cut to under 2 percent of a screen, measured. Hard edges throughout. New typefaces.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -513,6 +516,30 @@ Lime on canvas 14.8 to 1, ink on lime 15.0, ink on amber 11.6, ink on danger 6.2
 **D102. Three classes were renamed because their names became lies.**
 `surf--white` to `surf--card`, `surf--cream` to `surf--muted`, `surf--ink` to `surf--feature`. A class called white that paints dark grey is a trap for whoever reads it next.
 
+### Version 4, dark brutalist, 17 August 2026
+
+**D103. The accent is rare, and the amount is measured rather than judged.**
+Version 3 used lime for a full screen band, both direction tiles, the nav pill and the toast. The reference uses it for roughly five percent of a screen. It now appears on the primary button, the add button, the bar fill, the active tab rule and a card's left edge, and **covers under 2 percent of the Home screen**, asserted by summing the painted area of every element carrying the accent colour.
+Why: a single accent stops being an accent when it is the largest thing on screen. This was my error, not an ambiguity in the reference.
+
+**D104. A status is an edge and a text colour, not a slab of paint.**
+Insight cards, debt cards and the direction tiles all state their status with a 3px left rule, an outlined pill and a coloured figure. The one exception is the over budget band, which fills solid red, because that state is rare and has to interrupt.
+D053 survives in the form that matters: the screen still changes when your state changes. It simply no longer shouts while everything is fine.
+
+**D105. Hard edges throughout.**
+Cards 14px to 4px, buttons to 2px, sheets to 0, bars squared off. Nothing is a pill. The nav became a full width bar with a hard top edge instead of a floating capsule, and the active tab is the icon in the accent under a 2px rule rather than a filled block.
+
+**D106. Two typefaces: Space Grotesk for the interface, JetBrains Mono for every figure.**
+97KB for four files, less than Inter alone cost. A monospace guarantees digits line up in a column without depending on a tabular numeral feature the face may not carry, and a money app is mostly columns of digits. It also reads raw and technical, which is the register the reference is in.
+Supersedes D095, which superseded D045.
+
+**D107. The rupee is served from Space Grotesk even inside monospaced runs.**
+JetBrains Mono's latin-ext subset declares U+20B9 in its unicode range but carries **no glyph for it**, so every amount fell back to a system monospace for that one character. Caught by measuring: the mono advance is 48 units and the rupee measured 44. U+20B9 is now cut out of that face's range and a fourth `@font-face` serves it from Space Grotesk, which does have it, at no extra bytes because that file already ships.
+This is the third time the rupee has needed specific handling across three typefaces. It is now a standing check, not a one off.
+
+**D108. Earlier inspiration boards are no longer referenced.**
+The education app collage that drove versions 1 and 2 is out of scope. `design.md` keeps one paragraph of it only where it explains a decision still in force.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -638,6 +665,16 @@ Lime on canvas 14.8 to 1, ink on lime 15.0, ink on amber 11.6, ink on danger 6.2
 **C060.** Found and fixed three regressions the change introduced, each caught by rendering rather than by reading: `pill--dark` painted white text on a white pill once `--ink` became a text colour, the People summary tile used a glass fill with no bright ground behind it, and `--ink-3` failed contrast on the dark canvas.
 
 **C061.** Re-ran the acceptance and accessibility passes against the dark build. 18 checks pass, including a sweep for any element whose text colour equals its background, which is the classic dark theme regression.
+
+**C062.** Cut the accent back to reference levels and re-skinned for hard edges: radii, the nav as a full width bar, squared bars, uppercase tracked card titles, and rules between rows so the structure is visible.
+
+**C063.** Replaced Inter with Space Grotesk plus JetBrains Mono, and applied the mono to every figure in the app.
+
+**C064.** Found by measuring that JetBrains Mono has no rupee glyph despite declaring the range, and fixed it with a targeted fourth font face. See D107.
+
+**C065.** Verified: accent coverage under 2 percent, both faces loading rather than falling back, digits genuinely monospaced, the rupee served from Grotesk, the band dark under the limit and red over it, the status bar following it, every control named, no target under 36px, and all six screens rendering. 130 unit tests still pass.
+
+**C066.** Still stale and flagged rather than quietly left: `design-preview.html`, `design-directions.html` and `design-layouts.html` all render the cream version 2 system. They are historical records of a direction that is now two versions old.
 
 ## Open questions
 

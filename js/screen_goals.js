@@ -32,7 +32,7 @@ var ScreenGoals = (function () {
       if (which === "track") {
         path.setAttribute("stroke", "var(--sunken)");
       } else {
-        path.setAttribute("stroke", tone === "complete" ? "var(--s-ok)" : "var(--s-warn)");
+        path.setAttribute("stroke", "var(--s-ok)");
         path.setAttribute("stroke-dasharray", String(LEN));
         path.setAttribute("stroke-dashoffset", String(LEN * (1 - Math.min(percent, 100) / 100)));
       }

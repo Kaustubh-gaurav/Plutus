@@ -42,7 +42,7 @@ var ScreenPeople = (function () {
 
   function debtCard(v, today) {
     var surface = v.isSettled ? "surf--muted" : v.isOverdue ? "surf--danger" : "surf--card";
-    var barFill = v.isOverdue ? "fill--cur" : v.status === "partially_paid" ? "fill--warn" : "fill--ok";
+    var barFill = v.isOverdue ? "fill--danger" : v.status === "partially_paid" ? "fill--warn" : "fill--ok";
 
     return el("button.card.card--tap." + surface, {
       type: "button",
@@ -51,9 +51,7 @@ var ScreenPeople = (function () {
     },
       el("div.row",
         el("span.badge.badge--lg", {
-          style: v.isOverdue
-            ? { background: "var(--glass-dark)", color: "var(--ink)" }
-            : { background: "var(--cat-" + initialTint(v.personName) + ")", color: "var(--on-accent)" }
+          style: { background: "var(--cat-" + initialTint(v.personName) + ")", color: "var(--on-accent)" }
         }, el("b", { text: v.personName.trim().charAt(0).toUpperCase() })),
         el("span.row-tx",
           el("b", { text: v.personName }),

@@ -4,19 +4,19 @@
 > Anything on screen that is not in this file does not exist.
 
 Last updated: 17 August 2026
-**Version 3, dark.** Source: four new reference images in the Plutus Figma file, `hRrczeduKiRMrK1x9l5yzc`, from the DoMORE case study.
+**Version 4, dark brutalist.** Source: the four DoMORE reference images in the Plutus Figma file. Earlier boards are no longer referenced.
 
-**Why there is a version 3.** New inspiration replaced the old board. The direction inverts almost every surface decision from version 2 and keeps every structural one.
+**Why there is a version 4.** Version 3 read the reference as "dark plus lime" and then used lime for a full screen band, the tiles, the nav and the toast. The reference uses it for roughly five percent of a screen: one button, one underline, one small banner. Version 4 cuts it back to that, and leans into the brutalism the board actually carries.
 
-Ground: warm cream becomes near black `#121416`.
-Cards: saturated colour blocks become one dark surface with a hairline.
-Accent: teal, mustard, rose and periwinkle become one acid lime, plus a warning and a breach.
-Radius: 24 on cards becomes 14, and pills become 10px rectangles on buttons.
-Buttons: pill and sentence case become rectangle, uppercase and tracked.
-Tabs: a sunken segmented pill becomes an underline.
-Band: a colour block on every screen becomes Home only, with every other screen flat.
+**What changed from v3**
 
-**What did not change**, because none of it was ever about the palette: money as integer paise, nothing derived is stored, the status bands, colour never carrying meaning alone, every form in a sheet, one component one appearance, and a 44px minimum target.
+* **The accent is now rare.** Measured: it covers under 2 percent of the Home screen. It appears on the primary button, the add button, the bar fill, an active tab rule, a card's left edge, and nothing else.
+* **The Home band is dark under the limit.** State is carried by the bar, a pill and one hairline. It fills solid red only when you are over budget, because that is rare and should interrupt. D053 survives in the form that matters: the screen still changes when your state changes.
+* **Hard edges.** Cards drop from 14px to 4px, buttons to 2px, sheets to 0. Nothing is a pill. The nav is a full width bar with a hard top edge rather than a floating capsule.
+* **Structure is visible.** Rows are separated by rules, headers sit over hairlines, card titles are uppercase and tracked.
+* **New typefaces.** See section 4.
+
+## 0. The palette, sampled not guessed
 
 ## 0. The palette, sampled not guessed
 
@@ -116,9 +116,11 @@ Custom categories pick from these ten, never from a free colour picker.
 
 ## 4. Type
 
-**Inter**, self hosted as two variable woff2 subsets in `fonts/`, 133KB together. The rupee glyph U+20B9 lives in the latin-ext file, so both are required, exactly as with the face this replaced. Fallback is the system stack.
+**Space Grotesk** for the interface and **JetBrains Mono** for every figure. Self hosted, four woff2 files, 97KB together, which is less than Inter alone cost.
 
-Changed from Plus Jakarta Sans on 17 August 2026 at the user's request. Inter is the more neutral face of the two: a larger x height, tighter apertures, and a lower profile at display sizes, so the same headline reads slightly wider and slightly calmer. It costs 133KB against Jakarta's 49KB, because its variable file spans 100 to 900 and its latin-ext subset is large. That is a one time cost on a cached shell.
+Space Grotesk is a grotesque with squared off curves and odd details: about as close to brutalist as a face can be while staying readable at 11px. JetBrains Mono carries every amount, percentage and date total. A monospace guarantees digits line up in a column without depending on a tabular numeral feature the face may or may not carry, and a money app is mostly columns of digits. It also reads raw and technical, which is the register the reference is in.
+
+**The rupee needed handling.** JetBrains Mono's latin-ext subset declares U+20B9 in its range but carries no glyph for it, so every amount silently fell back to a system monospace for that one character. Found by measuring: the mono advance is 48 units and the rupee measured 44. U+20B9 is now cut out of that face's range and served from Space Grotesk instead, which does have it, at no extra cost because that file already ships.
 
 Inter's letterforms are optically smaller at the same point size, so the display sizes keep their negative tracking and nothing else moved.
 
@@ -231,12 +233,12 @@ The day by day chart was lifted from layout L3 at the user's request. It sits di
 Loud surfaces make drift easier, so these carry more weight than in version 1. A design review is these twelve, in order, against the screen.
 
 1. **Home opens with a bright band; every other screen opens flat.** On cream a dark band read as a block. On near black a dark band on a dark canvas is an invisible rectangle, so only Home, where the budget state is worth shouting, carries a colour block. Everywhere else it is a hairline under a title.
-2. **One surface, one accent.** Cards are all `--surface`. Colour appears on the Home band, on primary buttons, on bars, on selected chips and on status pills. A new colour needs a new job first.
+2. **The accent is rare, and it is earned.** Under 2 percent of a screen, measured. Primary buttons, the add button, the bar fill, the active tab rule, a card's left edge. Nothing else. A status is an edge and a text colour, never a slab of paint. The single exception is the over budget band, which fills solid red because it has to interrupt.
 3. **A surface colour means one thing.** Periwinkle is money you owe, everywhere, always.
 4. **Only the Home band changes colour.** Teal, mustard, rose, driven by the budget. Every other block keeps its colour forever.
 5. **Text colour follows the surface.** Dark on mustard, cream and periwinkle. Light on teal, rose and ink.
 6. **Every bar carries its numbers**, and overspend is always the hatch, never a different colour.
-7. **One card, one radius.** 14 on cards, 12 on tiles, 10 on buttons and badges, 18 on sheets, full round on pills and chips.
+7. **Hard edges.** 4 on cards and tiles, 3 on badges, 2 on buttons and pills, 0 on sheets. The only genuinely round things in the app are the avatar and the notification dot.
 8. **Figures are weight 800**, tabular, no exceptions.
 9. **Every form is a sheet.**
 10. **Direction is never colour alone.** Owed to you and you owe carry a word, an arrow and a colour, all three.

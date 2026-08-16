@@ -245,6 +245,8 @@ var ScreenHome = (function () {
   function insightCard(insights) {
     if (!insights.length) return null;
     var top = insights[0];
+    /* One edge, not a slab. Every insight is the same dark card; only the
+       rule down its left side changes. */
     var surface = top.tone === "danger" ? "surf--danger"
                 : top.tone === "warn" ? "surf--warn"
                 : top.tone === "ok" ? "surf--ok" : "surf--feature";

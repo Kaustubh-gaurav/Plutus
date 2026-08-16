@@ -48,13 +48,16 @@
 
   /* ── shape. much tighter than the light system: the reference is
      rectangles with a small radius, not pills and 24px cards. ── */
+  /* Hard edges. Brutalism is square: nothing here is a pill, and the few
+     radii left are just enough to stop a corner looking accidental. */
   --r-band: 0px;
-  --r-card: 14px;
-  --r-tile: 12px;
-  --r-badge: 10px;
-  --r-btn: 10px;
-  --r-pill: 999px;
-  --r-sheet: 18px;
+  --r-card: 4px;
+  --r-tile: 4px;
+  --r-badge: 3px;
+  --r-btn: 2px;
+  --r-pill: 2px;
+  --r-sheet: 0px;
+  --r-round: 999px;   /* the only genuinely round things: avatars, nav dots */
 
   /* ── space. unchanged: the rhythm was never the problem ── */
   --sp-1: 4px;  --sp-2: 6px;  --sp-3: 8px;  --sp-4: 11px;
@@ -63,36 +66,61 @@
   --gutter: 18px;
   --nav-h: 62px;
 
-  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  --font: "Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   color-scheme: dark;
 }
 
-/* The rupee glyph U+20B9 is NOT in the latin subset. It lives in latin-ext,
-   in Inter exactly as it did in Jakarta. Both files are required or every
-   amount renders its currency symbol in a fallback face while the digits
-   beside it are Inter. */
+/* Two faces, and the pairing is the point.
+
+   Space Grotesk carries the interface: a grotesque with squared off curves and
+   odd details, which is as close to brutalist as a readable UI face gets.
+
+   JetBrains Mono carries every figure. A monospace guarantees digits line up
+   in a column without relying on a tabular numeral feature the font may not
+   have, and a money app is mostly columns of digits. It also reads as raw and
+   technical, which is the register the reference is in.
+
+   The rupee glyph U+20B9 is in the latin-ext subset of both, not latin, so all
+   four files ship. */
 @font-face {
-  font-family: "Inter";
-  src: url("../fonts/inter-latin.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  font-family: "Grotesk";
+  src: url("../fonts/grotesk-latin.woff2") format("woff2");
+  font-weight: 300 700; font-style: normal; font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Inter";
-  src: url("../fonts/inter-latin-ext.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
-    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
-    U+A720-A7FF;
+  font-family: "Grotesk";
+  src: url("../fonts/grotesk-latin-ext.woff2") format("woff2");
+  font-weight: 300 700; font-style: normal; font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Mono";
+  src: url("../fonts/mono-latin.woff2") format("woff2");
+  font-weight: 100 800; font-style: normal; font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Mono";
+  src: url("../fonts/mono-latin-ext.woff2") format("woff2");
+  font-weight: 100 800; font-style: normal; font-display: swap;
+  /* U+20B9 is deliberately cut out of this range: Google declares it as
+     covered but the file carries no rupee glyph, so every amount fell back to
+     a system monospace for that one character. Measured, not assumed. */
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20B8, U+20BA-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* The rupee, inside monospaced runs, comes from Space Grotesk. It is the one
+   glyph in the app that has to be right, and this costs nothing because the
+   file is already in the shell. */
+@font-face {
+  font-family: "Mono";
+  src: url("../fonts/grotesk-latin-ext.woff2") format("woff2");
+  font-weight: 300 700; font-style: normal; font-display: swap;
+  unicode-range: U+20B9;
 }
 
 * { box-sizing: border-box; }
@@ -115,10 +143,14 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Every figure in this app is tabular. Amounts that jitter as digits change
-   are amounts nobody trusts. */
-.amount, .big, .tile-v, .bar-label, .row-amt {
+/* Every figure in this app is monospaced. A money app is columns of digits,
+   and a monospace guarantees they line up without depending on a tabular
+   numeral feature the face may or may not carry. */
+.amount, .big, .tile-v, .bar-label, .row-amt, .amount-input, .detail-figure,
+.ob-amount, .day-head span, .result-line b, .bar-day em, .ring-mid b {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
 }
 
 button {
@@ -134,7 +166,7 @@ svg { display: block; }
 
 .screen {
   min-height: 100svh;
-  padding-bottom: calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));
 }
 
 /* ── the band ───────────────────────────────────────────────
@@ -143,35 +175,39 @@ svg { display: block; }
    shouting, and every other screen gets a flat header on the canvas. A dark
    band on a dark canvas would be an invisible rectangle. */
 .band {
-  padding: calc(var(--sp-7) + env(safe-area-inset-top)) var(--gutter) var(--sp-8);
-  border-radius: 0 0 var(--r-card) var(--r-card);
-  background: var(--s-ok);
-  color: var(--on-ok);
-  transition: background-color .5s ease;
+  padding: calc(var(--sp-7) + env(safe-area-inset-top)) var(--gutter) var(--sp-7);
+  background: transparent;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  transition: background-color .4s ease;
 }
 @media (prefers-reduced-motion: reduce) { .band { transition: none; } }
 
-.band--ok     { background: var(--s-ok);     color: var(--on-ok); }
-.band--warn   { background: var(--s-warn);   color: var(--on-warn); }
-.band--danger { background: var(--s-danger); color: var(--on-danger); }
-
-/* Flat: no fill, no radius, just the canvas with a hairline under it. */
-.band--flat {
-  background: transparent; color: var(--ink);
-  border-radius: 0; border-bottom: 1px solid var(--line);
-  padding-bottom: var(--sp-6);
+/* The accent is not a wall. Under the limit the band is the same dark header
+   every other screen has, and the state is carried by the bar, the pill and
+   one hairline. Over the limit it goes solid red, because that is rare and
+   genuinely needs to interrupt. */
+.band--ok, .band--flat { background: transparent; color: var(--ink); }
+.band--ok   { border-bottom-color: var(--s-ok); }
+.band--warn { border-bottom-color: var(--s-warn); }
+.band--danger {
+  background: var(--s-danger); color: var(--on-danger);
+  border-bottom-color: var(--s-danger);
 }
 
 .band-top { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-6); }
 .band-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .band-who b { font-size: 15px; font-weight: 700; }
 .band-who span { font-size: 11px; font-weight: 600; opacity: .72; }
-.band-title { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+.band-title {
+  font-size: 34px; font-weight: 700; letter-spacing: -.04em;
+  text-transform: uppercase;
+}
 .band-eyebrow {
   display: block; font-size: 10px; font-weight: 800; letter-spacing: .12em;
   text-transform: uppercase; opacity: .7; margin-bottom: var(--sp-1);
 }
-.band .big { font-size: 44px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.band .big { font-size: 46px; font-weight: 700; letter-spacing: -.045em; line-height: 1; }
 
 /* content is pulled up to overlap the band. law 1 */
 .screen-body {
@@ -179,9 +215,9 @@ svg { display: block; }
   padding: var(--sp-6) var(--gutter) 0;
   display: flex; flex-direction: column; gap: var(--sp-5);
 }
-/* Only a bright band is overlapped. Pulling content up over a flat header
-   would just crowd the hairline. */
-.band:not(.band--flat) + .screen-body { margin-top: calc(var(--sp-8) * -1); }
+/* Nothing overlaps the header any more. Blocks sit on blocks, hard edge to
+   hard edge, which is the whole idea. */
+.band--danger + .screen-body { margin-top: 0; }
 
 /* ============================================================
    Components
@@ -196,7 +232,10 @@ svg { display: block; }
    bottom of this file, because .tile and others set their own background and
    at equal specificity the later rule wins. See the note down there. */
 .card-head { display: flex; align-items: center; gap: var(--sp-3); }
-.card-head b { flex: 1; font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+.card-head b {
+  flex: 1; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2);
+}
 
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
 .tiles--3 { grid-template-columns: repeat(3, 1fr); }
@@ -206,7 +245,10 @@ svg { display: block; }
   background: var(--surface); border: 1px solid var(--line);
 }
 .tile-v { font-size: 21px; font-weight: 800; letter-spacing: -.03em; }
-.tile-l { font-size: 11px; font-weight: 700; opacity: .72; }
+.tile-l {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--ink-3);
+}
 
 /* On dark a category is its icon colour, not a pastel circle. The badge
    behind it stays neutral so ten of them in a list do not fight. */
@@ -219,19 +261,20 @@ svg { display: block; }
 /* Initials only, never a photograph. The tint comes from a hash of the name,
    so Rahul is always the same colour. See design.md section 7. */
 .avatar {
-  width: 36px; height: 36px; border-radius: var(--r-pill); flex: none;
+  width: 36px; height: 36px; border-radius: var(--r-badge); flex: none;
   display: grid; place-items: center;
   font-size: 14px; font-weight: 800; line-height: 1;
   background: var(--ink-surface); color: var(--s-ok);
 }
 
 .circle-btn {
-  width: 36px; height: 36px; border-radius: var(--r-pill); flex: none;
+  width: 36px; height: 36px; border-radius: var(--r-btn); flex: none;
   display: grid; place-items: center; background: var(--glass); color: currentColor;
 }
 /* On a flat header there is no bright ground to cut into, so the button
    needs its own surface. */
-.band--flat .circle-btn, .circle-btn--sunken { background: var(--surface-2); color: var(--ink); }
+.circle-btn { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.band--danger .circle-btn { background: var(--glass); border-color: transparent; color: currentColor; }
 .circle-btn--ink { background: var(--s-ok); color: var(--on-accent); }
 
 /* ── bars. never without their numbers. law 6 ── */
@@ -241,13 +284,13 @@ svg { display: block; }
   font-size: 11.5px; font-weight: 700;
 }
 .bar {
-  height: 10px; border-radius: var(--r-pill); overflow: hidden; display: flex;
+  height: 8px; border-radius: 0; overflow: hidden; display: flex;
   background: var(--sunken);
 }
 /* On a bright band or a bright surface the track cuts into the fill. */
 .band:not(.band--flat) .bar, .surf--ok .bar, .surf--warn .bar,
 .surf--danger .bar, .surf--owe .bar { background: rgba(16, 19, 20, .22); }
-.bar > i { display: block; height: 100%; border-radius: var(--r-pill); transition: width .4s ease-out; }
+.bar > i { display: block; height: 100%; border-radius: 0; transition: width .4s ease-out; }
 @media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
 .fill--cur    { background: currentColor; }
 .fill--ink    { background: var(--ink-surface); }
@@ -260,7 +303,8 @@ svg { display: block; }
     rgba(255,255,255,.55) 0 4px, transparent 4px 9px);
 }
 
-.row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-1) 0; }
+.row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) 0; border-bottom: 1px solid var(--line); }
+.card > .row:last-child, .row:only-child { border-bottom: 0; }
 /* A row is a row whether or not it happens to be a link. The browser's default
    anchor colour and underline are element level and would otherwise win. */
 a.row { color: inherit; text-decoration: none; }
@@ -275,22 +319,24 @@ a.row { color: inherit; text-decoration: none; }
 
 .pill {
   display: inline-flex; align-items: center; border-radius: var(--r-pill);
-  padding: 5px 10px; font-size: 10.5px; font-weight: 800; white-space: nowrap;
+  padding: 5px 8px; font-size: 10px; font-weight: 700; white-space: nowrap;
+  text-transform: uppercase; letter-spacing: .06em;
 }
 .pill--dark   { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
 .pill--white  { background: var(--on-accent); color: var(--ink); }
 .pill--glass  { background: var(--glass); color: currentColor; }
 .pill--sunken { background: var(--sunken); color: var(--ink); }
-.pill--ok     { background: var(--pl-ok-bg);     color: var(--pl-ok-fg); }
-.pill--warn   { background: var(--pl-warn-bg);   color: var(--pl-warn-fg); }
-.pill--danger { background: var(--pl-danger-bg); color: var(--pl-danger-fg); }
+.pill--ok     { background: transparent; color: var(--pl-ok-fg); border: 1px solid var(--pl-ok-fg); }
+.pill--warn   { background: transparent; color: var(--pl-warn-fg); border: 1px solid var(--pl-warn-fg); }
+.pill--danger { background: transparent; color: var(--pl-danger-fg); border: 1px solid var(--pl-danger-fg); }
 .pills { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 
 /* Underline tabs, from the reference's Upcoming / Past. The 44px minimum
    from design.md still applies. */
 .seg { display: flex; gap: var(--sp-6); border-bottom: 1px solid var(--line); }
 .seg > button {
-  flex: 1; text-align: center; font-size: 13px; font-weight: 700;
+  flex: 1; text-align: center; font-size: 11.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
   min-height: 44px; padding: 8px 0 10px;
   color: var(--ink-3); border-bottom: 2px solid transparent; margin-bottom: -1px;
 }
@@ -300,9 +346,9 @@ a.row { color: inherit; text-decoration: none; }
 /* The reference's buttons are full width rectangles with a small radius and
    an uppercase label, not pills. The primary one is the accent. */
 .btn {
-  height: 52px; border-radius: var(--r-btn); display: grid; place-items: center;
-  font-size: 13px; font-weight: 800; width: 100%;
-  text-transform: uppercase; letter-spacing: .06em;
+  height: 54px; border-radius: var(--r-btn); display: grid; place-items: center;
+  font-size: 13px; font-weight: 700; width: 100%;
+  text-transform: uppercase; letter-spacing: .09em;
   background: var(--s-ok); color: var(--on-accent);
 }
 .btn--soft { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
@@ -320,25 +366,32 @@ a.row { color: inherit; text-decoration: none; }
 /* ============================================================
    Navigation. dark floating bar, four tabs plus a raised add.
    ============================================================ */
+/* A bar, not a floating pill: full width, hard top edge, sitting on the
+   bottom of the screen. */
 .nav {
-  position: fixed; z-index: 40;
-  left: var(--sp-6); right: var(--sp-6);
-  bottom: calc(14px + env(safe-area-inset-bottom));
-  height: var(--nav-h); background: var(--ink-surface); color: var(--ink-3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill); box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
-  display: flex; align-items: center; justify-content: space-around; padding: 0 10px;
+  position: fixed; z-index: 40; left: 0; right: 0; bottom: 0;
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--ink-surface); color: var(--ink-3);
+  border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-around;
 }
 .nav-tab {
-  width: 44px; height: 44px; border-radius: var(--r-pill);
-  display: grid; place-items: center;
+  width: 48px; height: 48px; border-radius: var(--r-btn);
+  display: grid; place-items: center; position: relative;
 }
-.nav-tab[aria-current="page"] { background: var(--s-ok); color: var(--on-accent); }
+/* The active tab is the icon in the accent with a rule over it, not a filled
+   block. One small mark instead of a slab of colour. */
+.nav-tab[aria-current="page"] { color: var(--s-ok); }
+.nav-tab[aria-current="page"]::before {
+  content: ""; position: absolute; top: -1px; left: 12px; right: 12px;
+  height: 2px; background: var(--s-ok);
+}
+/* The one deliberate slab of accent in the chrome: the primary action. */
 .nav-add {
-  width: 52px; height: 52px; border-radius: var(--r-pill);
+  width: 50px; height: 50px; border-radius: var(--r-btn);
   background: var(--s-ok); color: var(--on-accent);
-  display: grid; place-items: center; margin-top: -24px;
-  border: 4px solid var(--canvas);
+  display: grid; place-items: center;
 }
 
 /* ============================================================
@@ -372,8 +425,9 @@ a.row { color: inherit; text-decoration: none; }
 .toast {
   position: fixed; z-index: 60; left: 50%; transform: translateX(-50%) translateY(12px);
   bottom: calc(var(--nav-h) + 28px + env(safe-area-inset-bottom));
-  background: var(--s-ok); color: var(--on-accent);
-  padding: 11px 18px; border-radius: var(--r-pill);
+  background: var(--ink-surface); color: var(--ink);
+  border: 1px solid var(--s-ok);
+  padding: 11px 18px; border-radius: var(--r-btn);
   font-size: 13px; font-weight: 700; opacity: 0;
   transition: opacity .2s ease, transform .2s ease; pointer-events: none;
   max-width: calc(100vw - 40px); text-align: center;
@@ -403,7 +457,7 @@ a.row { color: inherit; text-decoration: none; }
   flex: 1; min-width: 0; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--sp-1);
 }
-.bar-day > i { width: 100%; border-radius: 8px; display: block; min-height: 3px; }
+.bar-day > i { width: 100%; border-radius: 0; display: block; min-height: 3px; }
 .bar-day > em {
   font-style: normal; font-size: 9.5px; font-weight: 800;
   font-variant-numeric: tabular-nums; opacity: .75; white-space: nowrap;
@@ -412,7 +466,7 @@ a.row { color: inherit; text-decoration: none; }
 .bar-day.is-today > span { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
 
 .bars--dense { gap: 2px; }
-.bars--dense .bar-day > i { border-radius: 4px; }
+.bars--dense .bar-day > i { border-radius: 0; }
 .bars--dense .bar-day > em { font-size: 8.5px; }
 .bars--dense .bar-day > span { font-size: 8.5px; }
 
@@ -428,7 +482,6 @@ a.row { color: inherit; text-decoration: none; }
 .ring-mid span { font-size: 11.5px; font-weight: 700; opacity: .55; }
 
 .tile--glass { background: var(--surface-2); color: inherit; }
-.band:not(.band--flat) .tile--glass { background: var(--glass); border-color: transparent; }
 .tile--tap { text-align: left; }
 .tile--tap:active { opacity: .75; }
 .card--tap { width: 100%; text-align: left; }
@@ -523,7 +576,7 @@ a.row { color: inherit; text-decoration: none; }
 .chip-row::-webkit-scrollbar { display: none; }
 .chip {
   display: inline-flex; align-items: center; gap: var(--sp-2); flex: none;
-  border-radius: var(--r-pill); padding: 9px 13px; min-height: 40px;
+  border-radius: var(--r-btn); padding: 9px 12px; min-height: 42px;
   background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
   font-size: 12.5px; font-weight: 700; white-space: nowrap;
 }
@@ -531,7 +584,7 @@ a.row { color: inherit; text-decoration: none; }
 /* The icon carries the category colour; the square behind it stays neutral
    so a row of ten chips does not turn into a paint chart. */
 .chip-dot {
-  width: 22px; height: 22px; border-radius: 7px; flex: none;
+  width: 22px; height: 22px; border-radius: var(--r-badge); flex: none;
   display: grid; place-items: center; background: var(--glass-dark);
 }
 .chip.is-on .chip-dot { background: rgba(16, 19, 20, .16); }
@@ -574,7 +627,9 @@ a.row { color: inherit; text-decoration: none; }
 /* ── history ── */
 .day-head {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 12px; font-weight: 800; padding-bottom: var(--sp-1);
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--line); margin-bottom: var(--sp-2);
 }
 .day-head span { font-variant-numeric: tabular-nums; opacity: .55; }
 .row--tap { width: 100%; text-align: left; }
@@ -690,14 +745,23 @@ body[data-onboarding] .nav { display: none; }
       surface must say `color: inherit`.
    ============================================================ */
 .surf--card   { background: var(--surface);   color: var(--ink); border: 1px solid var(--line); }
-.surf--muted  { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
-.surf--feature{ background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+.surf--muted  { background: var(--canvas);    color: var(--ink); border: 1px solid var(--line); }
+.surf--feature{ background: var(--surface);   color: var(--ink); border: 1px solid var(--line);
                 border-left: 3px solid var(--s-ok); }
-.surf--ok     { background: var(--s-ok);     color: var(--on-ok);     border-color: var(--s-ok); }
-.surf--warn   { background: var(--s-warn);   color: var(--on-warn);   border-color: var(--s-warn); }
-.surf--danger { background: var(--pl-danger-bg); color: var(--ink);   border: 1px solid var(--s-danger); }
-.surf--owe    { background: var(--s-owe);    color: var(--on-owe);    border-color: var(--s-owe); }
+
+/* Status surfaces are an edge and a text colour, not a slab of paint. The
+   only filled status in the app is the over budget band. */
+.surf--ok     { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 3px solid var(--s-ok); }
+.surf--warn   { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 3px solid var(--s-warn); }
+.surf--danger { background: var(--surface); color: var(--ink); border: 1px solid var(--s-danger); }
+.surf--owe    { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 3px solid var(--s-owe); }
 .surf--glass  { background: var(--glass-dark); color: inherit; }
+
+/* A tile states its allegiance in its figure and its edge, not its fill. */
+.surf--ok .tile-v   { color: var(--s-ok); }
+.surf--owe .tile-v  { color: var(--s-owe); }
+.surf--ok .badge    { background: var(--glass-dark); color: var(--s-ok); }
+.surf--owe .badge   { background: var(--glass-dark); color: var(--s-owe); }
 
 /* Text inside a surface always inherits. Never let an element selector win. */
 .surf--white p, .surf--cream p, .surf--ok p, .surf--warn p,
