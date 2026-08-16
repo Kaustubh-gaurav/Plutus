@@ -1,20 +1,14 @@
-/* Home, version 5: a bento grid.
+/* Home. Layout L1 with the day by day chart above the categories.
 
-   The reference's idea is that a tile's size is how important the thing
-   inside it is, and that the data itself is the decoration. So:
-
-     the big tall tile   what you have left, with the month drawn under it
-     the small tile      what you have spent
-     the ring tile       how much of the budget is gone
-     the day strip       this week, tap a day to read it
-     the list            what you spent that day
+   Order, top to bottom: band, weekly card, direction tiles, day by day chart,
+   where it went, one insight. The screen reads outward in time: the month,
+   then the week, then the days, then where the money actually went.
 
    Nothing here computes money. Every figure comes from the logic layer. */
 
 var ScreenHome = (function () {
 
   var el = UI.el;
-  var picked = null;   /* the day being read. null means today */
 
   function profile() { return Store.get().profile; }
   function money(paise) {
@@ -32,266 +26,251 @@ var ScreenHome = (function () {
     return name ? part + ", " + name : part;
   }
 
-  /* ── header ── */
+  /* ── band. its colour is the budget state ── */
 
-  function header(p, today, unread) {
-    return el("header.band",
-      el("div.band-top",
-        el("button.avatar", {
-          type: "button", "aria-label": "Settings", onclick: function () { App.go("#/settings"); }
-        }, (p.name || "P").trim().charAt(0).toUpperCase()),
-        el("span.band-who",
-          el("b", { text: greeting(p.name) }),
-          el("span", { text: Dates.formatRelativeDay(today, today) + ", " + Dates.formatDisplay(today, today) })
-        ),
-        el("button.circle-btn" + (unread ? ".has-dot" : ""), {
-          type: "button", "aria-label": unread ? unread + " unread notifications" : "Notifications",
-          onclick: function () { Notifications.open(); }
-        }, UI.icon("ic-bell", 17))
-      )
+  function band(p, monthly, today, unread) {
+    var head = el("div.band-top",
+      el("button.avatar", {
+        type: "button", "aria-label": "Settings", onclick: function () { App.go("#/settings"); }
+      }, (p.name || "P").trim().charAt(0).toUpperCase()),
+      el("span.band-who",
+        el("b", { text: greeting(p.name) }),
+        el("span", { text: Dates.formatRelativeDay(today, today) + ", " + Dates.formatDisplay(today, today) })
+      ),
+      el("button.circle-btn" + (unread ? ".has-dot" : ""), {
+        type: "button", "aria-label": unread ? unread + " unread notifications" : "Notifications",
+        onclick: function () { Notifications.open(); }
+      }, UI.icon("ic-bell", 17))
     );
-  }
 
-  /* ── the hero ───────────────────────────────────────────────
-     Screen one of the reference: the headline figure sits on the lit
-     ground with a bar under it, and everything else lives in the panel
-     below. What you have spent is the headline, because that is the
-     figure that changes when you act; what is left follows it. */
+    var nodes = [head, el("span.band-eyebrow", { text: Dates.monthName(monthly.period.key) + " budget" })];
 
-  function hero(monthly) {
     if (!monthly.hasBudget) {
-      /* Still show what was actually spent. Showing zero because no budget
-         exists would be stating something false. */
-      return el("section.hero",
-        el("span.hero-label", { text: "Spent in " + Dates.monthName(monthly.period.key) }),
-        el("span.hero-figure", { text: money(monthly.spent) }),
-        el("p.note", { style: { "margin-top": "4px" } },
-          "Set a monthly budget and every figure in the app starts working."),
-        el("button.btn-pill", {
-          type: "button", style: { "margin-top": "10px", "align-self": "flex-start" },
-          onclick: function () { App.go("#/settings"); }
-        }, UI.icon("ic-plus", 15), el("span", { text: "Set a budget" }))
-      );
+      nodes.push(el("span.big", { text: "Not set" }));
+      nodes.push(el("p.note", { style: { "margin-top": "8px" } },
+        "Set a budget and every figure in the app starts working."));
+      nodes.push(el("button.pill.pill--white", {
+        type: "button", style: { "margin-top": "12px" },
+        onclick: function () { App.go("#/settings"); }
+      }, "Set a monthly budget"));
+      return nodes;
     }
+
+    nodes.push(el("span.big", {
+      text: monthly.overspend > 0 ? money(monthly.overspend) + " over" : money(monthly.remaining) + " left"
+    }));
 
     var seg = Budget.barSegments(monthly);
-    var fill = "fill--" + Budget.fillForStatus(monthly.status);
-    var over = monthly.overspend > 0;
-
-    return el("section.hero",
-      el("span.hero-label", {
-        text: "Spent in " + Dates.monthName(monthly.period.key)
-      }),
-      el("span.hero-figure", { text: money(monthly.spent) }),
-
-      el("div.bar.hero-bar", {
-        role: "progressbar",
-        "aria-valuenow": String(Math.round(monthly.percentUsed)),
-        "aria-valuemin": "0", "aria-valuemax": "100",
-        "aria-label": "Monthly budget used"
-      },
-        el("i." + fill, { style: { width: seg.inside + "%" } }),
-        seg.over > 0 ? el("i." + fill + ".fill--over", { style: { width: seg.over + "%" } }) : null
+    /* This bar sits inside the band, and the band is already the status
+       colour: teal, then mustard, then red at the limit. A red bar on a red
+       band would be invisible, so here the fill stays currentColor and the
+       whole band carries the warning instead. */
+    nodes.push(el("div.bar-wrap", { style: { "margin-top": "12px" } },
+      el("div.bar-label", { style: { opacity: ".85" } },
+        el("span", { text: money(monthly.spent) + " of " + money(monthly.budget) }),
+        el("span", { text: Math.round(monthly.percentUsed) + "%" })
       ),
-
-      el("div.hero-foot",
-        el("span", {},
-          over ? el("b", { text: money(monthly.overspend) + " over" })
-               : el("b", { text: money(monthly.remaining) + " left" }),
-          el("span", { text: " of " + money(monthly.budget) })
-        ),
-        el("span", { text: Math.round(monthly.percentUsed) + "% used" })
-      ),
-
-      el("div.hero-foot", { style: { "margin-top": "-2px" } },
-        el("span", {
-          text: over
-            ? monthly.period.daysLeft + " day" + (monthly.period.daysLeft === 1 ? "" : "s") + " still to go"
-            : money(monthly.safeDailyRemaining) + " a day for the " + monthly.period.daysLeft +
-              " day" + (monthly.period.daysLeft === 1 ? "" : "s") + " left"
-        }),
-        el("span", { text: monthly.transactionCount + (monthly.transactionCount === 1 ? " entry" : " entries") })
-      )
-    );
-  }
-
-  /* -- this week ----------------------------------------------
-     The original layout's day by day chart, made tappable so it also does
-     the job the day strip was doing. One component, two uses, and one less
-     thing competing for the same space. */
-
-  function weekSection(s, weekPeriod, weekly, today, cats) {
-    var totals = Expenses.dailyTotals(s.expenses, weekPeriod);
-    var max = totals.reduce(function (m, d) { return Math.max(m, d.total); }, 0);
-    var names = ["S", "M", "T", "W", "T", "F", "S"];
-    var selected = picked || today;
-
-    var chart = el("div.bars");
-    totals.forEach(function (d) {
-      var parts = d.date.split("-");
-      var dow = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).getDay();
-      var pct = max > 0 ? Math.max((d.total / max) * 100, d.total > 0 ? 8 : 3) : 3;
-      var isSel = d.date === selected;
-      chart.appendChild(el("button.bar-day.bar-day--tap" + (d.date === today ? ".is-today" : ""), {
-        type: "button",
-        "aria-selected": isSel ? "true" : "false",
-        "aria-label": Dates.formatDisplay(d.date, today) + ", " + money(d.total),
-        onclick: function () { picked = d.date; render(); }
+      el("div.bar", {
+        role: "progressbar", "aria-valuenow": String(Math.round(monthly.percentUsed)),
+        "aria-valuemin": "0", "aria-valuemax": "100", "aria-label": "Monthly budget used"
       },
-        el("em", { text: d.total > 0 ? compact(d.total) : "" }),
-        el("i", { style: { height: pct + "%" } }),
-        el("span", { text: names[dow] })
-      ));
-    });
-
-    var section = el("section.section",
-      el("div.section-head",
-        el("b", { text: "This week" }),
-        weekly.hasBudget
-          ? el("span", { text: money(weekly.spent) + " of " + money(weekly.budget) })
-          : el("span", { text: money(Money.sum(totals, function (d) { return d.total; })) })
+        el("i.fill--cur", { style: { width: seg.inside + "%" } }),
+        seg.over > 0 ? el("i.fill--cur.fill--over", { style: { width: seg.over + "%" } }) : null
       )
-    );
-
-    if (weekly.hasBudget) {
-      var seg = Budget.barSegments(weekly);
-      var fill = "fill--" + Budget.fillForStatus(weekly.status);
-      section.appendChild(el("div.bar", {
-        role: "progressbar", "aria-valuenow": String(Math.round(weekly.percentUsed)),
-        "aria-valuemin": "0", "aria-valuemax": "100", "aria-label": "Weekly budget used"
-      },
-        el("i." + fill, { style: { width: seg.inside + "%" } }),
-        seg.over > 0 ? el("i." + fill + ".fill--over", { style: { width: seg.over + "%" } }) : null
-      ));
-    }
-
-    section.appendChild(chart);
-
-    var dayExpenses = Expenses.query(
-      s.expenses.filter(function (e) { return e.date === selected; }),
-      { sortBy: "date", sortDir: "desc" }, cats
-    );
-
-    section.appendChild(el("div.section-head", { style: { "margin-top": "2px" } },
-      el("b", { text: Dates.formatRelativeDay(selected, today), style: { "font-size": "12.5px" } }),
-      el("span", { text: money(Money.sum(dayExpenses, function (e) { return e.amount; })) })
     ));
 
-    if (!dayExpenses.length) {
-      section.appendChild(el("p.section-sub", { text: "Nothing recorded on this day." }));
-    } else {
-      dayExpenses.slice(0, 4).forEach(function (e) {
-        var cat = cats[e.categoryId];
-        section.appendChild(el("button.row.row--tap", {
-          type: "button",
-          "aria-label": "Edit " + money(e.amount) + (cat ? ", " + cat.name : ""),
-          onclick: function () { SheetExpense.open(e.id); }
-        },
-          el("span.badge.badge--lg", { style: { color: "var(--cat-" + (cat ? cat.tint : "stone") + ")" } },
-            UI.icon(cat ? cat.icon : "ic-dots", 18)),
-          el("span.row-tx",
-            el("b", { text: e.note || (cat ? cat.name : "Expense") }),
-            el("span", { text: cat ? cat.name : "" })
-          ),
-          el("span.row-amt", { text: money(e.amount) })
-        ));
-      });
-      if (dayExpenses.length > 4) {
-        section.appendChild(el("button.btn-pill", {
-          type: "button", style: { "align-self": "flex-start" },
-          onclick: function () { App.go("#/expenses"); }
-        }, el("span", { text: "See all " + dayExpenses.length })));
-      }
+    var pills = el("div.pills", { style: { "margin-top": "11px" } },
+      el("span.pill.pill--glass", { text: monthly.label })
+    );
+    if (monthly.overspend > 0) {
+      pills.appendChild(el("span.pill.pill--glass", {
+        text: monthly.period.daysLeft + " day" + (monthly.period.daysLeft === 1 ? "" : "s") + " still to go"
+      }));
+    } else if (monthly.period.daysLeft > 0) {
+      pills.appendChild(el("span.pill.pill--glass", {
+        text: money(monthly.safeDailyRemaining) + " a day for " + monthly.period.daysLeft +
+              " day" + (monthly.period.daysLeft === 1 ? "" : "s")
+      }));
     }
-
-    return section;
+    nodes.push(pills);
+    return nodes;
   }
 
-  /* -- people. the one place a box is still right, because these are two
-     figures rather than a list -- */
+  /* ── weekly ── */
 
-  function directionTiles(summary) {
-    if (summary.totalOwedToMe === 0 && summary.totalIOwe === 0) return null;
-    return el("section.section",
-      el("div.tiles",
-        el("button.tile.surf--ok.tile--tap", {
-          type: "button", "aria-label": "People who owe you", onclick: function () { App.go("#/people"); }
-        },
-          el("span.tile-v", { text: money(summary.totalOwedToMe) }),
-          el("span.tile-l", { text: "Owed to you" })
+  function weeklyCard(weekly) {
+    if (!weekly.hasBudget) return null;
+    var seg = Budget.barSegments(weekly);
+    var atLimit = weekly.status === "at_limit" || weekly.status === "exceeded";
+    /* The card keeps its mustard identity, per law 4, and the bar inside it
+       carries the state: red the moment the limit is reached.
+
+       Below the limit the fill stays ink rather than following the shared
+       status mapping, because that mapping's warning colour IS mustard, and
+       mustard on mustard is an invisible bar. Law 5: text and marks follow
+       the surface they sit on. */
+    var fill = atLimit ? "fill--danger" : "fill--ink";
+    return el("div.card.surf--warn",
+      el("div.card-head",
+        el("b", { text: "This week" }),
+        el("span.pill." + (atLimit ? "pill--danger" : "pill--dark"),
+           { text: Math.round(weekly.percentUsed) + "% used" })
+      ),
+      el("div.bar-wrap",
+        el("div.bar-label",
+          el("span", { text: money(weekly.spent) + " of " + money(weekly.budget) }),
+          el("span", { text: weekly.overspend > 0 ? money(weekly.overspend) + " over" : money(weekly.remaining) + " left" })
         ),
-        el("button.tile.surf--owe.tile--tap", {
-          type: "button", "aria-label": "People you owe", onclick: function () { App.go("#/people"); }
+        el("div.bar", {
+          role: "progressbar", "aria-valuenow": String(Math.round(weekly.percentUsed)),
+          "aria-valuemin": "0", "aria-valuemax": "100", "aria-label": "Weekly budget used"
         },
-          el("span.tile-v", { text: money(summary.totalIOwe) }),
-          el("span.tile-l", { text: "You owe" })
+          el("i." + fill, { style: { width: seg.inside + "%" } }),
+          seg.over > 0 ? el("i." + fill + ".fill--over", { style: { width: seg.over + "%" } }) : null
         )
       )
     );
   }
 
-  /* -- where it went -- */
+  /* ── the two directions. never colour alone: a word, an arrow, a colour ── */
 
-  function categorySection(analysis, cats) {
+  function directionTiles(summary) {
+    if (summary.totalOwedToMe === 0 && summary.totalIOwe === 0) return null;
+    return el("div.tiles",
+      el("button.tile.surf--ok.tile--tap", {
+        type: "button", onclick: function () { App.go("#/people"); }
+      },
+        el("span.badge", UI.icon("ic-up", 15)),
+        el("span.tile-v", { text: money(summary.totalOwedToMe) }),
+        el("span.tile-l", { text: "Owed to you" })
+      ),
+      el("button.tile.surf--owe.tile--tap", {
+        type: "button", onclick: function () { App.go("#/people"); }
+      },
+        el("span.badge", UI.icon("ic-down", 15)),
+        el("span.tile-v", { text: money(summary.totalIOwe) }),
+        el("span.tile-l", { text: "You owe" })
+      )
+    );
+  }
+
+  /* ── day by day, the current week ──────────────────────────
+     Every day of the period gets a bar, zeros included. A flat Wednesday is
+     information; a missing Wednesday is a bug. */
+
+  function dayChart(expenses, weekPeriod, weekly, today) {
+    var days = Expenses.dailyTotals(expenses, weekPeriod);
+    var max = days.reduce(function (m, d) { return Math.max(m, d.total); }, 0);
+    if (max === 0) return null;
+
+    var overDay = weekly.hasBudget ? Math.round(weekly.budget / 7) : null;
+    var bars = el("div.bars");
+    days.forEach(function (d) {
+      var pct = max > 0 ? Math.max((d.total / max) * 100, d.total > 0 ? 6 : 2) : 2;
+      var heavy = overDay !== null && d.total > overDay;
+      var isToday = d.date === today;
+      bars.appendChild(el("div.bar-day" + (isToday ? ".is-today" : ""),
+        el("em", { text: d.total > 0 ? compact(d.total) : "" }),
+        el("i" + (heavy ? ".fill--warn" : ".fill--ok"), {
+          style: { height: pct + "%" },
+          title: Dates.formatDisplay(d.date, today) + ", " + money(d.total)
+        }),
+        el("span", { text: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date(d.date.split("-")[0], Number(d.date.split("-")[1]) - 1, d.date.split("-")[2]).getDay()] })
+      ));
+    });
+
+    return el("div.card.surf--white",
+      el("div.card-head",
+        el("b", { text: "This week, day by day" }),
+        overDay !== null ? el("span.pill.pill--sunken", { text: compact(overDay) + " a day" }) : null
+      ),
+      bars
+    );
+  }
+
+  /* ── where it went ── */
+
+  function categoryCard(analysis, cats, monthPeriod) {
     if (!analysis.byCategory.length) return null;
     var byId = {};
     cats.forEach(function (c) { byId[c.id] = c; });
 
-    var section = el("section.section",
-      el("div.section-head",
+    var card = el("div.card.surf--white",
+      el("div.card-head",
         el("b", { text: "Where it went" }),
-        el("button.btn-pill", {
-          type: "button", style: { height: "30px", padding: "0 12px", "font-size": "12px" },
+        el("button.circle-btn.circle-btn--sunken", {
+          type: "button", "aria-label": "See all insights",
           onclick: function () { App.go("#/insights"); }
-        }, el("span", { text: "Insights" }))
+        }, UI.icon("ic-right", 16))
       )
     );
 
     analysis.byCategory.slice(0, 4).forEach(function (c) {
       var cat = byId[c.categoryId];
-      var hue = "var(--cat-" + (cat ? cat.tint : "stone") + ")";
-      section.appendChild(el("div.cat-line",
+      card.appendChild(el("div.cat-line",
         el("div.row",
-          el("span.badge.badge--lg", { style: { color: hue } }, UI.icon(cat ? cat.icon : "ic-dots", 18)),
+          el("span.badge.badge--lg", { style: { background: "var(--cat-" + (cat ? cat.tint : "stone") + ")" } },
+            UI.icon(cat ? cat.icon : "ic-dots", 17)),
           el("span.row-tx",
             el("b", { text: cat ? cat.name : "Uncategorised" }),
-            el("span", { text: Math.round(c.share) + "% \u00b7 " + c.count + (c.count === 1 ? " entry" : " entries") })
+            el("span", { text: Math.round(c.share) + "% of the month · " + c.count + (c.count === 1 ? " entry" : " entries") })
           ),
           el("span.row-amt", { text: money(c.total) })
         ),
-        el("div.bar", el("i", { style: { width: Math.max(c.share, 2) + "%", background: hue } }))
+        el("div.bar", el("i.fill--ok", { style: { width: Math.max(c.share, 2) + "%" } }))
       ));
     });
-    return section;
+    return card;
   }
 
-  function insightSection(insights) {
-    if (!insights.length) return null;
-    var top = insights[0];
-    var tone = top.tone === "danger" ? ".is-danger" : top.tone === "warn" ? ".is-warn" : "";
-    return el("section.section",
-      el("div.insight" + tone, el("p.note", { text: top.text }))
-    );
-  }
+  /* ── install ────────────────────────────────────────────────
+     Offered once, dismissible for good. An app that nags to be installed is
+     an app people uninstall. */
 
-  function installSection() {
+  function installCard() {
     if (typeof Install === "undefined") return null;
     if (!Install.available() || Install.isDismissed()) return null;
-    return el("section.section",
-      el("div.section-head",
+    return el("div.card.surf--ink.install-card",
+      el("div.card-head",
         el("b", { text: "Keep Plutus on your home screen" }),
-        el("button.circle-btn.circle-btn--sunken", {
-          type: "button", "aria-label": "Not now", onclick: function () { Install.dismiss(); }
+        el("button.circle-btn", {
+          type: "button", "aria-label": "Not now",
+          onclick: function () { Install.dismiss(); }
         }, UI.icon("ic-close", 15))
       ),
-      el("p.section-sub", { text: "Its own icon, no browser bars, and it opens with no signal." }),
-      el("button.btn", { type: "button", onclick: function () { Install.open(); } }, "Add it")
+      el("p.note", { text: "Its own icon, no browser bars, and it opens with no signal." }),
+      el("button.btn.btn--onink", { type: "button", onclick: function () { Install.open(); } },
+        "Add it")
     );
   }
 
-  /* -- render --------------------------------------------------
-     Header and hero on the lit ground, then one opaque panel carrying
-     everything else in sections rather than a stack of boxes. */
+  /* ── one insight, the most useful thing the app can say right now ── */
+
+  function insightCard(insights) {
+    if (!insights.length) return null;
+    var top = insights[0];
+    var surface = top.tone === "danger" ? "surf--danger"
+                : top.tone === "warn" ? "surf--warn"
+                : top.tone === "ok" ? "surf--ok" : "surf--ink";
+    return el("div.card." + surface,
+      el("div.card-head", el("b", { text: headlineFor(top) })),
+      el("p.note", { text: top.text })
+    );
+  }
+
+  function headlineFor(insight) {
+    switch (insight.id) {
+      case "over-budget": return "Over for the month";
+      case "pace": return "Slow down a little";
+      case "near": return "Getting close";
+      case "top-category": return "Your biggest category";
+      case "busiest-day": return "Your heaviest day";
+      case "vs-previous": return "Against last period";
+      default: return "Worth knowing";
+    }
+  }
+
+  /* ── render ── */
 
   function render() {
     var host = document.getElementById("screen-home");
@@ -307,45 +286,38 @@ var ScreenHome = (function () {
     var monthly = Budget.progress(monthlyBudget ? monthlyBudget.amount : null, s.expenses, monthPeriod);
     var weekly = Budget.progress(weeklyBudget ? weeklyBudget.amount : null, s.expenses, weekPeriod);
 
-    var cats = {};
-    s.categories.forEach(function (c) { cats[c.id] = c; });
-
-    var summary = Debts.summary(Debts.views(s.debts, s.repayments, today));
+    var debtViews = Debts.views(s.debts, s.repayments, today);
+    var summary = Debts.summary(debtViews);
 
     var prevPeriod = Dates.previousPeriod(monthPeriod, s.profile.weekStartsOn);
     var analysis = Analytics.analyse(s.expenses, monthPeriod, s.expenses, prevPeriod);
-    var insights = Analytics.insights(analysis, monthly, s.categories,
-                                      s.profile.currencySymbol, s.profile.grouping);
+    var insights = Analytics.insights(analysis, monthly, s.categories, s.profile.currencySymbol, s.profile.grouping);
 
     var unread = s.notifications.filter(function (n) { return !n.readAt; }).length;
 
     UI.clear(host);
-    host.appendChild(header(s.profile, today, unread));
-    host.appendChild(hero(monthly));
 
-    var panel = el("section.panel");
-    function add(node) { if (node) panel.appendChild(node); }
+    var header = el("header.band");
+    band(s.profile, monthly, today, unread).forEach(function (n) { header.appendChild(n); });
+    host.appendChild(header);
 
-    if (s.expenses.length) {
-      add(weekSection(s, weekPeriod, weekly, today, cats));
-    } else {
-      add(el("div.empty",
+    var body = el("div.screen-body",
+      weeklyCard(weekly),
+      installCard(),
+      directionTiles(summary),
+      dayChart(s.expenses, weekPeriod, weekly, today),
+      categoryCard(analysis, s.categories, monthPeriod),
+      insightCard(insights),
+      s.expenses.length ? null : el("div.empty",
         el("h2", { text: "Nothing recorded yet" }),
         el("p", { text: "Tap the plus to add what you just spent. It takes a couple of seconds." }),
         el("button.btn", { type: "button", onclick: function () { SheetExpense.open(); } }, "Add your first expense")
-      ));
-    }
+      )
+    );
+    host.appendChild(body);
 
-    add(directionTiles(summary));
-    add(categorySection(analysis, s.categories));
-    add(insightSection(insights));
-    add(installSection());
-
-    host.appendChild(panel);
     App.setBandColour(monthly.hasBudget ? monthly.surface : "ok");
   }
 
-  function reset() { picked = null; }
-
-  return { render: render, reset: reset };
+  return { render: render };
 })();

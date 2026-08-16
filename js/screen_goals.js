@@ -32,7 +32,7 @@ var ScreenGoals = (function () {
       if (which === "track") {
         path.setAttribute("stroke", "var(--sunken)");
       } else {
-        path.setAttribute("stroke", "var(--s-ok)");
+        path.setAttribute("stroke", tone === "complete" ? "var(--s-ok)" : "var(--s-warn)");
         path.setAttribute("stroke-dasharray", String(LEN));
         path.setAttribute("stroke-dashoffset", String(LEN * (1 - Math.min(percent, 100) / 100)));
       }
@@ -42,7 +42,7 @@ var ScreenGoals = (function () {
   }
 
   function goalCard(v, today) {
-    return el("div.card.surf--card",
+    return el("div.card.surf--white",
       el("div.card-head",
         el("b", { text: v.name }),
         v.isComplete
@@ -88,7 +88,7 @@ var ScreenGoals = (function () {
 
     UI.clear(host);
 
-    host.appendChild(el("header.band.band--flat",
+    host.appendChild(el("header.band.band--ok",
       el("div.band-top",
         el("button.circle-btn", {
           type: "button", "aria-label": "Back to home", onclick: function () { App.go("#/"); }
@@ -114,7 +114,7 @@ var ScreenGoals = (function () {
     }
 
     host.appendChild(body);
-    App.setBandColour("flat");
+    App.setBandColour("ok");
   }
 
   return { render: render };
@@ -263,7 +263,7 @@ var SheetGoal = (function () {
     );
 
     if (v.contributions.length) {
-      var list = el("div.card.surf--card", el("div.card-head", el("b", { text: "Contributions" })));
+      var list = el("div.card.surf--white", el("div.card-head", el("b", { text: "Contributions" })));
       v.contributions.forEach(function (c) {
         list.appendChild(el("div.row",
           el("span.badge.badge--lg", { style: { background: "var(--pl-ok-bg)" } }, UI.icon("ic-up", 16)),

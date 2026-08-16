@@ -106,6 +106,9 @@ Status: done as 3.2.0.
 **REQ 025.** "In the second screen of the inspiration there are gradients of three different colours coming down from the top, use that on the home screen." Plus: "make sure the text above the gradient is very readable, you can keep the gradient a little above." Plus: "for the stuff in the bigger box, use a similar layout to the first time you made the app, just make sure it does not look very boxy."
 Status: done as 3.3.0.
 
+**REQ 026.** "Let's just come back to the very first design that we made."
+Status: done as 4.0.0. The cream and teal design is restored from git, not rebuilt from memory.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -630,6 +633,22 @@ Six bordered cards on a dark sheet reads as packaging rather than information. I
 **D130. The day strip and the day by day chart merged into one component.**
 Both showed the same week. The chart's bars are now the day selector: tap one and the list below reads that day. One component doing two jobs, and one less thing competing for the same space.
 
+### Back to the original design, 17 August 2026
+
+**D131. The visual direction returns to version 2: cream, colour blocked, teal, mustard, rose, periwinkle.**
+Restored from commit `ce489d3`, the last commit that carried it, rather than rebuilt by hand. Rebuilding a design from memory invents differences; a checkout does not.
+Versions 3, 4 and 5 each matched the board they were drawn from and none of them was this product. They remain in git if they are ever wanted: `1075bb8` acid lime flat, `94978e9` dark brutalist, `5ef2a63` ambient bento, `9ce0f54` the three washes.
+
+**D132. Two fixes from the detour were kept rather than reverted with the rest.**
+The `data-onboarding` flag bug in `app.js`, which left the navigation hidden for good after restoring a backup, and the average daily figure printing paise inside a pill. Both were real defects rather than styling, so reverting them would have reintroduced bugs in the name of restoring a look.
+Everything else in those five files was presentational and went back.
+
+**D133. `viz.js` was deleted rather than left orphaned.**
+The ring, arc, spark bars and day strip belonged to the ambient direction. Goals carries its own ring, as it did originally. Dead code that no screen loads is worse than no code.
+
+**D134. The cache version moves forward, never back.**
+The restore brought `plutus-v7` back with `sw.js`; it is now `v15`. A cache name that goes backwards is how a device ends up serving something older than what it already has.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -807,6 +826,12 @@ Both showed the same week. The chart's bars are now the day selector: tap one an
 **C086.** Rebuilt the panel as sections with hairlines instead of a stack of cards, and merged the day strip into the week chart.
 
 **C087.** 16 checks pass, including that Home has three gradients while other screens have one, that the panel contains no stacked cards, and that tapping a bar selects that day. 130 unit tests still pass.
+
+**C088.** Restored the original design from `ce489d3` by checkout: stylesheet, all six screens, both sheets, the app shell, icons, manifest and `design.md`.
+
+**C089.** Re-applied the two genuine fixes made during the dark detour, and deleted `viz.js`.
+
+**C090.** Verified the restore rather than assuming it: canvas is `#FBF5E7`, no ambient layer survives, the typeface is Inter, the Home band is teal and turns rose over budget with the status bar following, both carried over fixes are present, all six screens render, every control is named, nothing is under 36px. 20 checks pass, 130 unit tests pass.
 
 ## Open questions
 

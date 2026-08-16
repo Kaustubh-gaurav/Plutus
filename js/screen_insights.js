@@ -83,7 +83,7 @@ var ScreenInsights = (function () {
 
     /* The band is mustard here, a fixed identity colour for this screen. Only
        the Home band changes colour, per law 4. */
-    var header = el("header.band.band--flat",
+    var header = el("header.band.band--warn",
       el("div.band-top",
         el("button.circle-btn", {
           type: "button", "aria-label": "Back to home", onclick: function () { App.go("#/"); }
@@ -128,19 +128,19 @@ var ScreenInsights = (function () {
         el("p", { text: "Once there are a few expenses here, this is where the pattern in them shows up." })
       ));
       host.appendChild(body);
-      App.setBandColour("flat");
+      App.setBandColour("warn");
       return;
     }
 
     body.appendChild(el("div.tiles.tiles--3",
-      el("div.tile.surf--card", el("span.tile-v", { text: compact(analysis.total) }), el("span.tile-l", { text: "Spent" })),
-      el("div.tile.surf--card", el("span.tile-v", { text: String(analysis.count) }), el("span.tile-l", { text: "Entries" })),
-      el("div.tile.surf--card", el("span.tile-v", { text: compact(analysis.averageExpense) }), el("span.tile-l", { text: "Average" }))
+      el("div.tile.surf--white", el("span.tile-v", { text: compact(analysis.total) }), el("span.tile-l", { text: "Spent" })),
+      el("div.tile.surf--white", el("span.tile-v", { text: String(analysis.count) }), el("span.tile-l", { text: "Entries" })),
+      el("div.tile.surf--white", el("span.tile-v", { text: compact(analysis.averageExpense) }), el("span.tile-l", { text: "Average" }))
     ));
 
     if (progress.hasBudget) {
       var seg2 = Budget.barSegments(progress);
-      body.appendChild(el("div.card.surf--card",
+      body.appendChild(el("div.card.surf--white",
         el("div.card-head",
           el("b", { text: "Against the budget" }),
           el("span.pill." + (progress.status === "exceeded" ? "pill--danger" : progress.status === "near_limit" ? "pill--warn" : "pill--ok"),
@@ -161,7 +161,7 @@ var ScreenInsights = (function () {
 
     var chart = barChart(Expenses.dailyTotals(s.expenses, period), period, today);
     if (chart) {
-      body.appendChild(el("div.card.surf--card",
+      body.appendChild(el("div.card.surf--white",
         el("div.card-head",
           el("b", { text: "Day by day" }),
           analysis.busiestDay
@@ -172,12 +172,12 @@ var ScreenInsights = (function () {
       ));
     }
 
-    var cats = el("div.card.surf--card", el("div.card-head", el("b", { text: "Where it went" })));
+    var cats = el("div.card.surf--white", el("div.card-head", el("b", { text: "Where it went" })));
     analysis.byCategory.forEach(function (c) {
       var cat = byId[c.categoryId];
       cats.appendChild(el("div.cat-line",
         el("div.row",
-          el("span.badge.badge--lg", { style: { color: "var(--cat-" + (cat ? cat.tint : "stone") + ")" } },
+          el("span.badge.badge--lg", { style: { background: "var(--cat-" + (cat ? cat.tint : "stone") + ")" } },
             UI.icon(cat ? cat.icon : "ic-dots", 17)),
           el("span.row-tx",
             el("b", { text: cat ? cat.name : "Uncategorised" }),
@@ -192,12 +192,12 @@ var ScreenInsights = (function () {
 
     insights.forEach(function (i) {
       var surface = i.tone === "danger" ? "surf--danger" : i.tone === "warn" ? "surf--warn"
-                  : i.tone === "ok" ? "surf--ok" : "surf--muted";
+                  : i.tone === "ok" ? "surf--ok" : "surf--cream";
       body.appendChild(el("div.card." + surface, el("p.note", { text: i.text })));
     });
 
     host.appendChild(body);
-    App.setBandColour("flat");
+    App.setBandColour("warn");
   }
 
   function reset() { kind = "monthly"; offset = 0; }

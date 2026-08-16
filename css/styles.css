@@ -1,85 +1,67 @@
 /* ============================================================
-   Plutus, version 5.
-
-   Direction: deep green black with an ambient glow, bento tiles, and
-   data as the hero. Colour is data ink, not decoration: the accent
-   draws rings, curves and bars, and almost nothing else.
-
-   Type is light and large where it matters. The reference sets its
-   headline figures around weight 300, not 800, and that restraint is
-   what makes the numbers feel expensive rather than loud.
-
-   See design.md. Token block first, then base, then components.
+   Plutus. Direction A: cream canvas, teal, mustard, rose, periwinkle.
+   Token block first, then base, then components, then screens.
+   Nothing below may introduce a colour that is not a token.
+   See design.md. Every rule here answers to the twelve laws.
    ============================================================ */
 
 :root {
-  /* ── ground. not flat black: a green black, lit from above ── */
-  --void:       #050B09;
-  --canvas:     #071110;
-  --surface:    #0E1B17;   /* every tile and card */
-  --surface-2:  #142320;   /* inputs, raised things inside a card */
-  --sunken:     #0B1613;   /* tracks and wells */
-  --panel:      #081518;   /* the solid sheet. Darker than the lit ground on
-                              purpose: the seam is what gives the screen its
-                              structure, and cards on it read as raised. */
-  --line:       rgba(255, 255, 255, .07);
-  --line-2:     rgba(255, 255, 255, .12);
+  /* ── surfaces. six, no seventh ── */
+  --canvas:   #FBF5E7;
+  --cream:    #FDF8EC;
+  --white:    #FFFFFF;
+  --sunken:   #EFE6D2;
 
-  --ink:        #FFFFFF;
-  --ink-2:      rgba(255, 255, 255, .58);
-  --ink-3:      rgba(255, 255, 255, .52);   /* .40 measured 3.83 on the panel,
-                                               under the threshold. .46 is the
-                                               line; this keeps headroom. */
-  --on-accent:  #04140A;
+  --s-ok:     #1F6259;   --on-ok:     #F6F0DE;
+  --s-warn:   #F0A93E;   --on-warn:   #2A1A02;
+  --s-danger: #D33E58;   --on-danger: #FFF3F4;
+  --s-owe:    #8E8BEE;   --on-owe:    #151046;
+  --ink:      #1A1720;   --on-ink:    #F6F0DE;
 
-  /* ── data ink ──
-     Lime is progress and health. Teal is the second series, used where
-     two things are drawn at once. Everything else is a state. */
-  --s-ok:     #A9F04E;   --on-ok:     var(--on-accent);
-  --s-teal:   #35D6BE;
-  --s-warn:   #F5C451;   --on-warn:   var(--on-accent);
-  --s-danger: #FF6B6B;   --on-danger: #16060A;
-  --s-owe:    #9D8CFF;   --on-owe:    #0B0722;
+  /* soft status tints, for pills on light surfaces only */
+  --pl-ok-bg:     #D6E7E2;  --pl-ok-fg:     #144C43;
+  --pl-warn-bg:   #FBEACD;  --pl-warn-fg:   #7A4C05;
+  --pl-danger-bg: #FBDCE1;  --pl-danger-fg: #9E1B33;
 
-  --pl-ok-bg:     rgba(169, 240, 78, .14);   --pl-ok-fg:     #C6F583;
-  --pl-warn-bg:   rgba(245, 196, 81, .14);   --pl-warn-fg:   #F7D486;
-  --pl-danger-bg: rgba(255, 107, 107, .16);  --pl-danger-fg: #FF9C9C;
+  /* glass, for pills and buttons sitting on a colour band */
+  --glass:      rgba(255, 255, 255, .22);
+  --glass-hard: rgba(255, 255, 255, .34);
 
-  --glass:      rgba(255, 255, 255, .08);
-  --glass-dark: rgba(255, 255, 255, .06);
+  /* ── category tints. only ever a badge behind an icon ── */
+  --cat-sky: #D6E4F2;  --cat-lilac: #E5DCF4;  --cat-sage: #DCE7CE;
+  --cat-clay: #F5DAC6; --cat-sand: #EFE4CA;   --cat-plum: #EEDAE6;
+  --cat-stone: #E5E1D8; --cat-mint: #D2E8DE;  --cat-apricot: #F7E0CC;
+  --cat-denim: #DAE0EF;
 
-  /* ── category hues. the icon carries them, on a neutral well ── */
-  --cat-sky: #6FB3FF;  --cat-lilac: #B79CFF;  --cat-sage: #8FD98A;
-  --cat-clay: #F2A17A; --cat-sand: #E3C46A;   --cat-plum: #F08ABF;
-  --cat-stone: #9AA3A6; --cat-mint: #56E3C6;  --cat-apricot: #FFB36B;
-  --cat-denim: #8AA6FF;
-
-  /* ── shape. soft again, but not pillowy ── */
-  --r-tile: 20px;
-  --r-card: 20px;
-  --r-badge: 12px;
-  --r-btn: 999px;
+  /* ── shape ── */
+  --r-band: 30px;
+  --r-card: 24px;
+  --r-tile: 22px;
+  --r-badge: 13px;
   --r-pill: 999px;
-  --r-sheet: 26px;
+  --r-sheet: 30px;
 
+  /* ── space. nothing between these values ── */
   --sp-1: 4px;  --sp-2: 6px;  --sp-3: 8px;  --sp-4: 11px;
   --sp-5: 12px; --sp-6: 16px; --sp-7: 18px; --sp-8: 22px; --sp-9: 26px;
 
   --gutter: 18px;
-  --nav-h: 64px;
+  --nav-h: 62px;
 
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
-
-  color-scheme: dark;
 }
 
-/* The rupee glyph U+20B9 is in latin-ext, not latin. Both files ship or
-   every amount renders its currency symbol in a fallback face. */
+/* The rupee glyph U+20B9 is NOT in the latin subset. It lives in latin-ext,
+   in Inter exactly as it did in Jakarta. Both files are required or every
+   amount renders its currency symbol in a fallback face while the digits
+   beside it are Inter. */
 @font-face {
   font-family: "Inter";
   src: url("../fonts/inter-latin.woff2") format("woff2");
-  font-weight: 100 900; font-style: normal; font-display: swap;
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
     U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
     U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
@@ -87,7 +69,9 @@
 @font-face {
   font-family: "Inter";
   src: url("../fonts/inter-latin-ext.woff2") format("woff2");
-  font-weight: 100 900; font-style: normal; font-display: swap;
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
     U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
     U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
@@ -97,10 +81,11 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
-/* The hidden attribute must always win. Any rule below that sets a display
-   value silently beats the browser default and leaves an element on screen
-   while its hidden property reads true. This cost the Timetable app two
-   separate bugs. Do not delete. */
+/* The hidden attribute must always win, no exceptions. Plenty of rules below
+   set a display value, and any of them silently beats the browser default for
+   [hidden], leaving the element on screen while its hidden property reads true.
+   This cost the Timetable app two separate bugs: an invisible overlay that
+   swallowed every tap, and a badge that would not clear. Do not delete. */
 [hidden] { display: none !important; }
 
 body {
@@ -113,192 +98,59 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* ── the ambient ground ────────────────────────────────────────
-   Three fixed radial washes: a green light source up and left, a colder
-   teal one to the right, and a deep glow from below. This is what stops
-   the dark reading as flat black, and it is why every tile can be a
-   nearly identical dark rectangle and still separate from the page. */
-/* The lit ground now belongs to the screen rather than the document, so Home
-   can carry its own wash while the rest of the app keeps one hue. */
-.screen { position: relative; isolation: isolate; }
-.screen::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 52svh;
-  z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(125% 46% at 26% 13%,
-      rgba(79, 184, 148, .95) 0%,
-      rgba(52, 134, 110, .55) 38%,
-      rgba(20, 62, 52, .16) 66%,
-      rgba(12, 34, 30, 0) 82%),
-    radial-gradient(85% 40% at 97% 2%,
-      rgba(44, 172, 184, .38) 0%, rgba(44, 172, 184, 0) 62%);
-}
-
-/* Home takes the second reference screen's treatment: three washes falling
-   from the top edge, green on the left, teal in the middle, cyan on the
-   right. Sampled across that screen at its top: #42744A on the left,
-   #388264 through #317C6D in the middle, #15687C on the right. They overlap
-   into one spectrum and fade out before the panel. */
-#screen-home::before {
-  height: 46svh;
-  background:
-    radial-gradient(64% 92% at 4% -26%,
-      rgba(92, 178, 104, .95) 0%, rgba(62, 112, 72, .38) 46%, rgba(30, 60, 40, 0) 76%),
-    radial-gradient(68% 96% at 48% -30%,
-      rgba(44, 152, 122, .92) 0%, rgba(38, 114, 100, .36) 48%, rgba(18, 56, 50, 0) 78%),
-    radial-gradient(64% 92% at 98% -26%,
-      rgba(22, 140, 176, .95) 0%, rgba(18, 92, 120, .38) 46%, rgba(10, 44, 60, 0) 76%);
-}
-
-/* A faint grain, so large flat gradients do not band on cheap panels. */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  opacity: .022;
-  background-image: radial-gradient(rgba(255,255,255,.9) .5px, transparent .5px);
-  background-size: 3px 3px;
-}
-
-.amount, .big, .tile-v, .bar-label, .row-amt, .detail-figure, .amount-input,
-.ob-amount, .day-head span, .result-line b, .bar-day em, .ring-mid b,
-.stat-line b, .tile-figure {
+/* Every figure in this app is tabular. Amounts that jitter as digits change
+   are amounts nobody trusts. */
+.amount, .big, .tile-v, .bar-label, .row-amt {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
 }
 
-button { font: inherit; color: inherit; border: 0; background: none;
-  padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-:focus-visible { outline: 2px solid var(--s-ok); outline-offset: 3px; }
+button {
+  font: inherit; color: inherit; border: 0; background: none;
+  padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 svg { display: block; }
 
 /* ============================================================
-   Screens
+   Screens. One page, every screen a section, router shows one.
    ============================================================ */
 
 .screen {
   min-height: 100svh;
-  padding-bottom: calc(var(--nav-h) + 30px + env(safe-area-inset-bottom));
-  /* A column, so a panel can take whatever height is left. Without this the
-     panel stops wherever its content ends and the lit ground shows through
-     underneath, which is the thing the panel exists to prevent. */
-  display: flex; flex-direction: column;
+  padding-bottom: calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
 }
 
-/* The header is transparent: the ambient glow is the header. */
+/* ── the band. every screen opens with one. law 1 ── */
 .band {
-  position: relative; z-index: 1;
-  padding: calc(var(--sp-7) + env(safe-area-inset-top)) var(--gutter) var(--sp-3);
-  background: transparent;
-  color: var(--ink);
+  padding: calc(var(--sp-7) + env(safe-area-inset-top)) var(--gutter) var(--sp-8);
+  border-radius: 0 0 var(--r-band) var(--r-band);
+  background: var(--s-ok);
+  color: var(--on-ok);
+  transition: background-color .5s ease;
 }
-.band--ok, .band--warn, .band--danger, .band--flat { background: transparent; }
+@media (prefers-reduced-motion: reduce) { .band { transition: none; } }
 
-.band-top { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-7); }
+.band--ok     { background: var(--s-ok);     color: var(--on-ok); }
+.band--warn   { background: var(--s-warn);   color: var(--on-warn); }
+.band--danger { background: var(--s-danger); color: var(--on-danger); }
+
+.band-top { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-6); }
 .band-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.band-who b { font-size: 14px; font-weight: 500; color: var(--ink); }
-/* The header sits on the brightest part of the glow, where 40 percent
-   white does not hold. Measured, not judged. */
-.band-who span { font-size: 11.5px; font-weight: 400; color: var(--ink-2); }
-
-/* Large and light. The reference sets its titles around 300, and that
-   restraint is what makes them feel expensive rather than loud. */
-.band-title { font-size: 32px; font-weight: 300; letter-spacing: -.02em; line-height: 1.1; }
+.band-who b { font-size: 15px; font-weight: 700; }
+.band-who span { font-size: 11px; font-weight: 600; opacity: .72; }
+.band-title { font-size: 29px; font-weight: 800; letter-spacing: -.03em; }
 .band-eyebrow {
-  display: block; font-size: 11px; font-weight: 500; letter-spacing: .02em;
-  color: var(--ink-3); margin-bottom: var(--sp-2);
+  display: block; font-size: 10px; font-weight: 700; letter-spacing: .11em;
+  text-transform: uppercase; opacity: .72; margin-bottom: var(--sp-1);
 }
-.band .big { font-size: 46px; font-weight: 300; letter-spacing: -.035em; line-height: 1.05; }
+.band .big { font-size: 44px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
 
-/* Every screen has the same floor: the header sits on the lit ground and
-   everything below it is on an opaque panel. Without this, only Home would
-   cut the glow and every other screen would leave content floating on it. */
-.screen-body, .panel {
-  position: relative; z-index: 1;
-  background: var(--panel);
-  border-top: 1px solid rgba(255, 255, 255, .10);
-  border-radius: 30px 30px 0 0;
-  padding: var(--sp-7) var(--gutter) calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
+/* content is pulled up to overlap the band. law 1 */
+.screen-body {
+  position: relative; z-index: 2; margin-top: calc(var(--sp-9) * -1);
+  padding: var(--sp-6) var(--gutter) 0;
   display: flex; flex-direction: column; gap: var(--sp-5);
-  flex: 1 0 auto;
-  margin-bottom: calc((var(--nav-h) + 30px + env(safe-area-inset-bottom)) * -1);
 }
-/* Cards sit on the panel, so they are the lighter, raised things. */
-.screen-body .card, .screen-body .tile,
-.panel .card, .panel .tile { background: var(--surface); }
-
-
-/* ============================================================
-   The hero and the panel.
-
-   From screen one of the reference: the headline figure sits on the lit
-   ground at the top, and everything else lives in a solid rounded panel
-   that starts under it and runs to the bottom of the screen.
-
-   The panel is opaque on purpose. Tiles floating on a gradient never
-   cover it convincingly, and the seam between lit ground and solid panel
-   is what gives the screen its structure.
-   ============================================================ */
-
-.hero { position: relative; z-index: 1; padding: 0 var(--gutter) var(--sp-8); display: flex; flex-direction: column; gap: var(--sp-3); }
-.hero-label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
-.hero-figure {
-  font-size: 52px; font-weight: 300; letter-spacing: -.04em; line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.hero-bar { margin-top: var(--sp-3); }
-.hero-foot {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 12.5px; color: var(--ink-2);
-}
-.hero-foot b { color: var(--ink); font-weight: 500; }
-
-.panel {
-  background: var(--panel);
-  border-top: 1px solid rgba(255, 255, 255, .10);
-  border-radius: 30px 30px 0 0;
-  padding: var(--sp-7) var(--gutter) calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
-  display: flex; flex-direction: column; gap: var(--sp-5);
-  flex: 1 0 auto;
-  /* The panel is the page below the fold, so the screen's own bottom
-     padding would double up. */
-  margin-bottom: calc((var(--nav-h) + 30px + env(safe-area-inset-bottom)) * -1);
-}
-/* Inside the panel the tiles sit on a slightly lighter ground, so they
-   still read as objects on a surface rather than holes in it. */
-.panel .card, .panel .tile { background: var(--surface); }
-
-/* ============================================================
-   Bento. The layout idea of the reference: a modular grid where a
-   tile's size is how important the thing inside it is.
-   ============================================================ */
-
-.bento { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
-.bento-tile {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-tile);
-  padding: var(--sp-6);
-  display: flex; flex-direction: column; gap: var(--sp-2);
-  position: relative; overflow: hidden;
-  min-height: 120px;
-}
-.bento-tile--tall { grid-row: span 2; }
-.bento-tile--wide { grid-column: span 2; }
-.bento-tile--tap { text-align: left; }
-.bento-tile--tap:active { border-color: var(--line-2); }
-
-/* A tile's mark sits top right, quiet, in the hue of what it measures. */
-.tile-mark {
-  position: absolute; top: var(--sp-5); right: var(--sp-5);
-  width: 22px; height: 22px; display: grid; place-items: center;
-  color: var(--s-ok);
-}
-.tile-label { font-size: 11.5px; font-weight: 500; color: var(--ink-3); }
-.tile-figure { font-size: 30px; font-weight: 300; letter-spacing: -.03em; line-height: 1; }
-.tile-figure small { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 3px; }
-.tile-foot { margin-top: auto; }
-
-/* Charts bleed to the tile edge, as they do in the reference. */
-.tile-bleed { margin: var(--sp-4) calc(var(--sp-6) * -1) calc(var(--sp-6) * -1); }
 
 /* ============================================================
    Components
@@ -307,307 +159,320 @@ svg { display: block; }
 .card {
   border-radius: var(--r-card); padding: var(--sp-6);
   display: flex; flex-direction: column; gap: var(--sp-5);
-  background: var(--surface); border: 1px solid var(--line);
+  background: var(--white);
 }
+/* Surface classes are NOT defined here. They live in one block at the very
+   bottom of this file, because .tile and others set their own background and
+   at equal specificity the later rule wins. See the note down there. */
 .card-head { display: flex; align-items: center; gap: var(--sp-3); }
-.card-head b { flex: 1; font-size: 14px; font-weight: 500; color: var(--ink); }
+.card-head b { flex: 1; font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
 
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
 .tiles--3 { grid-template-columns: repeat(3, 1fr); }
 .tile {
   border-radius: var(--r-tile); padding: var(--sp-5);
-  display: flex; flex-direction: column; gap: var(--sp-2);
-  background: var(--surface); border: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: var(--sp-3); background: var(--white);
 }
-.tile-v { font-size: 22px; font-weight: 300; letter-spacing: -.03em; }
-.tile-l { font-size: 11px; font-weight: 500; color: var(--ink-3); }
-.tile--tap { text-align: left; }
-.tile--glass { background: var(--glass-dark); }
+.tile-v { font-size: 21px; font-weight: 800; letter-spacing: -.03em; }
+.tile-l { font-size: 11px; font-weight: 700; opacity: .72; }
 
 .badge {
-  width: 38px; height: 38px; border-radius: var(--r-badge); flex: none;
-  display: grid; place-items: center; background: var(--surface-2);
+  width: 36px; height: 36px; border-radius: var(--r-badge); flex: none;
+  display: grid; place-items: center; background: var(--glass);
 }
-.badge--lg { width: 40px; height: 40px; font-size: 14px; font-weight: 600; }
+.badge--lg { width: 38px; height: 38px; font-size: 14px; font-weight: 800; }
 
+/* Initials only, never a photograph. The tint comes from a hash of the name,
+   so Rahul is always the same colour. See design.md section 7. */
 .avatar {
-  width: 38px; height: 38px; border-radius: var(--r-badge); flex: none;
+  width: 36px; height: 36px; border-radius: var(--r-pill); flex: none;
   display: grid; place-items: center;
-  font-size: 14px; font-weight: 600; line-height: 1;
-  background: var(--surface-2); color: var(--s-ok);
-  border: 1px solid var(--line-2);
+  font-size: 14px; font-weight: 800; line-height: 1;
+  background: var(--s-warn); color: var(--on-warn);
 }
 
 .circle-btn {
-  width: 38px; height: 38px; border-radius: var(--r-pill); flex: none;
-  display: grid; place-items: center;
-  background: var(--glass); color: var(--ink);
-  border: 1px solid var(--line);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  width: 36px; height: 36px; border-radius: var(--r-pill); flex: none;
+  display: grid; place-items: center; background: var(--glass); color: currentColor;
 }
-.circle-btn--sunken { background: var(--surface-2); }
-.circle-btn--ink { background: var(--s-ok); color: var(--on-accent); border-color: transparent; }
+.circle-btn--sunken { background: var(--sunken); color: var(--ink); }
+.circle-btn--ink { background: var(--ink); color: var(--on-ink); }
 
-/* ── bars ── */
-.bar-wrap { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* ── bars. never without their numbers. law 6 ── */
+.bar-wrap { display: flex; flex-direction: column; gap: var(--sp-2); }
 .bar-label {
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 11.5px; font-weight: 500; color: var(--ink-2);
+  font-size: 11.5px; font-weight: 700;
 }
-.bar { height: 6px; border-radius: var(--r-pill); overflow: hidden; display: flex; background: var(--sunken); }
-.bar > i { display: block; height: 100%; border-radius: var(--r-pill); transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.bar {
+  height: 11px; border-radius: var(--r-pill); overflow: hidden; display: flex;
+  background: rgba(26, 23, 32, .13);
+}
+.surf--ok .bar, .surf--danger .bar, .surf--ink .bar, .band .bar {
+  background: rgba(255, 255, 255, .26);
+}
+.surf--warn .bar { background: rgba(42, 26, 2, .16); }
+.bar > i { display: block; height: 100%; border-radius: var(--r-pill); transition: width .4s ease-out; }
 @media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
 .fill--cur    { background: currentColor; }
 .fill--ink    { background: var(--ink); }
 .fill--ok     { background: var(--s-ok); }
 .fill--warn   { background: var(--s-warn); }
 .fill--danger { background: var(--s-danger); }
-/* Overspend keeps its hatch, the one texture in the app. */
+/* the hatch means overspend. nothing else. law 6 */
 .fill--over {
   background-image: repeating-linear-gradient(115deg,
-    rgba(4, 20, 10, .55) 0 3px, transparent 3px 7px);
+    rgba(255,255,255,.55) 0 4px, transparent 4px 9px);
 }
 
-/* ── rows ── */
-.row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-3) 0; }
+.row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-1) 0; }
+/* A row is a row whether or not it happens to be a link. The browser's default
+   anchor colour and underline are element level and would otherwise win. */
 a.row { color: inherit; text-decoration: none; }
 .row-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .row-tx b {
-  font-size: 14px; font-weight: 500; letter-spacing: -.01em;
+  font-size: 14px; font-weight: 700; letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.row-tx span { font-size: 11.5px; font-weight: 400; color: var(--ink-3); }
-.row-amt { font-size: 15px; font-weight: 500; text-align: right; white-space: nowrap; }
-.row-amt small { display: block; font-size: 10.5px; font-weight: 400; color: var(--ink-3); }
-.row--tap { width: 100%; text-align: left; }
-.row--tap:active { opacity: .6; }
+.row-tx span { font-size: 11px; font-weight: 600; opacity: .6; }
+.row-amt { font-size: 15px; font-weight: 800; text-align: right; white-space: nowrap; }
+.row-amt small { display: block; font-size: 10px; font-weight: 700; opacity: .6; }
 
-/* ── pills and chips ── */
 .pill {
-  display: inline-flex; align-items: center; gap: var(--sp-2);
-  border-radius: var(--r-pill); padding: 6px 11px;
-  font-size: 11px; font-weight: 500; white-space: nowrap;
-  background: var(--glass); color: var(--ink-2); border: 1px solid var(--line);
+  display: inline-flex; align-items: center; border-radius: var(--r-pill);
+  padding: 5px 10px; font-size: 10.5px; font-weight: 800; white-space: nowrap;
 }
-.pill--dark   { background: var(--surface-2); color: var(--ink-2); }
-.pill--white  { background: var(--ink); color: var(--void); border-color: transparent; }
-.pill--glass  { background: var(--glass); color: var(--ink-2); }
-.pill--sunken { background: var(--surface-2); color: var(--ink-2); }
-.pill--ok     { background: var(--pl-ok-bg);     color: var(--pl-ok-fg);     border-color: transparent; }
-.pill--warn   { background: var(--pl-warn-bg);   color: var(--pl-warn-fg);   border-color: transparent; }
-.pill--danger { background: var(--pl-danger-bg); color: var(--pl-danger-fg); border-color: transparent; }
+.pill--dark   { background: var(--ink); color: var(--on-ink); }
+.pill--white  { background: var(--white); color: var(--ink); }
+.pill--glass  { background: var(--glass); color: currentColor; }
+.pill--sunken { background: var(--sunken); color: var(--ink); }
+.pill--ok     { background: var(--pl-ok-bg);     color: var(--pl-ok-fg); }
+.pill--warn   { background: var(--pl-warn-bg);   color: var(--pl-warn-fg); }
+.pill--danger { background: var(--pl-danger-bg); color: var(--pl-danger-fg); }
 .pills { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 
-/* ── tabs ── */
-.seg {
-  display: flex; gap: var(--sp-2); background: var(--surface);
-  border: 1px solid var(--line); border-radius: var(--r-pill); padding: 4px;
-}
+.seg { background: var(--sunken); border-radius: var(--r-pill); padding: 3px; display: flex; }
 .seg > button {
-  flex: 1; text-align: center; font-size: 12.5px; font-weight: 500;
-  min-height: 40px; padding: 8px var(--sp-3); border-radius: var(--r-pill);
-  color: var(--ink-3);
+  flex: 1; text-align: center; font-size: 12px; font-weight: 700;
+  /* 44px minimum, per design.md section 10. At 8px padding these came out at
+     34px, which is under the threshold on a real thumb. */
+  min-height: 44px; padding: 8px var(--sp-2);
+  border-radius: var(--r-pill); opacity: .66;
 }
-.seg > button[aria-selected="true"] { background: var(--glass); color: var(--ink); }
+.seg > button[aria-selected="true"] { background: var(--white); opacity: 1; }
 
-/* ── buttons ── */
+/* one button, one height, three tones. law 9 */
 .btn {
-  height: 52px; border-radius: var(--r-btn); display: grid; place-items: center;
-  font-size: 14px; font-weight: 600; width: 100%; letter-spacing: -.01em;
-  background: var(--s-ok); color: var(--on-accent);
+  height: 50px; border-radius: var(--r-pill); display: grid; place-items: center;
+  font-size: 15px; font-weight: 800; width: 100%;
+  background: var(--ink); color: var(--on-ink);
 }
-.btn--soft { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
-.btn--danger { background: transparent; color: var(--pl-danger-fg); border: 1px solid var(--pl-danger-fg); }
-.btn--onink { background: var(--s-ok); color: var(--on-accent); }
-.btn:active { transform: scale(.985); }
-.btn-row { display: flex; gap: var(--sp-3); }
-.btn-row .btn { flex: 1; }
-
-/* A small bordered pill button, like "+ Add" in the reference. */
-.btn-pill {
-  display: inline-flex; align-items: center; gap: var(--sp-2);
-  height: 38px; padding: 0 var(--sp-6); border-radius: var(--r-pill);
-  background: var(--glass); border: 1px solid var(--line);
-  font-size: 13px; font-weight: 500; color: var(--ink);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-}
+.btn--soft { background: var(--sunken); color: var(--ink); }
+.btn--danger { background: var(--pl-danger-bg); color: var(--pl-danger-fg); }
+.btn:active { transform: scale(.98); }
 
 .empty {
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-5);
-  text-align: center; padding: 48px var(--sp-8);
+  text-align: center; padding: 40px var(--sp-8);
 }
-.empty h2 { font-size: 18px; font-weight: 500; margin: 0; }
-.empty p { font-size: 13px; margin: 0; color: var(--ink-3); max-width: 30ch; }
+.empty h2 { font-size: 18px; font-weight: 800; margin: 0; }
+.empty p { font-size: 13px; margin: 0; opacity: .66; max-width: 30ch; }
 
 /* ============================================================
-   Sections.
-
-   Inside the panel most things are not boxes. A heading, a rule, and the
-   content sitting directly on the panel: stacking six bordered cards on a
-   dark sheet reads as packaging rather than information. Boxes are kept
-   only where the thing genuinely is an object, such as the two direction
-   figures.
-   ============================================================ */
-
-.section { display: flex; flex-direction: column; gap: var(--sp-5); }
-.section + .section { padding-top: var(--sp-6); border-top: 1px solid var(--line); }
-.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
-.section-head b { font-size: 14px; font-weight: 500; }
-.section-head span { font-size: 12px; color: var(--ink-3); }
-.section-sub { font-size: 12px; color: var(--ink-2); margin: 0; }
-
-/* Rows on the panel need their own separation, since there is no card
-   edge to give it to them. */
-.section .row + .row { border-top: 1px solid var(--line); }
-
-/* A quiet block for the one insight: a rule, not a frame. */
-.insight { border-left: 2px solid var(--s-ok); padding: var(--sp-1) 0 var(--sp-1) var(--sp-5); }
-.insight.is-warn { border-left-color: var(--s-warn); }
-.insight.is-danger { border-left-color: var(--s-danger); }
-
-/* Tappable bars in the week chart. */
-.bar-day--tap { cursor: pointer; }
-.bar-day--tap[aria-selected="true"] > i { background: var(--s-ok); }
-.bar-day--tap[aria-selected="true"] > span { color: var(--ink); }
-.bar-day--tap > i { transition: background-color .2s ease; }
-@media (prefers-reduced-motion: reduce) { .bar-day--tap > i { transition: none; } }
-
-/* ============================================================
-   Data visualisation
-   ============================================================ */
-
-.ring-wrap { position: relative; display: grid; place-items: center; }
-.ring { width: 100%; max-width: 132px; height: auto; }
-.ring-mid { position: absolute; display: flex; flex-direction: column; align-items: center; }
-.ring-mid b { font-size: 24px; font-weight: 300; letter-spacing: -.03em; }
-.ring-mid span { font-size: 10.5px; font-weight: 500; color: var(--ink-3); }
-
-/* Small heatmap style bars that bleed to a tile edge. */
-.spark { display: flex; align-items: flex-end; gap: 2px; height: 56px; padding: 0 var(--sp-6); }
-.spark i { flex: 1; border-radius: 2px; display: block; min-height: 2px; background: var(--s-teal); opacity: .8; }
-.spark i.is-peak { background: var(--s-ok); opacity: 1; }
-
-/* The sweeping arc, from the Burned Cal screen. */
-.arc-wrap { position: relative; height: 124px; margin: var(--sp-3) calc(var(--gutter) * -1) 0; }
-.arc-wrap svg { width: 100%; height: 124px; }
-
-.stat-line {
-  display: flex; justify-content: center; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5);
-  font-size: 12px; color: var(--ink-3);
-}
-.stat-line b { color: var(--ink); font-weight: 500; margin-left: 4px; }
-
-/* Day strip: seven days, a tick over each, the current one ringed. */
-.daystrip { display: flex; justify-content: space-between; padding: var(--sp-2) var(--sp-1); }
-.daystrip button {
-  display: flex; flex-direction: column; align-items: center; gap: var(--sp-3);
-  width: 42px; min-height: 58px; border-radius: var(--r-pill);
-}
-.daystrip .tick { width: 18px; height: 3px; border-radius: 2px; background: var(--line-2); }
-.daystrip .tick.is-on { background: var(--s-ok); }
-.daystrip .d {
-  width: 30px; height: 30px; border-radius: var(--r-pill);
-  display: grid; place-items: center; font-size: 12px; font-weight: 500; color: var(--ink-3);
-}
-.daystrip button[aria-selected="true"] .d { color: var(--ink); border: 1px solid var(--line-2); }
-
-.bars { display: flex; align-items: flex-end; gap: var(--sp-2); height: 96px; }
-.bar-day {
-  flex: 1; min-width: 0; height: 100%;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--sp-2);
-}
-.bar-day > i { width: 100%; border-radius: 3px; display: block; min-height: 3px; background: var(--s-teal); }
-.bar-day > em { font-style: normal; font-size: 9.5px; font-weight: 500; color: var(--ink-3); white-space: nowrap; }
-.bar-day > span { font-size: 10px; font-weight: 400; color: var(--ink-3); }
-.bar-day.is-today > span { color: var(--ink); }
-.bars--dense { gap: 2px; }
-.bars--dense .bar-day > em { font-size: 8.5px; }
-
-.cat-line { display: flex; flex-direction: column; gap: var(--sp-3); }
-
-/* ============================================================
-   Navigation. No bar: the icons float on the ambient ground, with
-   the primary action as a lime disc.
+   Navigation. dark floating bar, four tabs plus a raised add.
    ============================================================ */
 .nav {
-  position: fixed; z-index: 40; left: 0; right: 0; bottom: 0;
-  height: calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding: 0 var(--sp-8) env(safe-area-inset-bottom);
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--panel);
-  border-top: 1px solid var(--line);
+  position: fixed; z-index: 40;
+  left: var(--sp-6); right: var(--sp-6);
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  height: var(--nav-h); background: var(--ink); color: rgba(255, 255, 255, .45);
+  border-radius: var(--r-pill); box-shadow: 0 8px 24px rgba(26, 23, 32, .22);
+  display: flex; align-items: center; justify-content: space-around; padding: 0 10px;
 }
-.nav-tab { width: 44px; height: 44px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--ink-3); }
-.nav-tab[aria-current="page"] { color: var(--s-ok); }
+.nav-tab {
+  width: 44px; height: 44px; border-radius: var(--r-pill);
+  display: grid; place-items: center;
+}
+.nav-tab[aria-current="page"] { background: var(--s-warn); color: var(--on-warn); }
 .nav-add {
   width: 52px; height: 52px; border-radius: var(--r-pill);
-  background: var(--s-ok); color: var(--on-accent);
-  display: grid; place-items: center;
-  box-shadow: 0 6px 22px rgba(169, 240, 78, .3);
+  background: var(--s-danger); color: var(--on-danger);
+  display: grid; place-items: center; margin-top: -24px;
+  border: 4px solid var(--canvas);
 }
 
 /* ============================================================
-   Overlays
+   Overlays. every form is a sheet. law 9
    ============================================================ */
 .scrim {
-  position: fixed; inset: 0; z-index: 50; background: rgba(2, 8, 6, .7);
+  position: fixed; inset: 0; z-index: 50; background: rgba(26, 23, 32, .42);
   opacity: 0; transition: opacity .24s ease;
-  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
 }
 .scrim[data-open="true"] { opacity: 1; }
 .sheet {
   position: fixed; z-index: 51; left: 0; right: 0; bottom: 0;
-  background: var(--surface); border-radius: var(--r-sheet) var(--r-sheet) 0 0;
-  border-top: 1px solid var(--line-2);
-  padding: var(--sp-5) var(--gutter) calc(var(--sp-8) + env(safe-area-inset-bottom));
+  background: var(--cream); border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  padding: var(--sp-5) var(--gutter) calc(var(--sp-7) + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: var(--sp-5);
   max-height: 88svh; overflow-y: auto;
-  transform: translateY(100%); transition: transform .28s cubic-bezier(.2, .9, .2, 1);
+  box-shadow: 0 -8px 28px rgba(26, 23, 32, .18);
+  transform: translateY(100%); transition: transform .24s cubic-bezier(.2, .8, .2, 1);
 }
 .sheet[data-open="true"] { transform: translateY(0); }
-@media (prefers-reduced-motion: reduce) { .scrim, .sheet { transition: none; } }
-.sheet-grab { width: 38px; height: 4px; border-radius: var(--r-pill); background: var(--line-2); margin: 0 auto; }
-.sheet-title { font-size: 18px; font-weight: 500; letter-spacing: -.01em; }
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .sheet { transition: none; }
+}
+.sheet-grab {
+  width: 40px; height: 4px; border-radius: var(--r-pill);
+  background: rgba(26, 23, 32, .18); margin: 0 auto;
+}
+.sheet-title { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
 
 .toast {
   position: fixed; z-index: 60; left: 50%; transform: translateX(-50%) translateY(12px);
-  bottom: calc(var(--nav-h) + 30px + env(safe-area-inset-bottom));
-  background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-2);
-  padding: 12px 18px; border-radius: var(--r-pill);
-  font-size: 13px; font-weight: 500; opacity: 0;
+  bottom: calc(var(--nav-h) + 28px + env(safe-area-inset-bottom));
+  background: var(--ink); color: var(--on-ink);
+  padding: 11px 18px; border-radius: var(--r-pill);
+  font-size: 13px; font-weight: 700; opacity: 0;
   transition: opacity .2s ease, transform .2s ease; pointer-events: none;
   max-width: calc(100vw - 40px); text-align: center;
 }
 .toast[data-open="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* a persistent, unmissable failure. storage refusing to save is the worst
+   thing that can happen in this app, so it does not get a toast. */
 .banner {
   position: fixed; z-index: 61; left: var(--sp-6); right: var(--sp-6);
   top: calc(10px + env(safe-area-inset-top));
-  background: var(--pl-danger-bg); color: var(--pl-danger-fg);
-  border: 1px solid var(--s-danger);
-  border-radius: var(--r-tile); padding: var(--sp-5) var(--sp-6);
-  font-size: 13px; font-weight: 500;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background: var(--s-danger); color: var(--on-danger);
+  border-radius: var(--r-card); padding: var(--sp-5) var(--sp-6);
+  font-size: 13px; font-weight: 700;
+  box-shadow: 0 8px 24px rgba(26, 23, 32, .22);
 }
 
 /* ============================================================
-   Forms. Every one of them is in a sheet.
+   Charts, rings and the pieces the later screens needed.
+   All hand drawn: no chart library, nothing to download.
    ============================================================ */
+
+/* Day by day. Every day of the period gets a bar, zeros included, because a
+   flat Wednesday is information and a missing Wednesday is a bug. */
+.bars { display: flex; align-items: flex-end; gap: var(--sp-2); height: 108px; }
+.bar-day {
+  flex: 1; min-width: 0; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--sp-1);
+}
+.bar-day > i { width: 100%; border-radius: 8px; display: block; min-height: 3px; }
+.bar-day > em {
+  font-style: normal; font-size: 9.5px; font-weight: 800;
+  font-variant-numeric: tabular-nums; opacity: .75; white-space: nowrap;
+}
+.bar-day > span { font-size: 9.5px; font-weight: 700; opacity: .5; }
+.bar-day.is-today > span { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+
+.bars--dense { gap: 2px; }
+.bars--dense .bar-day > i { border-radius: 4px; }
+.bars--dense .bar-day > em { font-size: 8.5px; }
+.bars--dense .bar-day > span { font-size: 8.5px; }
+
+.cat-line { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.ring-wrap { position: relative; display: grid; place-items: center; padding-top: var(--sp-2); }
+.ring { width: 100%; max-width: 210px; height: auto; }
+.ring-mid {
+  position: absolute; top: 54%; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.ring-mid b { font-size: 26px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.ring-mid span { font-size: 11.5px; font-weight: 700; opacity: .55; }
+
+.tile--glass { background: var(--glass); color: inherit; }
+.tile--tap { text-align: left; }
+.tile--tap:active { opacity: .75; }
+.card--tap { width: 100%; text-align: left; }
+.card--tap:active { opacity: .75; }
+
+.detail-hero { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: var(--sp-3) 0; }
+.detail-label { font-size: 12px; font-weight: 700; opacity: .6; }
+.detail-figure { font-size: 40px; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.detail-sub { font-size: 12px; font-weight: 600; opacity: .6; }
+
+.group-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: var(--sp-4) var(--sp-1) 0; font-size: 12px; font-weight: 800;
+}
+.group-head span { opacity: .5; }
+
+.stepper { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
+.stepper b { font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+
+.filter-bar { display: flex; flex-direction: column; gap: var(--sp-3); }
+.filter-foot { display: flex; gap: var(--sp-2); }
+.search-input { background: var(--white); }
+.result-list { display: flex; flex-direction: column; gap: var(--sp-5); }
+.result-line {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px; font-weight: 700; opacity: .7; padding: 0 var(--sp-1);
+}
+.result-line b { font-variant-numeric: tabular-nums; }
+
+.note-row { padding: var(--sp-2) 0; border-bottom: 1px solid var(--line); }
+.note-row:last-of-type { border-bottom: 0; }
+.note-row.is-unread .row-tx b::after {
+  content: ""; display: inline-block; width: 6px; height: 6px;
+  border-radius: var(--r-pill); background: var(--s-danger); margin-left: 6px; vertical-align: middle;
+}
+
+/* An unread count on the bell, without a number competing with the figures. */
+.circle-btn.has-dot { position: relative; }
+.circle-btn.has-dot::after {
+  content: ""; position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px; border-radius: var(--r-pill);
+  background: var(--s-danger); box-shadow: 0 0 0 2px var(--s-ok);
+}
+
+/* A primary button sitting on an ink card cannot also be ink. */
+.btn--onink { background: var(--on-ink); color: var(--ink); }
+.install-card .card-head b { font-size: 15px; }
+.install-card .circle-btn { background: rgba(255, 255, 255, .16); }
+
+.steps { display: flex; flex-direction: column; gap: var(--sp-4); }
+.step { display: flex; align-items: flex-start; gap: var(--sp-4); font-size: 13.5px; font-weight: 600; }
+.step-n {
+  width: 26px; height: 26px; flex: none; border-radius: var(--r-pill);
+  display: grid; place-items: center; background: var(--sunken);
+  font-size: 12px; font-weight: 800;
+}
+
+.btn-row { display: flex; gap: var(--sp-3); }
+.btn-row .btn { flex: 1; }
+.field-help { font-size: 11px; font-weight: 600; opacity: .55; }
+.textarea { height: auto; padding: var(--sp-4) var(--sp-5); line-height: 1.45; resize: vertical; }
+
+/* ============================================================
+   Forms. Every one of them lives in a sheet, so these styles are
+   written for a cream surface and nothing else.
+   ============================================================ */
+
 .sheet-form { display: flex; flex-direction: column; gap: var(--sp-5); }
 
+/* The amount is the hero of the sheet: it is what the user came to type. */
 .amount-row {
   display: flex; align-items: baseline; justify-content: center; gap: var(--sp-2);
-  padding: var(--sp-5) 0 var(--sp-3);
+  padding: var(--sp-3) 0 var(--sp-1);
 }
-.amount-sym { font-size: 22px; font-weight: 400; color: var(--ink-3); }
+.amount-sym { font-size: 24px; font-weight: 800; opacity: .42; }
 .amount-input {
   border: 0; background: none; color: var(--ink); font: inherit;
-  font-size: 46px; font-weight: 300; letter-spacing: -.035em;
-  text-align: center; width: 100%; max-width: 250px; padding: 0; -webkit-appearance: none;
+  font-size: 46px; font-weight: 800; letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums; text-align: center;
+  width: 100%; max-width: 240px; padding: 0; -webkit-appearance: none;
 }
 .amount-input:focus { outline: none; }
-.amount-input::placeholder { color: var(--ink-3); }
+.amount-input::placeholder { color: var(--ink); opacity: .22; }
 
+/* A horizontal scroller, because a wrapping grid of categories pushes the
+   save button off the screen on a small phone. */
 .chip-row {
   display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: var(--sp-1);
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
@@ -615,194 +480,195 @@ a.row { color: inherit; text-decoration: none; }
 .chip-row::-webkit-scrollbar { display: none; }
 .chip {
   display: inline-flex; align-items: center; gap: var(--sp-2); flex: none;
-  border-radius: var(--r-pill); padding: 9px 13px; min-height: 42px;
-  background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line);
-  font-size: 12.5px; font-weight: 500; white-space: nowrap;
+  border-radius: var(--r-pill); padding: 9px 13px; min-height: 40px;
+  background: var(--white); color: var(--ink);
+  font-size: 12.5px; font-weight: 700; white-space: nowrap;
 }
-.chip.is-on { background: var(--s-ok); color: var(--on-accent); border-color: transparent; }
+.chip.is-on { background: var(--ink); color: var(--on-ink); }
 .chip-dot {
-  width: 22px; height: 22px; border-radius: 7px; flex: none;
-  display: grid; place-items: center; background: var(--glass-dark);
+  width: 22px; height: 22px; border-radius: 8px; flex: none;
+  display: grid; place-items: center; color: var(--ink);
 }
-.chip.is-on .chip-dot { background: rgba(4, 20, 10, .16); }
-.chip--new { border-style: dashed; background: none; }
+.chip--new { border: 1px dashed rgba(26, 23, 32, .25); background: none; }
 
 .field { display: flex; flex-direction: column; gap: var(--sp-2); }
-.field-label { font-size: 11px; font-weight: 500; color: var(--ink-3); }
-.field-input {
-  width: 100%; height: 50px; border: 1px solid var(--line); border-radius: 14px;
-  background: var(--surface-2); color: var(--ink);
-  font: inherit; font-size: 15px; font-weight: 400;
-  padding: 0 var(--sp-6); -webkit-appearance: none;
+.field-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; opacity: .5;
 }
-.field-input::placeholder { color: var(--ink-3); }
+.field-input {
+  width: 100%; height: 48px; border: 0; border-radius: var(--r-tile);
+  background: var(--white); color: var(--ink);
+  font: inherit; font-size: 15px; font-weight: 600;
+  padding: 0 var(--sp-5); -webkit-appearance: none;
+}
+.field-input::placeholder { color: var(--ink); opacity: .35; font-weight: 600; }
+/* The native date input is kept in the DOM but out of sight: the three quick
+   buttons above it are the interface, and it is only opened when needed. */
 .field-hidden { height: 0; overflow: hidden; }
-.field-help { font-size: 11px; font-weight: 400; color: var(--ink-3); }
-.textarea { height: auto; padding: var(--sp-4) var(--sp-6); line-height: 1.45; resize: vertical; }
 
-.more-toggle { align-self: flex-start; font-size: 13px; font-weight: 500; color: var(--ink-3); padding: var(--sp-1) 0; }
+.more-toggle {
+  align-self: flex-start; font-size: 13px; font-weight: 700;
+  color: var(--ink); opacity: .6; padding: var(--sp-1) 0;
+}
 .more-fields { display: flex; flex-direction: column; gap: var(--sp-5); }
 
 .form-error {
-  margin: 0; font-size: 12.5px; font-weight: 500;
+  margin: 0; font-size: 12.5px; font-weight: 700;
   color: var(--pl-danger-fg); background: var(--pl-danger-bg);
-  padding: var(--sp-4) var(--sp-5); border-radius: 14px;
+  padding: var(--sp-4) var(--sp-5); border-radius: var(--r-tile);
 }
 
-.tint-swatch { width: 34px; height: 34px; border-radius: var(--r-badge); flex: none; border: 2px solid transparent; }
+.tint-swatch {
+  width: 34px; height: 34px; border-radius: var(--r-badge); flex: none;
+  border: 2px solid transparent;
+}
 .tint-swatch.is-on { border-color: var(--ink); }
 
 /* ── history ── */
 .day-head {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 12px; font-weight: 500; color: var(--ink-2); padding-bottom: var(--sp-2);
+  font-size: 12px; font-weight: 800; padding-bottom: var(--sp-1);
 }
-.day-head span { color: var(--ink-3); }
-.filter-bar { display: flex; flex-direction: column; gap: var(--sp-3); }
-.filter-foot { display: flex; gap: var(--sp-2); }
-.search-input { background: var(--surface); }
-.result-list { display: flex; flex-direction: column; gap: var(--sp-5); }
-.result-line {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 12px; font-weight: 500; color: var(--ink-3); padding: 0 var(--sp-1);
-}
-.result-line b { color: var(--ink); }
-
-.group-head {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding: var(--sp-4) var(--sp-1) 0; font-size: 12px; font-weight: 500; color: var(--ink-2);
-}
-.group-head span { color: var(--ink-3); }
-.stepper { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
-.stepper b { font-size: 15px; font-weight: 500; }
-
-.detail-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) 0; }
-.detail-label { font-size: 12px; font-weight: 500; color: var(--ink-3); }
-.detail-figure { font-size: 42px; font-weight: 300; letter-spacing: -.035em; }
-.detail-sub { font-size: 12px; font-weight: 400; color: var(--ink-3); }
-
-.note-row { padding: var(--sp-3) 0; border-bottom: 1px solid var(--line); }
-.note-row:last-of-type { border-bottom: 0; }
-.note-row.is-unread .row-tx b::after {
-  content: ""; display: inline-block; width: 6px; height: 6px;
-  border-radius: var(--r-pill); background: var(--s-ok); margin-left: 6px; vertical-align: middle;
-}
-.circle-btn.has-dot { position: relative; }
-.circle-btn.has-dot::after {
-  content: ""; position: absolute; top: 7px; right: 7px;
-  width: 8px; height: 8px; border-radius: var(--r-pill);
-  background: var(--s-ok); box-shadow: 0 0 0 2px var(--canvas);
-}
-
-.steps { display: flex; flex-direction: column; gap: var(--sp-4); }
-.step { display: flex; align-items: flex-start; gap: var(--sp-4); font-size: 13.5px; font-weight: 400; }
-.step-n {
-  width: 26px; height: 26px; flex: none; border-radius: var(--r-pill);
-  display: grid; place-items: center; background: var(--s-ok); color: var(--on-accent);
-  font-size: 12px; font-weight: 600;
-}
-.install-card .card-head b { font-size: 14px; }
+.day-head span { font-variant-numeric: tabular-nums; opacity: .55; }
+.row--tap { width: 100%; text-align: left; }
+.row--tap:active { opacity: .6; }
 
 /* ============================================================
-   Onboarding. The ambient ground carries it; no coloured slab.
+   Onboarding. No nav, and the band fills the whole screen, so the
+   five questions feel like one continuous thing rather than five
+   pages. One question, one field, one button, per design.md.
    ============================================================ */
+
 body[data-onboarding] .nav { display: none; }
-.screen--onboarding { background: transparent; color: var(--ink); padding: 0; min-height: 100svh; }
+
+.screen--onboarding {
+  background: var(--s-ok);
+  color: var(--on-ok);
+  padding: 0;
+  min-height: 100svh;
+}
 .ob-inner {
-  min-height: 100svh; display: flex; flex-direction: column;
+  min-height: 100svh;
+  display: flex; flex-direction: column;
   padding: calc(var(--sp-7) + env(safe-area-inset-top)) var(--gutter)
            calc(var(--sp-8) + env(safe-area-inset-bottom));
   gap: var(--sp-8);
 }
-.ob-top { display: flex; align-items: center; gap: var(--sp-5); min-height: 38px; }
-.ob-spacer { width: 38px; height: 38px; flex: none; }
+.ob-top { display: flex; align-items: center; gap: var(--sp-5); min-height: 36px; }
+.ob-spacer { width: 36px; height: 36px; flex: none; }
+
 .ob-dots { display: flex; gap: var(--sp-2); align-items: center; }
-.ob-dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--line-2); transition: width .2s ease; }
-.ob-dot.is-done { background: var(--ink-3); }
-.ob-dot.is-on { width: 20px; background: var(--s-ok); }
-.ob-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-6); padding-bottom: var(--sp-8); }
-.ob-question { font-size: 30px; font-weight: 300; letter-spacing: -.025em; margin: 0; line-height: 1.15; }
-.ob-help { font-size: 14px; font-weight: 400; margin: 0; color: var(--ink-2); max-width: 32ch; }
-.ob-hint { font-size: 12px; font-weight: 400; margin: 0; color: var(--ink-3); }
-.ob-marks { display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-3); }
-.ob-mark { display: flex; align-items: center; gap: var(--sp-4); font-size: 14px; font-weight: 400; }
-.ob-mark-badge {
-  width: 36px; height: 36px; border-radius: var(--r-badge); flex: none;
-  display: grid; place-items: center; background: var(--surface);
-  border: 1px solid var(--line); color: var(--s-ok);
+.ob-dot {
+  width: 7px; height: 7px; border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .28);
+  transition: width .2s ease, background-color .2s ease;
 }
+.ob-dot.is-done { background: rgba(255, 255, 255, .55); }
+.ob-dot.is-on { width: 20px; background: var(--on-ok); }
+
+/* The question takes the middle of the screen, so the answer sits under the
+   thumb rather than under the notch. */
+.ob-body {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  gap: var(--sp-6); padding-bottom: var(--sp-8);
+}
+.ob-question { font-size: 30px; font-weight: 800; letter-spacing: -.03em; margin: 0; line-height: 1.1; }
+.ob-help { font-size: 14px; font-weight: 600; margin: 0; opacity: .78; max-width: 30ch; }
+.ob-hint { font-size: 12px; font-weight: 600; margin: 0; opacity: .6; }
+
+.ob-marks { display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-3); }
+.ob-mark { display: flex; align-items: center; gap: var(--sp-4); font-size: 14px; font-weight: 700; }
+.ob-mark-badge {
+  width: 34px; height: 34px; border-radius: var(--r-badge); flex: none;
+  display: grid; place-items: center; background: var(--glass);
+}
+
 .ob-field { display: flex; flex-direction: column; gap: var(--sp-2); }
 .ob-input {
-  width: 100%; height: 54px; border: 1px solid var(--line); border-radius: 14px;
-  background: var(--surface); color: var(--ink);
-  font: inherit; font-size: 17px; font-weight: 400; padding: 0 var(--sp-6);
-  -webkit-appearance: none;
+  width: 100%; height: 54px; border: 0; border-radius: var(--r-tile);
+  background: var(--glass); color: var(--on-ok);
+  font: inherit; font-size: 17px; font-weight: 700;
+  padding: 0 var(--sp-6); -webkit-appearance: none;
 }
-.ob-input::placeholder { color: var(--ink-3); }
+.ob-input::placeholder { color: currentColor; opacity: .5; font-weight: 600; }
+
 .ob-amount-row { display: flex; align-items: baseline; gap: var(--sp-2); }
-.ob-amount-sym { font-size: 24px; font-weight: 400; color: var(--ink-3); }
+.ob-amount-sym { font-size: 26px; font-weight: 800; opacity: .55; }
 .ob-amount {
-  flex: 1; min-width: 0; border: 0; background: none; color: var(--ink);
-  font: inherit; font-size: 46px; font-weight: 300; letter-spacing: -.035em;
-  padding: 0; -webkit-appearance: none;
+  flex: 1; min-width: 0; border: 0; background: none; color: var(--on-ok);
+  font: inherit; font-size: 46px; font-weight: 800; letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums; padding: 0; -webkit-appearance: none;
 }
-.ob-amount:focus { outline: none; }
-.ob-amount::placeholder { color: var(--ink-3); }
-.ob-field--amount { border-bottom: 1px solid var(--line-2); padding-bottom: var(--sp-3); }
-.ob-error { font-size: 12px; font-weight: 500; margin: 0; color: var(--pl-danger-fg); }
+.ob-amount::placeholder { color: currentColor; opacity: .32; }
+.ob-field--amount { border-bottom: 2px solid rgba(255, 255, 255, .3); padding-bottom: var(--sp-3); }
+.ob-error { font-size: 12px; font-weight: 700; margin: 0; color: var(--on-ok); opacity: .9; }
+
 .ob-choices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
 .ob-choices--wide { grid-template-columns: 1fr; }
 .ob-choice {
   display: flex; align-items: center; gap: var(--sp-4);
-  padding: var(--sp-5) var(--sp-6); border-radius: 16px;
-  background: var(--surface); border: 1px solid var(--line);
-  color: var(--ink); text-align: left; min-height: 58px;
+  padding: var(--sp-5) var(--sp-6); border-radius: var(--r-tile);
+  background: var(--glass); color: var(--on-ok); text-align: left;
+  min-height: 56px;
 }
-.ob-choice.is-on { border-color: var(--s-ok); background: var(--pl-ok-bg); }
-.ob-choice-sym { font-size: 19px; font-weight: 500; }
-.ob-choice-name { font-size: 13px; font-weight: 500; }
+.ob-choice.is-on { background: var(--on-ok); color: var(--s-ok); }
+.ob-choice-sym { font-size: 19px; font-weight: 800; }
+.ob-choice-name { font-size: 13px; font-weight: 700; }
+
 .ob-suggest {
-  text-align: left; font-size: 12.5px; font-weight: 400; line-height: 1.4;
-  padding: var(--sp-4) var(--sp-5); border-radius: 14px;
-  background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
+  text-align: left; font-size: 12.5px; font-weight: 700; line-height: 1.4;
+  padding: var(--sp-4) var(--sp-5); border-radius: var(--r-tile);
+  background: var(--glass); color: var(--on-ok);
 }
+
 .ob-actions { display: flex; flex-direction: column; gap: var(--sp-4); }
-.ob-next { background: var(--s-ok); color: var(--on-accent); }
-.ob-skip { height: 40px; font-size: 13px; font-weight: 500; color: var(--ink-3); }
+.ob-next { background: var(--ink); color: var(--on-ink); }
+.ob-skip {
+  height: 40px; font-size: 13px; font-weight: 700; color: var(--on-ok); opacity: .7;
+}
 
 /* ============================================================
-   SURFACES. Last on purpose: components above set their own
-   background, and at equal specificity the later rule wins.
+   SURFACES. This block is last on purpose. Do not move it.
 
-   A status is an edge and a hue here, never a slab of paint.
+   Two cascade traps, both of which have already bitten this design once:
+
+   1. Components set their own background. `.tile` declares a white fill, and
+      at equal specificity the LATER rule wins, so a surface class written
+      earlier silently loses. A teal tile became a white tile still carrying
+      cream text, which is invisible. Surfaces must come last.
+
+   2. An element selector beats inheritance. A `p` inside a coloured card kept
+      the document's paragraph colour rather than the card's, because `p {}`
+      is a real selector and inheritance is not. Anything textual inside a
+      surface must say `color: inherit`.
    ============================================================ */
-.surf--card   { background: var(--surface);   color: var(--ink); border: 1px solid var(--line); }
-.surf--muted  { background: var(--sunken);    color: var(--ink); border: 1px solid var(--line); }
-.surf--feature{ background: var(--surface);   color: var(--ink); border: 1px solid var(--line);
-                border-left: 2px solid var(--s-ok); }
-.surf--ok     { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-.surf--warn   { background: var(--surface); color: var(--ink); border: 1px solid rgba(245, 196, 81, .35); }
-.surf--danger { background: var(--surface); color: var(--ink); border: 1px solid rgba(255, 107, 107, .45); }
-.surf--owe    { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-.surf--glass  { background: var(--glass-dark); color: inherit; }
+.surf--white  { background: var(--white);    color: var(--ink); }
+.surf--cream  { background: var(--cream);    color: var(--ink); }
+.surf--ok     { background: var(--s-ok);     color: var(--on-ok); }
+.surf--warn   { background: var(--s-warn);   color: var(--on-warn); }
+.surf--danger { background: var(--s-danger); color: var(--on-danger); }
+.surf--owe    { background: var(--s-owe);    color: var(--on-owe); }
+.surf--ink    { background: var(--ink);      color: var(--on-ink); }
+.surf--glass  { background: var(--glass);    color: inherit; }
 
-.surf--ok .tile-v,  .surf--ok .tile-figure  { color: var(--s-ok); }
-.surf--owe .tile-v, .surf--owe .tile-figure { color: var(--s-owe); }
-.surf--ok .badge, .surf--ok .tile-mark    { color: var(--s-ok); }
-.surf--owe .badge, .surf--owe .tile-mark  { color: var(--s-owe); }
-
-/* Text inside a surface always inherits: an element selector such as p{}
-   beats inheritance, and a paragraph would otherwise keep the document's
-   colour rather than the card's. */
-.surf--card p, .surf--muted p, .surf--feature p, .surf--ok p, .surf--warn p,
-.surf--danger p, .surf--owe p, .band p, .note, .bento-tile p { color: inherit; }
-.note { font-size: 13px; font-weight: 400; line-height: 1.5; margin: 0; color: var(--ink-2); }
+/* Text inside a surface always inherits. Never let an element selector win. */
+.surf--white p, .surf--cream p, .surf--ok p, .surf--warn p,
+.surf--danger p, .surf--owe p, .surf--ink p,
+.band p, .note {
+  color: inherit;
+}
+.note { font-size: 12.5px; font-weight: 600; line-height: 1.45; margin: 0; opacity: .85; }
 
 /* ============================================================
-   Above phone width the app stays a phone, centred.
+   Above phone width the app stays a phone, centred. It is an
+   installed mobile app, not a desktop layout.
    ============================================================ */
 @media (min-width: 520px) {
-  body { background: #02110D; }
-  #app { max-width: 430px; margin: 0 auto; min-height: 100svh; position: relative; overflow: hidden; }
-  .nav { max-width: 430px; margin: 0 auto; }
+  body { background: #E9E1D0; }
+  #app {
+    max-width: 430px; margin: 0 auto; min-height: 100svh;
+    background: var(--canvas); overflow: hidden;
+  }
+  .nav { max-width: 398px; margin: 0 auto; }
 }

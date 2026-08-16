@@ -123,9 +123,9 @@ var App = (function () {
       band.classList.remove("band--ok", "band--warn", "band--danger");
       band.classList.add(cls);
     }
-    /* The header is transparent now: the ambient ground runs to the top of
-       the screen, so the status bar matches the canvas in every state. */
-    var colour = getComputedStyle(document.documentElement).getPropertyValue("--canvas").trim();
+    var colour = getComputedStyle(document.documentElement)
+      .getPropertyValue(state === "danger" ? "--s-danger" : state === "warn" ? "--s-warn" : "--s-ok")
+      .trim();
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta && colour) meta.setAttribute("content", colour);
   }

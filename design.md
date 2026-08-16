@@ -1,98 +1,20 @@
 # Plutus: Design System
 
 > The visual source of truth. `context.md` is product, `architecture.md` is code structure, `implementation.md` is order, `decision.md` is history.
-> Anything on screen that is not in this file does not exist.
+> Anything on screen that is not in this file does not exist. If a screen needs something new, it gets added here first, as a component, then used everywhere it applies.
 
 Last updated: 17 August 2026
-**Version 5: ambient dark, bento, data as the hero.** Source: the fitness dashboard reference in the Plutus Figma file. It is the only reference in scope.
+**Version 2 restored.** Cream canvas, colour blocked cards, teal, mustard, rose and periwinkle.
 
-## 0. What the reference actually does
+**Why it came back.** Versions 3, 4 and 5 chased three different dark references: acid lime flat, dark brutalist, and ambient bento. Each matched its board, and none of them was this product. The cream direction was chosen deliberately from an A against B comparison, it is the one the whole app was built in, and it is the one that reads calmest under dense figures. Every one of those explorations is in git if it is ever wanted again: the tags are in `decision.md`.
 
-Three things, and they are what make it feel expensive:
+Two fixes made during that detour were kept rather than reverted with the rest: the onboarding flag bug in `app.js`, and the compact formatting of the average daily figure.
 
-1. **The ground is lit, not flat.** A deep green black with a soft light source above and left, a colder one to the right, and a glow from below. Nothing in the app is pure black, and every card can therefore be a nearly identical dark rectangle and still separate from the page.
-2. **Bento.** A modular grid where a tile's size is how important the thing inside it is. One tall tile, two small ones, each holding a single figure and a small piece of data drawing.
-3. **Data is the decoration.** A ring gauge, a sweeping curve with a lit endpoint, small bars bleeding to a tile's edge. There is no ornament that is not also information.
-
-Type is **light and large**: headline figures sit around weight 300, not 800. That restraint is most of why the numbers read as expensive rather than shouty. This reverses version 4 completely and deliberately.
-
-## 0a. The palette, sampled from the reference
-
-```
---void      #050B09    behind everything
---canvas    #071110    the lit ground
---surface   #0E1B17    every tile and card
---surface-2 #142320    inputs and raised things
---line      rgba(255,255,255,.07)
-
---ink   #FFFFFF   --ink-2 rgba(255,255,255,.58)   --ink-3 rgba(255,255,255,.40)
-
---s-ok     #A9F04E    progress and health, and the brand
---s-teal   #35D6BE    the second data series
---s-warn   #F5C451    approaching
---s-danger #FF6B6B    at or past the limit, overdue
---s-owe    #9D8CFF    money you owe
-```
-
-The accent is **data ink**. It draws rings, curves, bars and the one primary action, and it is not used as a background anywhere except that action.
-
-## 0aa. Home: hero on the ground, everything else on a panel
-
-Screen one of the reference does two things that the first attempt at this
-direction missed.
-
-**The glow lights the top of the screen. It is not a picture.** The first pass
-had three heavy washes including one from below, and it read as a background
-rather than as light. It is now two, at roughly half the opacity, fading out
-before the panel starts.
-
-**A solid rounded panel carries the content.** Tiles floating on a gradient
-never cover it convincingly: you see the wash between and behind them, and the
-screen has no floor. So Home is now:
-
-```
-   header      avatar, greeting, bell          on the lit ground
-   hero        SPENT IN AUGUST                 on the lit ground
-               9,168          the headline
-               bar
-               15,832 left of 25,000, 37% used
-   +--------------------------------------+
-   | day strip                            |   the panel: opaque, radius 30,
-   | the day you tapped, as a list        |   darker than the lit ground, and
-   | owed to you / you owe                |   always runs to the bottom of the
-   | where it went                        |   screen whatever the content
-   | one insight                          |
-   +--------------------------------------+
-```
-
-Spent is the headline rather than remaining, because spent is the figure that
-moves when you act. What is left sits directly under it, in the same breath.
-
-The panel is **darker** than the ground above it, not lighter, so the seam
-reads and the cards on it are the raised things. It also grows to fill the
-screen, because a panel that stops where its content ends leaves the wash
-showing underneath, which is the whole problem it exists to solve.
-
-## 0b. Components the reference gave us
-
-* **Bento tile.** Radius 20, one dark surface, a hairline border. A tall variant spans two rows, a wide one spans two columns.
-* **Ring gauge.** A 270 degree arc, stroked twice, with a soft bloom filter on the value. The gap at the bottom is what makes it a gauge rather than a pie.
-* **Sweeping arc.** A curve that rises left to right, ending in a haloed dot placed at the fraction given. The curve carries the meaning; the dot is where you are now.
-* **Spark bars.** Small blocks bleeding to a tile's edge, scaled to the tallest, with the peak picked out in the accent.
-* **Day strip.** Seven days with a tick over each, lit when something was recorded, the selected day ringed. Tapping one reads that day.
-* **Pill button.** A small bordered capsule with a blur behind it, from the reference's "+ Add".
+**Why there is a version 2.** Version 1 read the instruction "no variation between screens" as a reason to strip the colour out, and produced white cards on a cream canvas with one teal accent. It was rejected, correctly: it did not follow the reference. Consistency has to come from the system being identical everywhere, not from the palette being absent. Version 2 puts the colour back at the strength the board actually uses, and takes the consistency out of the laws in section 9 instead.
 
 ## 1. What the board actually does
-## 1. What the board actually does
-## 1. What the board actually does
 
-**Version 3.** The reference is a near black app with a single acid lime accent. Lime appears as full width primary buttons with uppercase labels, as a banner block with dark text on it, as the active tab underline, as the selected state on a tile, and as highlighted words in a headline. Everything else is dark grey on darker grey, separated by hairlines rather than by colour. Radii are small. Text is white with grey secondaries.
-
-The discipline that makes it work is restraint: **one loud colour, used only where something is actionable or urgent.** That is the same discipline version 2 had, pointed at a different palette.
-
-*(The paragraph below describes the previous board and is kept because it explains decisions still in force.)*
-
-Screen one of the old board carried a rose header block, a white card, a mustard block and a teal player in a single screen. Saturated blocks of colour, several to a screen, were that direction's whole identity.
+Look at screen one of the top board. In a single screen there is a rose header block that bleeds to the top edge, a white card, a mustard block and a teal player. Screen five does the same in orange. Screen three is teal edge to edge. **Saturated blocks of colour, several to a screen, are the whole visual identity.** That is the thing to carry across.
 
 **Taken:**
 
@@ -159,11 +81,9 @@ Custom categories pick from these ten, never from a free colour picker.
 
 ## 4. Type
 
-**Space Grotesk** for the interface and **JetBrains Mono** for every figure. Self hosted, four woff2 files, 97KB together, which is less than Inter alone cost.
+**Inter**, self hosted as two variable woff2 subsets in `fonts/`, 133KB together. The rupee glyph U+20B9 lives in the latin-ext file, so both are required, exactly as with the face this replaced. Fallback is the system stack.
 
-Space Grotesk is a grotesque with squared off curves and odd details: about as close to brutalist as a face can be while staying readable at 11px. JetBrains Mono carries every amount, percentage and date total. A monospace guarantees digits line up in a column without depending on a tabular numeral feature the face may or may not carry, and a money app is mostly columns of digits. It also reads raw and technical, which is the register the reference is in.
-
-**The rupee needed handling.** JetBrains Mono's latin-ext subset declares U+20B9 in its range but carries no glyph for it, so every amount silently fell back to a system monospace for that one character. Found by measuring: the mono advance is 48 units and the rupee measured 44. U+20B9 is now cut out of that face's range and served from Space Grotesk instead, which does have it, at no extra cost because that file already ships.
+Changed from Plus Jakarta Sans on 17 August 2026 at the user's request. Inter is the more neutral face of the two: a larger x height, tighter apertures, and a lower profile at display sizes, so the same headline reads slightly wider and slightly calmer. It costs 133KB against Jakarta's 49KB, because its variable file spans 100 to 900 and its latin-ext subset is large. That is a one time cost on a cached shell.
 
 Inter's letterforms are optically smaller at the same point size, so the display sizes keep their negative tracking and nothing else moved.
 
@@ -275,13 +195,13 @@ The day by day chart was lifted from layout L3 at the user's request. It sits di
 
 Loud surfaces make drift easier, so these carry more weight than in version 1. A design review is these twelve, in order, against the screen.
 
-1. **Every screen opens on the ambient ground.** The header is transparent: the lit gradient runs to the top of the screen and the status bar matches it. No screen has a coloured header block.
-2. **The accent is data ink.** It draws the ring, the curve, the bars and the one primary action. It is never a background except on that action. A status is a hue and an edge: the ring turns amber then red, the tall tile takes a red border when you are over.
+1. **Every screen opens with a band.** Full bleed to the top edge, curved off at the bottom, content pulled up over it.
+2. **Six surfaces, no seventh.** A new colour needs a new job first.
 3. **A surface colour means one thing.** Periwinkle is money you owe, everywhere, always.
 4. **Only the Home band changes colour.** Teal, mustard, rose, driven by the budget. Every other block keeps its colour forever.
 5. **Text colour follows the surface.** Dark on mustard, cream and periwinkle. Light on teal, rose and ink.
 6. **Every bar carries its numbers**, and overspend is always the hatch, never a different colour.
-7. **Soft again, but not pillowy.** 20 on tiles and cards, 12 on badges, 26 on sheets, full round on buttons, pills and chips.
+7. **One card, one radius.** 24 on cards, 30 on the band and sheets, 13 on badges, full round on pills.
 8. **Figures are weight 800**, tabular, no exceptions.
 9. **Every form is a sheet.**
 10. **Direction is never colour alone.** Owed to you and you owe carry a word, an arrow and a colour, all three.

@@ -9,7 +9,7 @@
       stranded on the previous version.
 */
 
-const CACHE = "plutus-v14";
+const CACHE = "plutus-v15";
 
 const SHELL = [
   "./",
@@ -32,7 +32,6 @@ const SHELL = [
   "js/validate.js",
   "js/store.js",
   "js/actions.js",
-  "js/viz.js",
   "js/ui.js",
   "js/install.js",
   "js/notifications.js",
