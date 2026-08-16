@@ -115,42 +115,74 @@ var ScreenHome = (function () {
     );
   }
 
-  /* ── the week, and the day you tapped ── */
+  /* -- this week ----------------------------------------------
+     The original layout's day by day chart, made tappable so it also does
+     the job the day strip was doing. One component, two uses, and one less
+     thing competing for the same space. */
 
-  function weekSection(s, weekPeriod, today, cats) {
+  function weekSection(s, weekPeriod, weekly, today, cats) {
     var totals = Expenses.dailyTotals(s.expenses, weekPeriod);
+    var max = totals.reduce(function (m, d) { return Math.max(m, d.total); }, 0);
     var names = ["S", "M", "T", "W", "T", "F", "S"];
-    var days = totals.map(function (d) {
+    var selected = picked || today;
+
+    var chart = el("div.bars");
+    totals.forEach(function (d) {
       var parts = d.date.split("-");
       var dow = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).getDay();
-      return { date: d.date, total: d.total, short: names[dow], label: Dates.formatDisplay(d.date, today) };
+      var pct = max > 0 ? Math.max((d.total / max) * 100, d.total > 0 ? 8 : 3) : 3;
+      var isSel = d.date === selected;
+      chart.appendChild(el("button.bar-day.bar-day--tap" + (d.date === today ? ".is-today" : ""), {
+        type: "button",
+        "aria-selected": isSel ? "true" : "false",
+        "aria-label": Dates.formatDisplay(d.date, today) + ", " + money(d.total),
+        onclick: function () { picked = d.date; render(); }
+      },
+        el("em", { text: d.total > 0 ? compact(d.total) : "" }),
+        el("i", { style: { height: pct + "%" } }),
+        el("span", { text: names[dow] })
+      ));
     });
 
-    var selected = picked || today;
-    var strip = Viz.dayStrip(days, selected, function (date) {
-      picked = date;
-      render();
-    });
+    var section = el("section.section",
+      el("div.section-head",
+        el("b", { text: "This week" }),
+        weekly.hasBudget
+          ? el("span", { text: money(weekly.spent) + " of " + money(weekly.budget) })
+          : el("span", { text: money(Money.sum(totals, function (d) { return d.total; })) })
+      )
+    );
+
+    if (weekly.hasBudget) {
+      var seg = Budget.barSegments(weekly);
+      var fill = "fill--" + Budget.fillForStatus(weekly.status);
+      section.appendChild(el("div.bar", {
+        role: "progressbar", "aria-valuenow": String(Math.round(weekly.percentUsed)),
+        "aria-valuemin": "0", "aria-valuemax": "100", "aria-label": "Weekly budget used"
+      },
+        el("i." + fill, { style: { width: seg.inside + "%" } }),
+        seg.over > 0 ? el("i." + fill + ".fill--over", { style: { width: seg.over + "%" } }) : null
+      ));
+    }
+
+    section.appendChild(chart);
 
     var dayExpenses = Expenses.query(
       s.expenses.filter(function (e) { return e.date === selected; }),
       { sortBy: "date", sortDir: "desc" }, cats
     );
-    var dayTotal = Money.sum(dayExpenses, function (e) { return e.amount; });
 
-    var card = el("div.card.surf--card",
-      el("div.card-head",
-        el("b", { text: Dates.formatRelativeDay(selected, today) }),
-        el("span.pill.pill--sunken", { text: money(dayTotal) })
-      )
-    );
+    section.appendChild(el("div.section-head", { style: { "margin-top": "2px" } },
+      el("b", { text: Dates.formatRelativeDay(selected, today), style: { "font-size": "12.5px" } }),
+      el("span", { text: money(Money.sum(dayExpenses, function (e) { return e.amount; })) })
+    ));
 
     if (!dayExpenses.length) {
-      card.appendChild(el("p.note", { text: "Nothing recorded on this day." }));
+      section.appendChild(el("p.section-sub", { text: "Nothing recorded on this day." }));
     } else {
-      dayExpenses.slice(0, 5).forEach(function (e) {
+      dayExpenses.slice(0, 4).forEach(function (e) {
         var cat = cats[e.categoryId];
-        card.appendChild(el("button.row.row--tap", {
+        section.appendChild(el("button.row.row--tap", {
           type: "button",
           "aria-label": "Edit " + money(e.amount) + (cat ? ", " + cat.name : ""),
           onclick: function () { SheetExpense.open(e.id); }
@@ -164,99 +196,102 @@ var ScreenHome = (function () {
           el("span.row-amt", { text: money(e.amount) })
         ));
       });
-      if (dayExpenses.length > 5) {
-        card.appendChild(el("button.btn-pill", {
+      if (dayExpenses.length > 4) {
+        section.appendChild(el("button.btn-pill", {
           type: "button", style: { "align-self": "flex-start" },
           onclick: function () { App.go("#/expenses"); }
         }, el("span", { text: "See all " + dayExpenses.length })));
       }
     }
 
-    return [strip, card];
+    return section;
   }
 
-  /* ── people, only once there is someone ── */
+  /* -- people. the one place a box is still right, because these are two
+     figures rather than a list -- */
 
   function directionTiles(summary) {
     if (summary.totalOwedToMe === 0 && summary.totalIOwe === 0) return null;
-    return el("div.tiles",
-      el("button.tile.surf--ok.tile--tap", {
-        type: "button", onclick: function () { App.go("#/people"); }
-      },
-        el("span.tile-v", { text: money(summary.totalOwedToMe) }),
-        el("span.tile-l", { text: "Owed to you" })
-      ),
-      el("button.tile.surf--owe.tile--tap", {
-        type: "button", onclick: function () { App.go("#/people"); }
-      },
-        el("span.tile-v", { text: money(summary.totalIOwe) }),
-        el("span.tile-l", { text: "You owe" })
+    return el("section.section",
+      el("div.tiles",
+        el("button.tile.surf--ok.tile--tap", {
+          type: "button", "aria-label": "People who owe you", onclick: function () { App.go("#/people"); }
+        },
+          el("span.tile-v", { text: money(summary.totalOwedToMe) }),
+          el("span.tile-l", { text: "Owed to you" })
+        ),
+        el("button.tile.surf--owe.tile--tap", {
+          type: "button", "aria-label": "People you owe", onclick: function () { App.go("#/people"); }
+        },
+          el("span.tile-v", { text: money(summary.totalIOwe) }),
+          el("span.tile-l", { text: "You owe" })
+        )
       )
     );
   }
 
-  /* ── where it went ── */
+  /* -- where it went -- */
 
-  function categoryCard(analysis, cats) {
+  function categorySection(analysis, cats) {
     if (!analysis.byCategory.length) return null;
     var byId = {};
     cats.forEach(function (c) { byId[c.id] = c; });
 
-    var card = el("div.card.surf--card",
-      el("div.card-head",
+    var section = el("section.section",
+      el("div.section-head",
         el("b", { text: "Where it went" }),
-        el("button.circle-btn.circle-btn--sunken", {
-          type: "button", "aria-label": "See all insights",
+        el("button.btn-pill", {
+          type: "button", style: { height: "30px", padding: "0 12px", "font-size": "12px" },
           onclick: function () { App.go("#/insights"); }
-        }, UI.icon("ic-right", 16))
+        }, el("span", { text: "Insights" }))
       )
     );
 
     analysis.byCategory.slice(0, 4).forEach(function (c) {
       var cat = byId[c.categoryId];
       var hue = "var(--cat-" + (cat ? cat.tint : "stone") + ")";
-      card.appendChild(el("div.cat-line",
+      section.appendChild(el("div.cat-line",
         el("div.row",
           el("span.badge.badge--lg", { style: { color: hue } }, UI.icon(cat ? cat.icon : "ic-dots", 18)),
           el("span.row-tx",
             el("b", { text: cat ? cat.name : "Uncategorised" }),
-            el("span", { text: Math.round(c.share) + "% · " + c.count + (c.count === 1 ? " entry" : " entries") })
+            el("span", { text: Math.round(c.share) + "% \u00b7 " + c.count + (c.count === 1 ? " entry" : " entries") })
           ),
           el("span.row-amt", { text: money(c.total) })
         ),
         el("div.bar", el("i", { style: { width: Math.max(c.share, 2) + "%", background: hue } }))
       ));
     });
-    return card;
+    return section;
   }
 
-  function insightCard(insights) {
+  function insightSection(insights) {
     if (!insights.length) return null;
     var top = insights[0];
-    var surface = top.tone === "danger" ? "surf--danger" : top.tone === "warn" ? "surf--warn" : "surf--feature";
-    return el("div.card." + surface, el("p.note", { text: top.text }));
+    var tone = top.tone === "danger" ? ".is-danger" : top.tone === "warn" ? ".is-warn" : "";
+    return el("section.section",
+      el("div.insight" + tone, el("p.note", { text: top.text }))
+    );
   }
 
-  function installCard() {
+  function installSection() {
     if (typeof Install === "undefined") return null;
     if (!Install.available() || Install.isDismissed()) return null;
-    return el("div.card.surf--card.install-card",
-      el("div.card-head",
+    return el("section.section",
+      el("div.section-head",
         el("b", { text: "Keep Plutus on your home screen" }),
         el("button.circle-btn.circle-btn--sunken", {
           type: "button", "aria-label": "Not now", onclick: function () { Install.dismiss(); }
         }, UI.icon("ic-close", 15))
       ),
-      el("p.note", { text: "Its own icon, no browser bars, and it opens with no signal." }),
+      el("p.section-sub", { text: "Its own icon, no browser bars, and it opens with no signal." }),
       el("button.btn", { type: "button", onclick: function () { Install.open(); } }, "Add it")
     );
   }
 
-  /* ── render ──────────────────────────────────────────────────
-     Header and hero on the lit ground, then one opaque panel with
-     rounded top corners carrying everything else to the bottom of the
-     screen. Tiles floating on a gradient never covered it convincingly,
-     and the seam is what gives the screen its structure. */
+  /* -- render --------------------------------------------------
+     Header and hero on the lit ground, then one opaque panel carrying
+     everything else in sections rather than a stack of boxes. */
 
   function render() {
     var host = document.getElementById("screen-home");
@@ -268,7 +303,9 @@ var ScreenHome = (function () {
     var weekPeriod = Dates.weekPeriod(today, s.profile.weekStartsOn);
 
     var monthlyBudget = Budget.resolveForPeriod(s.budgets, monthPeriod);
+    var weeklyBudget = Budget.resolveForPeriod(s.budgets, weekPeriod);
     var monthly = Budget.progress(monthlyBudget ? monthlyBudget.amount : null, s.expenses, monthPeriod);
+    var weekly = Budget.progress(weeklyBudget ? weeklyBudget.amount : null, s.expenses, weekPeriod);
 
     var cats = {};
     s.categories.forEach(function (c) { cats[c.id] = c; });
@@ -290,7 +327,7 @@ var ScreenHome = (function () {
     function add(node) { if (node) panel.appendChild(node); }
 
     if (s.expenses.length) {
-      weekSection(s, weekPeriod, today, cats).forEach(add);
+      add(weekSection(s, weekPeriod, weekly, today, cats));
     } else {
       add(el("div.empty",
         el("h2", { text: "Nothing recorded yet" }),
@@ -300,9 +337,9 @@ var ScreenHome = (function () {
     }
 
     add(directionTiles(summary));
-    add(categoryCard(analysis, s.categories));
-    add(insightCard(insights));
-    add(installCard());
+    add(categorySection(analysis, s.categories));
+    add(insightSection(insights));
+    add(installSection());
 
     host.appendChild(panel);
     App.setBandColour(monthly.hasBudget ? monthly.surface : "ok");

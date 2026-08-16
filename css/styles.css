@@ -104,7 +104,7 @@ html, body { margin: 0; padding: 0; }
 [hidden] { display: none !important; }
 
 body {
-  background: var(--void);
+  background: var(--canvas);
   color: var(--ink);
   font-family: var(--font);
   font-size: 14px;
@@ -118,15 +118,12 @@ body {
    teal one to the right, and a deep glow from below. This is what stops
    the dark reading as flat black, and it is why every tile can be a
    nearly identical dark rectangle and still separate from the page. */
-body::before {
-  content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
-  /* Measured off the reference rather than guessed. Walking down its centre
-     column, the glow climbs from luminance 31 at the top to 139 just above the
-     panel, then drops to 17 in a single row. So the light source sits LOW,
-     brightening downward until the panel cuts it dead.
-
-     That cliff is the effect. The gradient is meant to be bright and obvious;
-     the panel is meant to stop it completely. */
+/* The lit ground now belongs to the screen rather than the document, so Home
+   can carry its own wash while the rest of the app keeps one hue. */
+.screen { position: relative; isolation: isolate; }
+.screen::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 52svh;
+  z-index: -1; pointer-events: none;
   background:
     radial-gradient(125% 46% at 26% 13%,
       rgba(79, 184, 148, .95) 0%,
@@ -134,9 +131,25 @@ body::before {
       rgba(20, 62, 52, .16) 66%,
       rgba(12, 34, 30, 0) 82%),
     radial-gradient(85% 40% at 97% 2%,
-      rgba(44, 172, 184, .38) 0%, rgba(44, 172, 184, 0) 62%),
-    var(--canvas);
+      rgba(44, 172, 184, .38) 0%, rgba(44, 172, 184, 0) 62%);
 }
+
+/* Home takes the second reference screen's treatment: three washes falling
+   from the top edge, green on the left, teal in the middle, cyan on the
+   right. Sampled across that screen at its top: #42744A on the left,
+   #388264 through #317C6D in the middle, #15687C on the right. They overlap
+   into one spectrum and fade out before the panel. */
+#screen-home::before {
+  height: 46svh;
+  background:
+    radial-gradient(64% 92% at 4% -26%,
+      rgba(92, 178, 104, .95) 0%, rgba(62, 112, 72, .38) 46%, rgba(30, 60, 40, 0) 76%),
+    radial-gradient(68% 96% at 48% -30%,
+      rgba(44, 152, 122, .92) 0%, rgba(38, 114, 100, .36) 48%, rgba(18, 56, 50, 0) 78%),
+    radial-gradient(64% 92% at 98% -26%,
+      rgba(22, 140, 176, .95) 0%, rgba(18, 92, 120, .38) 46%, rgba(10, 44, 60, 0) 76%);
+}
+
 /* A faint grain, so large flat gradients do not band on cheap panels. */
 body::after {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
@@ -172,6 +185,7 @@ svg { display: block; }
 
 /* The header is transparent: the ambient glow is the header. */
 .band {
+  position: relative; z-index: 1;
   padding: calc(var(--sp-7) + env(safe-area-inset-top)) var(--gutter) var(--sp-3);
   background: transparent;
   color: var(--ink);
@@ -198,6 +212,7 @@ svg { display: block; }
    everything below it is on an opaque panel. Without this, only Home would
    cut the glow and every other screen would leave content floating on it. */
 .screen-body, .panel {
+  position: relative; z-index: 1;
   background: var(--panel);
   border-top: 1px solid rgba(255, 255, 255, .10);
   border-radius: 30px 30px 0 0;
@@ -223,7 +238,7 @@ svg { display: block; }
    is what gives the screen its structure.
    ============================================================ */
 
-.hero { padding: 0 var(--gutter) var(--sp-8); display: flex; flex-direction: column; gap: var(--sp-3); }
+.hero { position: relative; z-index: 1; padding: 0 var(--gutter) var(--sp-8); display: flex; flex-direction: column; gap: var(--sp-3); }
 .hero-label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
 .hero-figure {
   font-size: 52px; font-weight: 300; letter-spacing: -.04em; line-height: 1;
@@ -423,6 +438,39 @@ a.row { color: inherit; text-decoration: none; }
 }
 .empty h2 { font-size: 18px; font-weight: 500; margin: 0; }
 .empty p { font-size: 13px; margin: 0; color: var(--ink-3); max-width: 30ch; }
+
+/* ============================================================
+   Sections.
+
+   Inside the panel most things are not boxes. A heading, a rule, and the
+   content sitting directly on the panel: stacking six bordered cards on a
+   dark sheet reads as packaging rather than information. Boxes are kept
+   only where the thing genuinely is an object, such as the two direction
+   figures.
+   ============================================================ */
+
+.section { display: flex; flex-direction: column; gap: var(--sp-5); }
+.section + .section { padding-top: var(--sp-6); border-top: 1px solid var(--line); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.section-head b { font-size: 14px; font-weight: 500; }
+.section-head span { font-size: 12px; color: var(--ink-3); }
+.section-sub { font-size: 12px; color: var(--ink-2); margin: 0; }
+
+/* Rows on the panel need their own separation, since there is no card
+   edge to give it to them. */
+.section .row + .row { border-top: 1px solid var(--line); }
+
+/* A quiet block for the one insight: a rule, not a frame. */
+.insight { border-left: 2px solid var(--s-ok); padding: var(--sp-1) 0 var(--sp-1) var(--sp-5); }
+.insight.is-warn { border-left-color: var(--s-warn); }
+.insight.is-danger { border-left-color: var(--s-danger); }
+
+/* Tappable bars in the week chart. */
+.bar-day--tap { cursor: pointer; }
+.bar-day--tap[aria-selected="true"] > i { background: var(--s-ok); }
+.bar-day--tap[aria-selected="true"] > span { color: var(--ink); }
+.bar-day--tap > i { transition: background-color .2s ease; }
+@media (prefers-reduced-motion: reduce) { .bar-day--tap > i { transition: none; } }
 
 /* ============================================================
    Data visualisation

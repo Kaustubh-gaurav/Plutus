@@ -103,6 +103,9 @@ Status: done as 3.1.0.
 **REQ 024.** "In the first image the gradient is very bright and very evident, and the big box below breaks it completely. It is not translucent, it just breaks the gradient completely. I want something like that."
 Status: done as 3.2.0.
 
+**REQ 025.** "In the second screen of the inspiration there are gradients of three different colours coming down from the top, use that on the home screen." Plus: "make sure the text above the gradient is very readable, you can keep the gradient a little above." Plus: "for the stuff in the bigger box, use a similar layout to the first time you made the app, just make sure it does not look very boxy."
+Status: done as 3.3.0.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -608,6 +611,25 @@ The reference is brightest just above its cut, but the things sitting there are 
 **D125. Two contrast failures found by measuring, both mine.**
 `--ink-3` at 40 percent white measured **3.83** on the panel, under the threshold, so it is now 52 percent. And on the brightest glow, even 88 percent white only reaches 4.48, which is why the light source had to move rather than the type get heavier. The ground under the hero's small print now measures `#212C2F`, where the secondary text clears 5.0 and the primary clears 14.3.
 
+### Three washes, and the panel unboxed, 17 August 2026
+
+**D126. Home carries three washes falling from the top edge: green, teal, cyan.**
+Sampled across the second reference screen at its top: `#42744A` on the left, `#388264` through `#317C6D` in the middle, `#15687C` on the right. Three radials anchored above the top edge overlap into one spectrum and fade before the panel.
+The lit ground moved from the document to the screen, so Home can carry its own treatment while every other screen keeps a single hue.
+
+**D127. The washes are anchored well above the viewport, so the text sits on the tail rather than the peak.**
+Their centres are at minus 26 to minus 30 percent. This was the user's own suggestion and it is the right one: it keeps the colour obvious at the top edge while the ground under the type stays dark.
+
+**D128. Readability was verified by measuring, not by looking.**
+The page was rendered twice, once normally and once with every glyph turned transparent, then the true ground behind each line was sampled from the second render and contrasted against that line's computed colour. Every line passes: the tightest is the date at **5.26** against a 4.5 requirement, and the headline figure is at 17.3.
+This is now the way to check text on a gradient. Eyeballing a screenshot cannot tell you what is behind a glyph.
+
+**D129. The panel is sections, not a stack of cards.**
+Six bordered cards on a dark sheet reads as packaging rather than information. Inside the panel there is now a heading, a hairline, and the content sitting directly on the sheet. Boxes are kept only for the two direction figures, because those genuinely are objects rather than lists.
+
+**D130. The day strip and the day by day chart merged into one component.**
+Both showed the same week. The chart's bars are now the day selector: tap one and the list below reads that day. One component doing two jobs, and one less thing competing for the same space.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -775,6 +797,16 @@ The reference is brightest just above its cut, but the things sitting there are 
 **C081.** Fixed two measured contrast failures: `--ink-3` on the panel, and secondary text on the glow.
 
 **C082.** 12 checks pass, including that every one of the six screens has a fully opaque panel with the right radius that reaches the bottom of the viewport. 130 unit tests still pass.
+
+**C083.** Sampled the second reference screen across its top edge and built the three washes from those colours, scoped to Home.
+
+**C084.** Lifted the washes above the viewport so the type sits on their tail.
+
+**C085.** Verified readability by rendering the screen twice, once with all glyphs transparent, and sampling the real ground behind every line. All pass, tightest 5.26.
+
+**C086.** Rebuilt the panel as sections with hairlines instead of a stack of cards, and merged the day strip into the week chart.
+
+**C087.** 16 checks pass, including that Home has three gradients while other screens have one, that the panel contains no stacked cards, and that tapping a bar selects that day. 130 unit tests still pass.
 
 ## Open questions
 
