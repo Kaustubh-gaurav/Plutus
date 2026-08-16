@@ -73,6 +73,9 @@ Status: done. All three settled as D062 to D064, Phase 1 built and pushed.
 **REQ 014.** "Done." (GitHub Pages enabled.) Then: build Phase 2.
 Status: done. The site is live and the logic layer is built and tested.
 
+**REQ 015.** "Start the next phase, also in the figma file add all the icons that you will need, I'll give them to you afterwards."
+Status: done. 47 icons drawn into a new "Icons for build" page in the Figma file, and Phase 3 built.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -368,6 +371,24 @@ Every other function takes today as an argument, which is what makes month rollo
 `new Date("2026-08-16")` parses as UTC and lands on the 15th west of Greenwich. Every date is parsed to local midnight instead.
 Why: an expense recorded at 11pm on the 31st must belong to that month wherever the phone is.
 
+### Phase 3, onboarding, 16 August 2026
+
+**D071. Only the currency is compulsory in onboarding.**
+Name, monthly budget and weekly budget can all be skipped. Nothing is written to the store until the final step, so backing out halfway leaves no half configured profile.
+Why: someone who has not decided on a budget should still be able to start recording expenses today. A budget wall on first run loses the user before the app has shown them anything.
+
+**D072. The safe daily allowance is floored, not rounded.**
+`₹19,000` over 15 days shows `₹1,266` a day, not `₹1,266.67` and not `₹1,267`.
+Why: this figure is an allowance, not a measurement. Someone who spends exactly it every remaining day must land inside the budget, and rounding up quietly puts them over. Caught by looking at a render, and now has its own test.
+
+**D073. Home renders from the store as of Phase 3, earlier than planned.**
+Onboarding can now set a budget, and the static Home markup still said "Not set", which is a screen stating something false. The band and the weekly card are real; the tiles, the day by day chart and the category card arrive with real expenses in Phases 4 and 5.
+Why: rule R2. A screen that looks alive and is not is worse than an empty one.
+
+**D074. The Figma icon sheet is the handoff format for icons.**
+A page named "Icons for build" holds all 47 icons in five sections, each drawn at 24 by 24 with the id the code uses printed underneath. Categories are shown inside their real tinted badge, since that is the only place they appear.
+Why: naming each cell after the code id means a redrawn icon drops straight in with no mapping table.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -441,6 +462,14 @@ Why: an expense recorded at 11pm on the 31st must belong to that month wherever 
 **C034.** Wired all nine logic files into `index.html` in dependency order and into the service worker shell, bumped `CACHE` to `plutus-v2` and `VERSION` to `0.2.0`, and verified every shell entry exists before pushing.
 
 **C035.** GitHub Pages is live at `https://kaustubh-gaurav.github.io/Plutus/`.
+
+**C036.** Built the Figma icon sheet: a new page in `hRrczeduKiRMrK1x9l5yzc` with 47 icons across navigation and chrome, actions, money and state, the thirteen categories, and payment methods.
+
+**C037.** Built Phase 3, `js/onboarding.js`: five steps, the gate in `app.js`, and the full screen band treatment from `design.md`. Verified by driving the whole flow headless and reading back what was written: profile, currency, week start and both budget records with the right `effectiveFrom` dates.
+
+**C038.** Built `js/screen_home.js` so Home reads the store. Verified in all four budget states, and confirmed the band colour and the status bar follow the state, teal to mustard to rose, with the hatch marking overspend.
+
+**C039.** Found and fixed the daily allowance rounding, see D072. 108 tests passing.
 
 ## Open questions
 

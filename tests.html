@@ -518,6 +518,15 @@
       ok(p.isPaceRisky, "projected total must exceed the budget");
       ok(p.projectedTotal > p.budget);
     });
+    it("floors the safe daily allowance to whole rupees, never rounds it up", function () {
+      /* 15 days left, 19,000 remaining. 1,266.67 a day would put you over. */
+      var p = Budget.progress(2500000, [exp(600000, "2026-08-05")], MONTH);
+      eq(p.remaining, 1900000);
+      eq(p.safeDailyRemaining, 126600);
+      ok(p.safeDailyRemaining * p.period.daysLeft <= p.remaining,
+         "spending the allowance every remaining day must stay inside the budget");
+    });
+
     it("does not cry pace when spending is comfortable", function () {
       var p = Budget.progress(2500000, [exp(500000, "2026-08-05")], MONTH);
       notOk(p.isPaceRisky);

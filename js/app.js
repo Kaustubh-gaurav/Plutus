@@ -30,7 +30,30 @@ var App = (function () {
     render();
   }
 
+  /* ── the onboarding gate ────────────────────────────────────
+     Until the profile says otherwise, the whole app is one screen. The nav is
+     hidden rather than disabled, because a tab bar you cannot use is worse
+     than no tab bar at all. */
+
+  function needsOnboarding() {
+    return !Store.get().profile.onboarded;
+  }
+
+  function showOnboarding() {
+    UI.qsa(".screen").forEach(function (n) { n.hidden = n.id !== "screen-onboarding"; });
+    document.body.setAttribute("data-onboarding", "true");
+    Onboarding.start();
+  }
+
+  function leaveOnboarding() {
+    document.body.removeAttribute("data-onboarding");
+    go("#/");
+    render();
+  }
+
   function render() {
+    if (needsOnboarding()) { showOnboarding(); return; }
+
     var route = routeFor(location.hash);
     current = route;
 
@@ -59,6 +82,15 @@ var App = (function () {
      placeholders, so it only keeps the chrome honest. */
 
   function refresh() {
+    if (needsOnboarding()) return;
+    /* Each screen rebuilds itself from a fresh read of the store. That is what
+       guarantees no screen can show a stale figure: there is nothing cached to
+       go stale. Screens arrive phase by phase; until one exists, its static
+       empty state stands. */
+    if (current && current.id === "screen-home" && typeof ScreenHome !== "undefined") {
+      ScreenHome.render();
+      return;
+    }
     setBandColour();
   }
 
@@ -151,5 +183,9 @@ var App = (function () {
 
   document.addEventListener("DOMContentLoaded", boot);
 
-  return { go: go, refresh: refresh, setBandColour: setBandColour, route: function () { return current; } };
+  return {
+    go: go, refresh: refresh, setBandColour: setBandColour,
+    leaveOnboarding: leaveOnboarding,
+    route: function () { return current; }
+  };
 })();

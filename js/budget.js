@@ -67,7 +67,13 @@ var Budget = (function () {
     var elapsed = period.daysElapsed > 0 ? period.daysElapsed : 0;
     var averageDailySpend = elapsed > 0 ? Math.round(spent / elapsed) : 0;
     var projectedTotal = elapsed > 0 ? Math.round(averageDailySpend * period.totalDays) : spent;
-    var safeDailyRemaining = period.daysLeft > 0 ? Math.round(remaining / period.daysLeft) : remaining;
+    /* Floored to whole rupees, and floored rather than rounded. This is an
+       allowance, not a measurement: a user who spends exactly this much every
+       remaining day must land inside the budget, and rounding up would put
+       them over it. */
+    var safeDailyRemaining = period.daysLeft > 0
+      ? Math.floor(remaining / period.daysLeft / 100) * 100
+      : remaining;
 
     var status = statusFromPercent(percentUsed, hasBudget);
 

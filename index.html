@@ -53,31 +53,11 @@
 
 <div id="app">
 
-  <!-- ══ Home ══════════════════════════════════════════════ -->
-  <section class="screen" id="screen-home" hidden>
-    <header class="band band--ok">
-      <div class="band-top">
-        <button class="avatar" type="button" aria-label="Settings" onclick="App.go('#/settings')">P</button>
-        <span class="band-who"><b>Welcome to Plutus</b><span>Nothing recorded yet</span></span>
-        <button class="circle-btn" type="button" aria-label="Notifications"><svg width="17" height="17" aria-hidden="true"><use href="#ic-bell"/></svg></button>
-      </div>
-      <span class="band-eyebrow">Monthly budget</span>
-      <span class="big">Not set</span>
-      <p class="note" style="margin-top:8px">Set a budget and every figure in the app starts working.</p>
-    </header>
+  <!-- ══ Onboarding. Outside the router: App gates on profile.onboarded ══ -->
+  <section class="screen screen--onboarding" id="screen-onboarding" hidden></section>
 
-    <div class="screen-body">
-      <div class="empty">
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
-          <rect x="6" y="30" width="68" height="16" rx="8" fill="var(--sunken)"/>
-          <rect x="6" y="30" width="27" height="16" rx="8" fill="var(--s-ok)"/>
-          <circle cx="40" cy="38" r="30" stroke="var(--sunken)" stroke-width="3" fill="none"/>
-        </svg>
-        <h2>Your month starts here</h2>
-        <p>Set a monthly budget, then record what you spend. Everything else follows from those two things.</p>
-      </div>
-    </div>
-  </section>
+  <!-- ══ Home. Rendered by js/screen_home.js from the store ══ -->
+  <section class="screen" id="screen-home" hidden></section>
 
   <!-- ══ History ═══════════════════════════════════════════ -->
   <section class="screen" id="screen-expenses" hidden>
@@ -192,6 +172,8 @@
 <script src="js/validate.js"></script>
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="js/screen_home.js"></script>
 <script src="js/app.js"></script>
 <script>
   document.getElementById("version-line").textContent =
