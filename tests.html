@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plutus tests</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; padding: 24px; background: #FBF5E7; color: #1A1720;
+         font: 14px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { opacity: .6; margin: 0 0 20px; }
+  #summary { padding: 14px 18px; border-radius: 14px; font-weight: 700;
+             margin-bottom: 18px; font-size: 15px; }
+  #summary[data-status="pass"] { background: #D6E7E2; color: #144C43; }
+  #summary[data-status="fail"] { background: #FBDCE1; color: #9E1B33; }
+  .group { margin-bottom: 16px; }
+  .group > b { display: block; margin-bottom: 4px; font-size: 13px; }
+  .case { padding: 2px 0 2px 16px; }
+  .pass::before { content: "ok   "; color: #1F6259; }
+  .fail { color: #9E1B33; font-weight: 700; }
+  .fail::before { content: "FAIL "; }
+  .why { padding-left: 38px; opacity: .75; }
+</style>
+</head>
+<body>
+
+<h1>Plutus tests</h1>
+<p class="sub">The logic layer, tested with no DOM and no real storage. Green before every deploy.</p>
+<div id="summary">running</div>
+<div id="out"></div>
+
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+
+<script>
+/* ── a thirty line harness. no npm, no runner, no build ── */
+(function () {
+  var out = document.getElementById("out");
+  var passed = 0, failed = 0, group = null;
+
+  function describe(name, fn) {
+    group = document.createElement("div");
+    group.className = "group";
+    var b = document.createElement("b");
+    b.textContent = name;
+    group.appendChild(b);
+    out.appendChild(group);
+    try { fn(); } catch (e) { record(false, "threw outside a case", e && e.message); }
+  }
+
+  function record(ok, label, why) {
+    var line = document.createElement("div");
+    line.className = "case " + (ok ? "pass" : "fail");
+    line.textContent = label;
+    (group || out).appendChild(line);
+    if (ok) passed++; else {
+      failed++;
+      if (why) {
+        var w = document.createElement("div");
+        w.className = "why";
+        w.textContent = why;
+        (group || out).appendChild(w);
+      }
+    }
+  }
+
+  function it(label, fn) {
+    try { fn(); record(true, label); }
+    catch (e) { record(false, label, e && e.message); }
+  }
+
+  function eq(actual, expected, note) {
+    var a = JSON.stringify(actual), b = JSON.stringify(expected);
+    if (a !== b) throw new Error((note ? note + ": " : "") + "expected " + b + ", got " + a);
+  }
+  function ok(v, note) { if (!v) throw new Error(note || "expected truthy"); }
+  function notOk(v, note) { if (v) throw new Error(note || "expected falsy"); }
+
+  /* A storage object that behaves like localStorage, and can be told to fail
+     the way a real one does when the quota runs out. */
+  function fakeStorage(opts) {
+    opts = opts || {};
+    var map = {};
+    return {
+      _map: map,
+      getItem: function (k) { return Object.prototype.hasOwnProperty.call(map, k) ? map[k] : null; },
+      setItem: function (k, v) {
+        if (opts.full) { var e = new Error("QuotaExceededError"); e.name = "QuotaExceededError"; throw e; }
+        map[k] = String(v);
+      },
+      removeItem: function (k) { delete map[k]; }
+    };
+  }
+
+  var FIXED = "2026-08-16T10:00:00.000Z";
+  Store.__setNow(function () { return FIXED; });
+
+  /* ───────────────────────────────────────────────────────── */
+
+  describe("store: a fresh device", function () {
+    var fs = fakeStorage();
+    Store.__setBackend(fs);
+    Store.load();
+    var s = Store.get();
+
+    it("starts not onboarded", function () { eq(s.profile.onboarded, false); });
+    it("defaults to Indian rupees and Indian grouping", function () {
+      eq(s.profile.currencyCode, "INR");
+      eq(s.profile.grouping, "IN");
+    });
+    it("starts the week on Monday", function () { eq(s.profile.weekStartsOn, 1); });
+    it("seeds the default categories once", function () {
+      eq(s.categories.length, CONFIG.DEFAULT_CATEGORIES.length);
+      ok(s.categories[0].isDefault, "seeded categories are marked default");
+    });
+    it("holds no expenses, debts, goals or contributions", function () {
+      eq(s.expenses.length, 0); eq(s.debts.length, 0);
+      eq(s.goals.length, 0); eq(s.contributions.length, 0);
+    });
+    it("writes itself to storage on first load", function () {
+      ok(fs.getItem(CONFIG.STORE_KEY), "first load persists the seeded store");
+    });
+    it("does not seed a second time", function () {
+      Store.load();
+      eq(Store.get().categories.length, CONFIG.DEFAULT_CATEGORIES.length);
+    });
+  });
+
+  describe("store: it survives a restart", function () {
+    var fs = fakeStorage();
+    Store.__setBackend(fs);
+    Store.load();
+    Store.setProfile({ name: "Kaustubh", onboarded: true });
+    Store.insert("expenses", { amount: 42000, categoryId: "cat_1", date: "2026-08-16" }, "exp");
+
+    it("reads back exactly what was written", function () {
+      Store.load();
+      var s = Store.get();
+      eq(s.profile.name, "Kaustubh");
+      eq(s.profile.onboarded, true);
+      eq(s.expenses.length, 1);
+      eq(s.expenses[0].amount, 42000);
+    });
+    it("keeps ids unique across a restart", function () {
+      var a = Store.insert("expenses", { amount: 100, date: "2026-08-16" }, "exp").value.id;
+      Store.load();
+      var b = Store.insert("expenses", { amount: 100, date: "2026-08-16" }, "exp").value.id;
+      ok(a !== b, "ids must not repeat after a reload, got " + a + " twice");
+    });
+  });
+
+  describe("store: a value written by an older build", function () {
+    var fs = fakeStorage();
+    fs.setItem(CONFIG.STORE_KEY, JSON.stringify({
+      schemaVersion: 1,
+      profile: { name: "Old" },
+      expenses: [{ id: "exp_1", amount: 500, date: "2026-07-01" }]
+    }));
+    Store.__setBackend(fs);
+    Store.load();
+    var s = Store.get();
+
+    it("keeps the fields that were there", function () {
+      eq(s.profile.name, "Old");
+      eq(s.expenses.length, 1);
+    });
+    it("fills in every field that was missing", function () {
+      eq(s.profile.weekStartsOn, 1);
+      eq(s.settings.thresholds, CONFIG.DEFAULT_THRESHOLDS);
+      eq(s.goals, []);
+      eq(s.contributions, []);
+      eq(s.firedAlerts, {});
+    });
+    it("does not crash on a missing collection", function () {
+      ok(Array.isArray(s.debts) && Array.isArray(s.repayments));
+    });
+  });
+
+  describe("store: a corrupt value", function () {
+    var fs = fakeStorage();
+    fs.setItem(CONFIG.STORE_KEY, "{ this is not json");
+    Store.__setBackend(fs);
+    Store.load();
+
+    it("boots to a usable blank store", function () {
+      eq(Store.get().expenses.length, 0);
+      ok(Store.get().categories.length > 0, "categories still seeded");
+    });
+    it("reports the failure so the app can say so", function () {
+      eq(Store.loadError(), "corrupt");
+    });
+    it("does NOT overwrite the corrupt value", function () {
+      eq(fs.getItem(CONFIG.STORE_KEY), "{ this is not json");
+    });
+  });
+
+  describe("store: storage that refuses to write", function () {
+    var fs = fakeStorage({ full: true });
+    Store.__setBackend(fs);
+    Store.load();
+
+    it("reports the write as failed rather than swallowing it", function () {
+      notOk(Store.save(), "save must return false when storage refuses");
+      ok(Store.saveBlocked(), "saveBlocked must be set so the UI can warn");
+    });
+    it("still lets the app run in memory", function () {
+      var r = Store.insert("expenses", { amount: 100, date: "2026-08-16" }, "exp");
+      notOk(r.ok, "the write is reported as not landed");
+      eq(Store.get().expenses.length, 1, "but the record is in memory");
+    });
+  });
+
+  describe("store: collections", function () {
+    var fs = fakeStorage();
+    Store.__setBackend(fs);
+    Store.load();
+
+    var made = Store.insert("debts", {
+      direction: "lent", personName: "Rahul", originalAmount: 500000, date: "2026-07-12"
+    }, "debt").value;
+
+    it("stamps an id and timestamps on insert", function () {
+      ok(made.id, "id");
+      eq(made.createdAt, FIXED);
+      eq(made.updatedAt, FIXED);
+    });
+    it("finds a record by id", function () {
+      eq(Store.byId("debts", made.id).personName, "Rahul");
+    });
+    it("patches without touching id or createdAt", function () {
+      Store.update("debts", made.id, { personName: "Rahul S", id: "hacked", createdAt: "nope" });
+      var d = Store.byId("debts", made.id);
+      eq(d.personName, "Rahul S");
+      eq(d.id, made.id);
+      eq(d.createdAt, FIXED);
+    });
+    it("filters with where", function () {
+      Store.insert("debts", { direction: "borrowed", personName: "Priya", originalAmount: 300000, date: "2026-08-01" }, "debt");
+      eq(Store.where("debts", function (d) { return d.direction === "lent"; }).length, 1);
+    });
+    it("removes a record", function () {
+      Store.remove("debts", made.id);
+      eq(Store.byId("debts", made.id), null);
+    });
+    it("reports a missing record rather than throwing", function () {
+      eq(Store.remove("debts", "nope").ok, false);
+      eq(Store.update("debts", "nope", {}).ok, false);
+    });
+    it("refuses an unknown collection", function () {
+      var threw = false;
+      try { Store.insert("nonsense", {}); } catch (e) { threw = true; }
+      ok(threw, "an unknown collection must throw, not silently create one");
+    });
+  });
+
+  describe("store: repayments and contributions are their own records", function () {
+    var fs = fakeStorage();
+    Store.__setBackend(fs);
+    Store.load();
+
+    var debt = Store.insert("debts", {
+      direction: "lent", personName: "Rahul", originalAmount: 500000, date: "2026-07-12"
+    }, "debt").value;
+    Store.insert("repayments", { debtId: debt.id, amount: 200000, date: "2026-08-01" }, "rep");
+
+    var goal = Store.insert("goals", { name: "New laptop", targetAmount: 8000000 }, "goal").value;
+    Store.insert("contributions", { goalId: goal.id, amount: 4500000, date: "2026-08-05" }, "con");
+
+    it("never mutates the original debt amount", function () {
+      eq(Store.byId("debts", debt.id).originalAmount, 500000);
+    });
+    it("keeps the repayment as a separate record", function () {
+      var reps = Store.where("repayments", function (r) { return r.debtId === debt.id; });
+      eq(reps.length, 1);
+      eq(reps[0].amount, 200000);
+    });
+    it("keeps goal contributions the same way, so a goal has a history", function () {
+      var cons = Store.where("contributions", function (c) { return c.goalId === goal.id; });
+      eq(cons.length, 1);
+      eq(cons[0].amount, 4500000);
+      eq(Store.byId("goals", goal.id).targetAmount, 8000000);
+    });
+  });
+
+  describe("store: export, import and reset", function () {
+    var fs = fakeStorage();
+    Store.__setBackend(fs);
+    Store.load();
+    Store.setProfile({ name: "Kaustubh", onboarded: true });
+    Store.insert("expenses", { amount: 42000, categoryId: "cat_1", date: "2026-08-16" }, "exp");
+    var backup = Store.exportAll();
+
+    it("exports a labelled backup", function () {
+      eq(backup.app, "Plutus");
+      eq(backup.schemaVersion, CONFIG.SCHEMA_VERSION);
+      eq(backup.data.expenses.length, 1);
+    });
+    it("exports a copy, not a live reference", function () {
+      Store.insert("expenses", { amount: 999, date: "2026-08-16" }, "exp");
+      eq(backup.data.expenses.length, 1, "the backup must not change underneath you");
+    });
+    it("reset wipes the data but keeps the app usable", function () {
+      Store.reset();
+      eq(Store.get().expenses.length, 0);
+      eq(Store.get().profile.onboarded, false);
+      ok(Store.get().categories.length > 0, "categories are seeded again");
+    });
+    it("import restores the exact same state", function () {
+      Store.importAll(backup);
+      var s = Store.get();
+      eq(s.profile.name, "Kaustubh");
+      eq(s.profile.onboarded, true);
+      eq(s.expenses.length, 1);
+      eq(s.expenses[0].amount, 42000);
+    });
+    it("import refuses something that is not a backup", function () {
+      eq(Store.importAll("hello").ok, false);
+      eq(Store.importAll(null).ok, false);
+    });
+    it("an export and a fresh import round trip exactly", function () {
+      var again = Store.exportAll();
+      Store.reset();
+      Store.importAll(again);
+      eq(Store.exportAll().data.expenses, again.data.expenses);
+    });
+  });
+
+  /* ── summary ── */
+  var summary = document.getElementById("summary");
+  summary.setAttribute("data-status", failed ? "fail" : "pass");
+  summary.textContent = failed
+    ? failed + " failed, " + passed + " passed"
+    : "all " + passed + " passed";
+})();
+</script>
+</body>
+</html>

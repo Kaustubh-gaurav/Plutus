@@ -1,0 +1,8 @@
+# Nothing is built, so nothing is generated. This file exists to keep the OS
+# and editors from adding noise to a repository that is served verbatim.
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+.idea/
