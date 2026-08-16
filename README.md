@@ -26,7 +26,7 @@ privacy.html             required for the Play listing, and true from day one
 manifest.webmanifest
 sw.js                    offline shell. read the two rules at the top
 css/styles.css           tokens first, then components. surfaces last, on purpose
-fonts/                   Plus Jakarta Sans, two variable subsets, 49KB
+fonts/                   Inter, two variable subsets, 133KB. Both needed: the rupee sign is in latin-ext
 icons/
 js/config.js             constants. loaded first
 js/ui.js                 DOM helpers, sheets, toasts, confirms

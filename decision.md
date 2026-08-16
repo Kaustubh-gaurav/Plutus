@@ -85,6 +85,9 @@ Status: done. Phases 5 to 9 built in one pass. Phase 10, Android packaging, need
 **REQ 018.** "Add a download like an app option, also the bar should become red when the limit has been reached for the weekly/monthly budget."
 Status: done. Both shipped as 1.1.0.
 
+**REQ 019.** "Let's use Inter."
+Status: done as 1.2.0. D045 superseded by D095.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -276,7 +279,10 @@ Why: someone who learns that an amber bar means getting close must be able to tr
 Owed to the user and owed by the user are separated by a word, an icon and a colour, all three, every time.
 Why: confusing the two directions is the one error this product cannot afford.
 
-**D045. Typeface is Plus Jakarta Sans, self hosted, two variable woff2 subsets, 49KB total.**
+**D045. ~~Typeface is Plus Jakarta Sans, self hosted, two variable woff2 subsets, 49KB total.~~**
+**SUPERSEDED by D095** on 17 August 2026. The rupee glyph finding survives the change and is the reason both files are still shipped.
+
+**D045 original text.** Typeface is Plus Jakarta Sans, self hosted, two variable woff2 subsets, 49KB total.
 Already downloaded into `Plutus/fonts/`. The rupee glyph U+20B9 sits in the latin-ext subset rather than latin, so both files are required. Every element rendering money sets `font-variant-numeric: tabular-nums`.
 Why: the inspiration's character lives almost entirely in its geometric bold sans, and a system stack would lose it. Self hosting keeps the no cross origin rule and full offline behaviour intact. The weights turned out to be one variable file per subset rather than three static ones, which halved the budget.
 
@@ -469,6 +475,18 @@ A dismissible card on Home, and a permanent row in Settings. Dismissal is stored
 **D094. The install offer branches by platform, because the platforms genuinely differ.**
 Chrome and Edge fire `beforeinstallprompt`, which is captured, held and spent on a real tap. iOS Safari fires nothing and offers no API, so there it shows the three Share menu steps instead of a button that could not work. Verified with a spoofed iPhone user agent: three steps, no button.
 
+### Typeface, 17 August 2026
+
+**D095. The typeface is Inter, self hosted as two variable woff2 subsets, 133KB together.**
+Requested by the user. Replaces Plus Jakarta Sans.
+The same trap applies and was checked before shipping rather than after: **the rupee glyph U+20B9 is in Inter's latin-ext subset, not latin**, exactly as it was in Jakarta. Ship only the latin file and every amount renders its currency symbol in a fallback face while the digits beside it are Inter. Both files stay in the shell.
+Cost: 133KB against 49KB, because Inter's variable file spans weight 100 to 900 and its latin-ext subset alone is 85KB. It is a one time cost on a cached shell and nothing else in the app fetches anything, so it was not worth arguing about.
+Nothing else moved. The display sizes keep their negative tracking, and Inter's larger x height makes the same headline read slightly wider and slightly calmer, which suits a money app.
+
+**D096. The design specimen pages were regenerated rather than left in the old face.**
+`design-preview.html`, `design-directions.html` and `design-layouts.html` all embedded Jakarta as base64 and all three now embed Inter.
+Why: a specimen advertising a typeface the app does not ship is worse than no specimen. The only remaining mentions of Jakarta in the repository are historical notes that say it was replaced.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -580,6 +598,12 @@ Chrome and Edge fire `beforeinstallprompt`, which is captured, held and spent on
 **C053.** Caught and fixed a regression the change introduced: mustard fill on the mustard weekly card was nearly invisible at 80 percent. Found by rendering 43, 80, 100 and 130 percent side by side rather than by looking at one.
 
 **C054.** 130 tests passing. `CACHE` at `plutus-v6`, `VERSION` at `1.1.0`.
+
+**C055.** Swapped the typeface to Inter: downloaded both variable subsets, replaced the files in `fonts/`, updated the `@font-face` blocks and the font token, and deleted the Jakarta files.
+
+**C056.** Regenerated all three design specimen pages in Inter from their generators, so nothing in the repository advertises a font the app no longer ships.
+
+**C057.** `CACHE` at `plutus-v7`, `VERSION` at `1.2.0`. Verified the rupee sign renders in Inter rather than a fallback, by checking which subset carries U+20B9 before shipping.
 
 ## Open questions
 

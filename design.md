@@ -77,7 +77,11 @@ Custom categories pick from these ten, never from a free colour picker.
 
 ## 4. Type
 
-**Plus Jakarta Sans**, self hosted as two variable woff2 subsets in `fonts/`, 49KB together. The rupee glyph U+20B9 lives in the latin-ext file, so both are required. Fallback is the system stack.
+**Inter**, self hosted as two variable woff2 subsets in `fonts/`, 133KB together. The rupee glyph U+20B9 lives in the latin-ext file, so both are required, exactly as with the face this replaced. Fallback is the system stack.
+
+Changed from Plus Jakarta Sans on 17 August 2026 at the user's request. Inter is the more neutral face of the two: a larger x height, tighter apertures, and a lower profile at display sizes, so the same headline reads slightly wider and slightly calmer. It costs 133KB against Jakarta's 49KB, because its variable file spans 100 to 900 and its latin-ext subset is large. That is a one time cost on a cached shell.
+
+Inter's letterforms are optically smaller at the same point size, so the display sizes keep their negative tracking and nothing else moved.
 
 Every element that renders money or a percentage sets `font-variant-numeric: tabular-nums`. Figures jitter without it, and figures that jitter are figures nobody trusts.
 
