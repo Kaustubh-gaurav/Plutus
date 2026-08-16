@@ -41,7 +41,7 @@ var ScreenPeople = (function () {
   }
 
   function debtCard(v, today) {
-    var surface = v.isSettled ? "surf--cream" : v.isOverdue ? "surf--danger" : "surf--white";
+    var surface = v.isSettled ? "surf--muted" : v.isOverdue ? "surf--danger" : "surf--card";
     var barFill = v.isOverdue ? "fill--cur" : v.status === "partially_paid" ? "fill--warn" : "fill--ok";
 
     return el("button.card.card--tap." + surface, {
@@ -51,7 +51,9 @@ var ScreenPeople = (function () {
     },
       el("div.row",
         el("span.badge.badge--lg", {
-          style: v.isOverdue ? { background: "var(--glass)" } : { background: "var(--cat-" + initialTint(v.personName) + ")" }
+          style: v.isOverdue
+            ? { background: "var(--glass-dark)", color: "var(--ink)" }
+            : { background: "var(--cat-" + initialTint(v.personName) + ")", color: "var(--on-accent)" }
         }, el("b", { text: v.personName.trim().charAt(0).toUpperCase() })),
         el("span.row-tx",
           el("b", { text: v.personName }),
@@ -91,7 +93,7 @@ var ScreenPeople = (function () {
 
     UI.clear(host);
 
-    var header = el("header.band.band--ok",
+    var header = el("header.band.band--flat",
       el("div.band-top",
         el("button.circle-btn", {
           type: "button", "aria-label": "Back to home", onclick: function () { App.go("#/"); }
@@ -103,7 +105,7 @@ var ScreenPeople = (function () {
       ),
       el("h1.band-title", { text: "People" }),
       el("div.tiles", { style: { "margin-top": "14px" } },
-        el("div.tile.tile--glass",
+        el("div.tile.surf--ok",
           el("span.tile-v", { text: money(summary.totalOwedToMe) }),
           el("span.tile-l", { text: "Owed to you" })
         ),
@@ -153,7 +155,7 @@ var ScreenPeople = (function () {
     }
 
     host.appendChild(body);
-    App.setBandColour("ok");
+    App.setBandColour("flat");
   }
 
   function setDirection(d) { direction = d; }

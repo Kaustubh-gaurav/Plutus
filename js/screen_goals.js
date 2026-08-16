@@ -42,7 +42,7 @@ var ScreenGoals = (function () {
   }
 
   function goalCard(v, today) {
-    return el("div.card.surf--white",
+    return el("div.card.surf--card",
       el("div.card-head",
         el("b", { text: v.name }),
         v.isComplete
@@ -88,7 +88,7 @@ var ScreenGoals = (function () {
 
     UI.clear(host);
 
-    host.appendChild(el("header.band.band--ok",
+    host.appendChild(el("header.band.band--flat",
       el("div.band-top",
         el("button.circle-btn", {
           type: "button", "aria-label": "Back to home", onclick: function () { App.go("#/"); }
@@ -114,7 +114,7 @@ var ScreenGoals = (function () {
     }
 
     host.appendChild(body);
-    App.setBandColour("ok");
+    App.setBandColour("flat");
   }
 
   return { render: render };
@@ -263,7 +263,7 @@ var SheetGoal = (function () {
     );
 
     if (v.contributions.length) {
-      var list = el("div.card.surf--white", el("div.card-head", el("b", { text: "Contributions" })));
+      var list = el("div.card.surf--card", el("div.card-head", el("b", { text: "Contributions" })));
       v.contributions.forEach(function (c) {
         list.appendChild(el("div.row",
           el("span.badge.badge--lg", { style: { background: "var(--pl-ok-bg)" } }, UI.icon("ic-up", 16)),

@@ -9,7 +9,7 @@
       stranded on the previous version.
 */
 
-const CACHE = "plutus-v7";
+const CACHE = "plutus-v8";
 
 const SHELL = [
   "./",

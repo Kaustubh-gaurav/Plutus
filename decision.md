@@ -88,6 +88,9 @@ Status: done. Both shipped as 1.1.0.
 **REQ 019.** "Let's use Inter."
 Status: done as 1.2.0. D045 superseded by D095.
 
+**REQ 020.** "I've pasted new design inspiration in the figma file, please make the new design according to that."
+Four new reference images from the DoMORE case study: near black, one acid lime accent. Status: done as 2.0.0.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -487,6 +490,29 @@ Nothing else moved. The display sizes keep their negative tracking, and Inter's 
 `design-preview.html`, `design-directions.html` and `design-layouts.html` all embedded Jakarta as base64 and all three now embed Inter.
 Why: a specimen advertising a typeface the app does not ship is worse than no specimen. The only remaining mentions of Jakarta in the repository are historical notes that say it was replaced.
 
+### Version 3, dark, 17 August 2026
+
+**D097. The visual direction is now dark with a single acid lime accent.**
+Sampled from the reference pixels rather than estimated: canvas `#121416`, card `#1E2021`, line `#3D3D3D`, accent `#C2F854`.
+This inverts nearly every surface decision in version 2 and keeps every structural one. Money as integer paise, nothing derived stored, the status bands, colour never meaning anything alone, every form a sheet, one component one appearance, and the 44px target all survive untouched, because none of them were ever about the palette.
+Supersedes: D042, D052, and the surface half of D041.
+
+**D098. Only Home carries a coloured band. Every other screen opens flat.**
+On cream, a dark band read as a block against the page. On near black, a dark band on a dark canvas is an invisible rectangle. So Home keeps the bright status block, which is exactly the reference's lime banner with dark text on it, and every other screen gets a title with a hairline under it.
+D053 survives: the Home band is still the budget state, lime then amber then red.
+
+**D099. Category colour moved from the badge to the icon.**
+On cream a category was a pastel circle. Pastels on near black turn to mud, so the hue is now the icon and the badge behind it is the neutral raised surface. Ten hues, unchanged in meaning.
+
+**D100. Buttons are uppercase rectangles, and tabs are underlines.**
+Both taken directly from the reference. Radii drop across the board: 24 to 14 on cards, pill to 10 on buttons.
+
+**D101. Every colour pairing in the dark palette was measured before shipping.**
+Lime on canvas 14.8 to 1, ink on lime 15.0, ink on amber 11.6, ink on danger 6.2, ink on periwinkle 7.8. The first `--ink-3` tried measured **4.26**, under the threshold for small text, and was replaced with one at 5.9. Dark themes fail quietly on secondary text, so this was computed rather than judged.
+
+**D102. Three classes were renamed because their names became lies.**
+`surf--white` to `surf--card`, `surf--cream` to `surf--muted`, `surf--ink` to `surf--feature`. A class called white that paints dark grey is a trap for whoever reads it next.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -604,6 +630,14 @@ Why: a specimen advertising a typeface the app does not ship is worse than no sp
 **C056.** Regenerated all three design specimen pages in Inter from their generators, so nothing in the repository advertises a font the app no longer ships.
 
 **C057.** `CACHE` at `plutus-v7`, `VERSION` at `1.2.0`. Verified the rupee sign renders in Inter rather than a fallback, by checking which subset carries U+20B9 before shipping.
+
+**C058.** Read the four new reference images, sampled the palette from their pixels, and rewrote the token block and every component rule that carried the light identity.
+
+**C059.** Re-skinned in CSS wherever possible. The screens only ever used a bounded set of semantic classes, which is why an entire direction change came down to a token rewrite plus three renames and five header changes.
+
+**C060.** Found and fixed three regressions the change introduced, each caught by rendering rather than by reading: `pill--dark` painted white text on a white pill once `--ink` became a text colour, the People summary tile used a glass fill with no bright ground behind it, and `--ink-3` failed contrast on the dark canvas.
+
+**C061.** Re-ran the acceptance and accessibility passes against the dark build. 18 checks pass, including a sweep for any element whose text colour equals its background, which is the classic dark theme regression.
 
 ## Open questions
 

@@ -102,18 +102,14 @@ var ScreenHome = (function () {
     if (!weekly.hasBudget) return null;
     var seg = Budget.barSegments(weekly);
     var atLimit = weekly.status === "at_limit" || weekly.status === "exceeded";
-    /* The card keeps its mustard identity, per law 4, and the bar inside it
-       carries the state: red the moment the limit is reached.
-
-       Below the limit the fill stays ink rather than following the shared
-       status mapping, because that mapping's warning colour IS mustard, and
-       mustard on mustard is an invisible bar. Law 5: text and marks follow
-       the surface they sit on. */
-    var fill = atLimit ? "fill--danger" : "fill--ink";
-    return el("div.card.surf--warn",
+    /* On dark every card is the same surface, so the bar is the only thing
+       carrying state and it can follow the shared mapping directly: accent,
+       then amber, then red at the limit. */
+    var fill = "fill--" + Budget.fillForStatus(weekly.status);
+    return el("div.card.surf--card",
       el("div.card-head",
         el("b", { text: "This week" }),
-        el("span.pill." + (atLimit ? "pill--danger" : "pill--dark"),
+        el("span.pill." + (atLimit ? "pill--danger" : "pill--sunken"),
            { text: Math.round(weekly.percentUsed) + "% used" })
       ),
       el("div.bar-wrap",
@@ -179,7 +175,7 @@ var ScreenHome = (function () {
       ));
     });
 
-    return el("div.card.surf--white",
+    return el("div.card.surf--card",
       el("div.card-head",
         el("b", { text: "This week, day by day" }),
         overDay !== null ? el("span.pill.pill--sunken", { text: compact(overDay) + " a day" }) : null
@@ -195,7 +191,7 @@ var ScreenHome = (function () {
     var byId = {};
     cats.forEach(function (c) { byId[c.id] = c; });
 
-    var card = el("div.card.surf--white",
+    var card = el("div.card.surf--card",
       el("div.card-head",
         el("b", { text: "Where it went" }),
         el("button.circle-btn.circle-btn--sunken", {
@@ -209,7 +205,7 @@ var ScreenHome = (function () {
       var cat = byId[c.categoryId];
       card.appendChild(el("div.cat-line",
         el("div.row",
-          el("span.badge.badge--lg", { style: { background: "var(--cat-" + (cat ? cat.tint : "stone") + ")" } },
+          el("span.badge.badge--lg", { style: { color: "var(--cat-" + (cat ? cat.tint : "stone") + ")" } },
             UI.icon(cat ? cat.icon : "ic-dots", 17)),
           el("span.row-tx",
             el("b", { text: cat ? cat.name : "Uncategorised" }),
@@ -230,7 +226,7 @@ var ScreenHome = (function () {
   function installCard() {
     if (typeof Install === "undefined") return null;
     if (!Install.available() || Install.isDismissed()) return null;
-    return el("div.card.surf--ink.install-card",
+    return el("div.card.surf--feature.install-card",
       el("div.card-head",
         el("b", { text: "Keep Plutus on your home screen" }),
         el("button.circle-btn", {
@@ -251,7 +247,7 @@ var ScreenHome = (function () {
     var top = insights[0];
     var surface = top.tone === "danger" ? "surf--danger"
                 : top.tone === "warn" ? "surf--warn"
-                : top.tone === "ok" ? "surf--ok" : "surf--ink";
+                : top.tone === "ok" ? "surf--ok" : "surf--feature";
     return el("div.card." + surface,
       el("div.card-head", el("b", { text: headlineFor(top) })),
       el("p.note", { text: top.text })

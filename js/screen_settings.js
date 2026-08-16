@@ -229,7 +229,7 @@ var ScreenSettings = (function () {
       body.appendChild(el("button.row.row--tap", {
         type: "button", onclick: function () { UI.closeSheet(); setTimeout(function () { categorySheet(c); }, 260); }
       },
-        el("span.badge.badge--lg", { style: { background: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 17)),
+        el("span.badge.badge--lg", { style: { color: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 17)),
         el("span.row-tx",
           el("b", { text: c.name }),
           el("span", { text: used ? used + (used === 1 ? " expense" : " expenses") : "Not used yet" })
@@ -305,7 +305,7 @@ var ScreenSettings = (function () {
           type: "button", "aria-pressed": on ? "true" : "false",
           onclick: function () { draft.categoryId = c.id; paintCats(); }
         },
-          el("span.chip-dot", { style: { background: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
+          el("span.chip-dot", { style: { color: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
           el("span", { text: c.name })
         ));
       });
@@ -405,7 +405,7 @@ var ScreenSettings = (function () {
           type: "button",
           onclick: function () { UI.closeSheet(); setTimeout(function () { recurringSheet(r); }, 260); }
         },
-          el("span.badge.badge--lg", { style: { background: "var(--cat-" + (c ? c.tint : "stone") + ")" } },
+          el("span.badge.badge--lg", { style: { color: "var(--cat-" + (c ? c.tint : "stone") + ")" } },
             UI.icon(c ? c.icon : "ic-repeat", 17)),
           el("span.row-tx",
             el("b", { text: r.note || (c ? c.name : "Recurring") }),
@@ -580,7 +580,7 @@ var ScreenSettings = (function () {
 
     UI.clear(host);
 
-    host.appendChild(el("header.band.band--ok",
+    host.appendChild(el("header.band.band--flat",
       el("div.band-top",
         el("button.circle-btn", {
           type: "button", "aria-label": "Back to home", onclick: function () { App.go("#/"); }
@@ -592,7 +592,7 @@ var ScreenSettings = (function () {
 
     var body = el("div.screen-body",
 
-      el("div.card.surf--white",
+      el("div.card.surf--card",
         el("div.card-head", el("b", { text: "Budgets" })),
         row("Monthly budget", monthly ? money(monthly.amount) : "Not set", function () {
           amountSheet({
@@ -615,14 +615,14 @@ var ScreenSettings = (function () {
         row("Budget history", s.budgets.length + (s.budgets.length === 1 ? " record" : " records"), budgetHistorySheet)
       ),
 
-      el("div.card.surf--white",
+      el("div.card.surf--card",
         el("div.card-head", el("b", { text: "You" })),
         row("Name", p.name || "Not set", nameSheet),
         row("Currency", p.currencyCode + "  " + p.currencySymbol, currencySheet),
         row("Week starts on", p.weekStartsOn === 1 ? "Monday" : "Sunday", weekStartSheet)
       ),
 
-      el("div.card.surf--white",
+      el("div.card.surf--card",
         el("div.card-head", el("b", { text: "Spending" })),
         row("Categories", activeCats + " in use", categoriesSheet),
         row("Recurring expenses",
@@ -632,20 +632,20 @@ var ScreenSettings = (function () {
             function () { App.go("#/goals"); })
       ),
 
-      el("div.card.surf--white",
+      el("div.card.surf--card",
         el("div.card-head", el("b", { text: "Alerts" })),
         row("Notifications",
             s.settings.notifications === false ? "Off" : "On",
             notificationSheet)
       ),
 
-      el("div.card.surf--white",
+      el("div.card.surf--card",
         el("div.card-head", el("b", { text: "Your data" })),
         row("Export or restore", "A copy you can keep", exportSheet),
         row("Erase everything", "Cannot be undone", resetSheet, true)
       ),
 
-      el("div.card.surf--cream",
+      el("div.card.surf--muted",
         el("div.card-head", el("b", { text: "About" })),
         row("Install as an app",
             typeof Install !== "undefined" && Install.isStandalone() ? "Already installed" : "Add it to your home screen",

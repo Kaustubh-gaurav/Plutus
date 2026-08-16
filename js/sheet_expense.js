@@ -60,7 +60,7 @@ var SheetExpense = (function () {
           type: "button", "aria-pressed": on ? "true" : "false",
           onclick: function () { draft.categoryId = c.id; paintCategories(); clearError(); }
         },
-          el("span.chip-dot", { style: { background: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
+          el("span.chip-dot", { style: { color: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
           el("span", { text: c.name })
         ));
       });

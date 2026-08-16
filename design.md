@@ -1,16 +1,55 @@
 # Plutus: Design System
 
 > The visual source of truth. `context.md` is product, `architecture.md` is code structure, `implementation.md` is order, `decision.md` is history.
-> Anything on screen that is not in this file does not exist. If a screen needs something new, it gets added here first, as a component, then used everywhere it applies.
+> Anything on screen that is not in this file does not exist.
 
-Last updated: 16 August 2026
-Version 2. Source: the Plutus Figma file, `hRrczeduKiRMrK1x9l5yzc`, one pinned inspiration collage of six screens from two education apps.
+Last updated: 17 August 2026
+**Version 3, dark.** Source: four new reference images in the Plutus Figma file, `hRrczeduKiRMrK1x9l5yzc`, from the DoMORE case study.
 
-**Why there is a version 2.** Version 1 read the instruction "no variation between screens" as a reason to strip the colour out, and produced white cards on a cream canvas with one teal accent. It was rejected, correctly: it did not follow the reference. Consistency has to come from the system being identical everywhere, not from the palette being absent. Version 2 puts the colour back at the strength the board actually uses, and takes the consistency out of the laws in section 9 instead.
+**Why there is a version 3.** New inspiration replaced the old board. The direction inverts almost every surface decision from version 2 and keeps every structural one.
+
+Ground: warm cream becomes near black `#121416`.
+Cards: saturated colour blocks become one dark surface with a hairline.
+Accent: teal, mustard, rose and periwinkle become one acid lime, plus a warning and a breach.
+Radius: 24 on cards becomes 14, and pills become 10px rectangles on buttons.
+Buttons: pill and sentence case become rectangle, uppercase and tracked.
+Tabs: a sunken segmented pill becomes an underline.
+Band: a colour block on every screen becomes Home only, with every other screen flat.
+
+**What did not change**, because none of it was ever about the palette: money as integer paise, nothing derived is stored, the status bands, colour never carrying meaning alone, every form in a sheet, one component one appearance, and a 44px minimum target.
+
+## 0. The palette, sampled not guessed
+
+Taken from the reference pixels rather than estimated.
+
+```
+--canvas    #121416    behind every screen
+--surface   #1E2021    every card
+--surface-2 #282A2C    sheets, inputs, raised things
+--line      #34383A    the only border
+--ink       #FFFFFF    --ink-2 #A7ADB0    --ink-3 #8D9295
+--on-accent #101314    text on any bright fill
+
+--s-ok      #C2F854    the brand AND the healthy state
+--s-warn    #FFC24B    approaching
+--s-danger  #FF5C5C    at or past the limit, overdue
+--s-owe     #A99BFF    money you owe
+```
+
+Every pairing was measured, not eyeballed. Lime on canvas is 14.8 to 1, ink on lime 15.0, ink on amber 11.6, ink on danger 6.2, ink on periwinkle 7.8, and `--ink-3` is 5.9. The first `--ink-3` tried measured 4.26 and was rejected for being under the threshold for small text.
+
+**Category colour moved.** On cream, a category was a pastel circle. On dark, pastel circles turn to mud, so the category hue is now the **icon** and the badge behind it stays neutral. Ten hues, unchanged in meaning.
 
 ## 1. What the board actually does
+## 1. What the board actually does
 
-Look at screen one of the top board. In a single screen there is a rose header block that bleeds to the top edge, a white card, a mustard block and a teal player. Screen five does the same in orange. Screen three is teal edge to edge. **Saturated blocks of colour, several to a screen, are the whole visual identity.** That is the thing to carry across.
+**Version 3.** The reference is a near black app with a single acid lime accent. Lime appears as full width primary buttons with uppercase labels, as a banner block with dark text on it, as the active tab underline, as the selected state on a tile, and as highlighted words in a headline. Everything else is dark grey on darker grey, separated by hairlines rather than by colour. Radii are small. Text is white with grey secondaries.
+
+The discipline that makes it work is restraint: **one loud colour, used only where something is actionable or urgent.** That is the same discipline version 2 had, pointed at a different palette.
+
+*(The paragraph below describes the previous board and is kept because it explains decisions still in force.)*
+
+Screen one of the old board carried a rose header block, a white card, a mustard block and a teal player in a single screen. Saturated blocks of colour, several to a screen, were that direction's whole identity.
 
 **Taken:**
 
@@ -191,13 +230,13 @@ The day by day chart was lifted from layout L3 at the user's request. It sits di
 
 Loud surfaces make drift easier, so these carry more weight than in version 1. A design review is these twelve, in order, against the screen.
 
-1. **Every screen opens with a band.** Full bleed to the top edge, curved off at the bottom, content pulled up over it.
-2. **Six surfaces, no seventh.** A new colour needs a new job first.
+1. **Home opens with a bright band; every other screen opens flat.** On cream a dark band read as a block. On near black a dark band on a dark canvas is an invisible rectangle, so only Home, where the budget state is worth shouting, carries a colour block. Everywhere else it is a hairline under a title.
+2. **One surface, one accent.** Cards are all `--surface`. Colour appears on the Home band, on primary buttons, on bars, on selected chips and on status pills. A new colour needs a new job first.
 3. **A surface colour means one thing.** Periwinkle is money you owe, everywhere, always.
 4. **Only the Home band changes colour.** Teal, mustard, rose, driven by the budget. Every other block keeps its colour forever.
 5. **Text colour follows the surface.** Dark on mustard, cream and periwinkle. Light on teal, rose and ink.
 6. **Every bar carries its numbers**, and overspend is always the hatch, never a different colour.
-7. **One card, one radius.** 24 on cards, 30 on the band and sheets, 13 on badges, full round on pills.
+7. **One card, one radius.** 14 on cards, 12 on tiles, 10 on buttons and badges, 18 on sheets, full round on pills and chips.
 8. **Figures are weight 800**, tabular, no exceptions.
 9. **Every form is a sheet.**
 10. **Direction is never colour alone.** Owed to you and you owe carry a word, an arrow and a colour, all three.

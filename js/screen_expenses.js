@@ -46,7 +46,7 @@ var ScreenExpenses = (function () {
       onclick: function () { SheetExpense.open(e.id); }
     },
       el("span.badge.badge--lg", {
-        style: { background: "var(--cat-" + (cat ? cat.tint : "stone") + ")" }
+        style: { color: "var(--cat-" + (cat ? cat.tint : "stone") + ")" }
       }, UI.icon(cat ? cat.icon : "ic-dots", 17)),
       el("span.row-tx",
         el("b", { text: title }),
@@ -57,7 +57,7 @@ var ScreenExpenses = (function () {
   }
 
   function dayGroup(group, cats, today) {
-    var card = el("div.card.surf--white");
+    var card = el("div.card.surf--card");
     card.appendChild(el("div.day-head",
       el("b", { text: Dates.formatRelativeDay(group.date, today) }),
       el("span", { text: money(group.total) })
@@ -106,7 +106,7 @@ var ScreenExpenses = (function () {
           render();
         }
       },
-        el("span.chip-dot", { style: { background: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
+        el("span.chip-dot", { style: { color: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
         el("span", { text: c.name })
       ));
     });
@@ -183,7 +183,7 @@ var ScreenExpenses = (function () {
 
     UI.clear(host);
 
-    var header = el("header.band.band--ok",
+    var header = el("header.band.band--flat",
       el("div.band-top",
         el("button.circle-btn", {
           type: "button", "aria-label": "Back to home",
@@ -218,7 +218,7 @@ var ScreenExpenses = (function () {
     body.appendChild(listHost);
     host.appendChild(body);
     renderList();
-    App.setBandColour("ok");
+    App.setBandColour("flat");
     return;
   }
 

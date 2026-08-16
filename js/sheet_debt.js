@@ -146,9 +146,9 @@ var SheetDebt = (function () {
       ),
 
       el("div.tiles.tiles--3",
-        el("div.tile.surf--cream", el("span.tile-v", { text: money(v.originalAmount) }), el("span.tile-l", { text: "Original" })),
-        el("div.tile.surf--cream", el("span.tile-v", { text: money(v.totalRepaid) }), el("span.tile-l", { text: "Paid back" })),
-        el("div.tile.surf--cream", el("span.tile-v", { text: money(v.remaining) }), el("span.tile-l", { text: "Remaining" }))
+        el("div.tile.surf--muted", el("span.tile-v", { text: money(v.originalAmount) }), el("span.tile-l", { text: "Original" })),
+        el("div.tile.surf--muted", el("span.tile-v", { text: money(v.totalRepaid) }), el("span.tile-l", { text: "Paid back" })),
+        el("div.tile.surf--muted", el("span.tile-v", { text: money(v.remaining) }), el("span.tile-l", { text: "Remaining" }))
       ),
 
       el("div.bar-wrap",
@@ -169,7 +169,7 @@ var SheetDebt = (function () {
     }
 
     if (v.repayments.length) {
-      var list = el("div.card.surf--white",
+      var list = el("div.card.surf--card",
         el("div.card-head", el("b", { text: "History" }))
       );
       v.repayments.forEach(function (r) {
