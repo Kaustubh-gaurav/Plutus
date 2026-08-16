@@ -67,6 +67,9 @@ Status: done. `design-layouts.html` built with four Home layouts in the locked p
 **REQ 012.** "I liked the first option the most, but in the third option there is a graph with the heading This week day by day. I want that graph in the first option, just above the Where it went section. Now please start building."
 Status: done for the layout decision, and Phase 0 is built.
 
+**REQ 013.** "Contribution history, Indian grouping, and Monday." Plus the repository: `https://github.com/Kaustubh-gaurav/Plutus`.
+Status: done. All three settled as D062 to D064, Phase 1 built and pushed.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -329,6 +332,18 @@ Order on Home: band, weekly card, direction tiles, day by day chart, categories,
 Why the position works: the screen now reads outward in time. The month in the band, then the week, then the individual days, then where the money actually went. The chart also gives Home something to say in the gap between "a budget exists" and "there is a month of history", which was L1's one weak spot.
 Confirms: D057, with the one addition. Supersedes nothing.
 
+### Data and formatting, 16 August 2026
+
+**D062. Savings goal contributions are their own append only records, exactly like repayments.**
+A `contributions` collection keyed by `goalId`. A goal keeps `targetAmount` and never has its history overwritten.
+Why: it makes goals and debts the same idea in two directions, so one mental model and one set of tests covers both. Answers Q006.
+
+**D063. Indian number grouping.** `1,25,000` rather than `125,000`. Stored on the profile as `grouping: "IN"` so a different currency can carry a different rule later. Answers Q011.
+
+**D064. The week starts on Monday.** Configurable per profile, Monday is the default. Answers Q005.
+
+**D065. The repository is `Kaustubh-gaurav/Plutus`.** Answers Q008. Pages will serve it at `kaustubh-gaurav.github.io/Plutus/`, which is also the TWA scope if that route is taken later.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -385,6 +400,14 @@ Confirms: D057, with the one addition. Supersedes nothing.
 
 **C026.** Fixed two defects found in that first render: the Home avatar referenced a class that had never been written, and the Settings privacy row rendered as a default blue underlined link because anchor styling is element level and beat the row component. Both are now in `css/styles.css`.
 
+**C027.** Built Phase 1, `js/store.js`: one key, one object, field by field hydration, the migration runner, id counter, category seeding, generic collection helpers, profile and settings writers, and export, import and reset.
+
+**C028.** Built `tests.html`, a browser test page with a thirty line harness and no npm. 33 cases covering a fresh device, surviving a restart, a value written by an older build, a corrupt value, storage that refuses to write, the collection helpers, repayments and contributions as separate records, and an export and import round trip. All green.
+
+**C029.** Wired the store into boot, and surfaced its two failure states in the interface: a corrupt value and a device that will not accept writes both raise a banner that stays up.
+
+**C030.** Initialised the repository, committed Phase 0 and Phase 1, and pushed to `Kaustubh-gaurav/Plutus`.
+
 ## Open questions
 
 Move an item out of this section, into Decisions, as soon as it is answered.
@@ -401,7 +424,7 @@ Move an item out of this section, into Decisions, as soon as it is answered.
 
 **Q010. Name clash.** A UK fintech trades as Plutus. Irrelevant to a GitHub Pages release, worth a search before a Play Store listing.
 
-**Q011. Number grouping.** Indian grouping assumed, `1,25,000` rather than `125,000`. It affects every figure in the product, so it is worth confirming once.
+**Q011. ~~Number grouping.~~ ANSWERED: Indian grouping.** See D063.
 
 **Q002. ~~Stack was assumed, not specified.~~ ANSWERED 15 August 2026.** Vanilla static PWA in the Timetable shape. See D027.
 
@@ -409,10 +432,10 @@ Move an item out of this section, into Decisions, as soon as it is answered.
 
 **Q004. Multi currency.** MVP assumes one currency chosen at onboarding with no conversion. Confirm that is enough.
 
-**Q005. Week cycle default.** Week start is configurable. Confirm the default should be Monday.
+**Q005. ~~Week cycle default.~~ ANSWERED: Monday.** See D064.
 
-**Q006. Savings goals funding.** Goals currently hold a `currentAmount` the user updates manually. Confirm whether contributions should instead be recorded as their own entries with a history, the way repayments are.
+**Q006. ~~Savings goals funding.~~ ANSWERED: contributions keep a history.** See D062.
 
 **Q007. Android wrapper route.** TWA or Capacitor, per D035. Recommendation is TWA, but it does not need deciding until Phase 10. If TWA wins, the `assetlinks.json` file has to go in the `kaustubh-gaurav.github.io` root repository, so that repository needs to stay available.
 
-**Q008. Repository and URL.** Plutus needs its own GitHub repository, which puts it at `kaustubh-gaurav.github.io/Plutus/`. Confirm the name, since it becomes the URL, the PWA scope and, if TWA is chosen, part of the app identity.
+**Q008. ~~Repository and URL.~~ ANSWERED: Kaustubh-gaurav/Plutus.** See D065.
