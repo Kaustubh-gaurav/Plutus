@@ -100,6 +100,9 @@ A single new reference: a fitness dashboard, ambient dark green, bento tiles, da
 **REQ 023.** "The gradient looks too much in the bg and the boxes in front of it don't cover it well enough. For the home screen take inspiration from the first screen in the inspiration image: keep the main monthly spent at the top with a bar, and then the rest of the things in that rounded box below it."
 Status: done as 3.1.0.
 
+**REQ 024.** "In the first image the gradient is very bright and very evident, and the big box below breaks it completely. It is not translucent, it just breaks the gradient completely. I want something like that."
+Status: done as 3.2.0.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -587,6 +590,24 @@ This also retires the ring from Home: the bar already says what the ring said, a
 **D120. With no budget, the hero still shows real spending.**
 It showed zero, which is false the moment anything has been recorded. Rule R2 again.
 
+### The glow and the cut, measured, 17 August 2026
+
+**D121. The glow was measured off the reference rather than judged by eye.**
+Walking down the centre column of the reference's first screen: luminance climbs from 31 at the top to **139** just above the panel, then drops to **17** in a single row. My previous pass peaked around 25. It was not slightly dim, it was five times too dim.
+The panel colour was taken from the same reading: `#081518`, exactly what the reference uses.
+
+**D122. The cut is the effect, so nothing softens it.**
+The upward box shadow under the panel was removed. A soft halo over the glow is precisely what "it just breaks the gradient completely" rules out.
+
+**D123. Every screen gets the panel, not only Home.**
+`.screen-body` and `.panel` are now the same treatment. Otherwise Home would cut the glow and every other screen would leave its content floating on a bright wash.
+
+**D124. The light source sits high, not low.**
+The reference is brightest just above its cut, but the things sitting there are **dark tiles**, not text. Our hero has small print at the bottom of the lit area, so the same placement would have put 12px text on the brightest ground in the app. The centre moved up to 13 percent, which keeps the glow obvious behind the big white figure and lets it fall away before the small print.
+
+**D125. Two contrast failures found by measuring, both mine.**
+`--ink-3` at 40 percent white measured **3.83** on the panel, under the threshold, so it is now 52 percent. And on the brightest glow, even 88 percent white only reaches 4.48, which is why the light source had to move rather than the type get heavier. The ground under the hero's small print now measures `#212C2F`, where the secondary text clears 5.0 and the primary clears 14.3.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -744,6 +765,16 @@ It showed zero, which is false the moment anything has been recorded. Rule R2 ag
 **C076.** Three fixes found by rendering rather than reading: the panel was a shade lighter than the ground so its edge was invisible, the panel stopped where its content ended on a sparse month and let the wash show underneath, and the no budget hero displayed zero when money had been spent.
 
 **C077.** 19 checks pass, including that the panel is opaque, has its rounded corners, contains the day strip and the list, and runs past the fold on a nearly empty month. 130 unit tests still pass.
+
+**C078.** Sampled the reference's luminance profile down its centre column, matched the glow to it, and took the panel colour from the same reading.
+
+**C079.** Removed the panel's upward shadow so the cut is hard, and gave every screen the same opaque panel.
+
+**C080.** Moved the light source up after discovering that the reference's brightest zone carries dark tiles rather than text, which our layout could not copy directly.
+
+**C081.** Fixed two measured contrast failures: `--ink-3` on the panel, and secondary text on the glow.
+
+**C082.** 12 checks pass, including that every one of the six screens has a fully opaque panel with the right radius that reaches the bottom of the viewport. 130 unit tests still pass.
 
 ## Open questions
 

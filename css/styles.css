@@ -19,7 +19,7 @@
   --surface:    #0E1B17;   /* every tile and card */
   --surface-2:  #142320;   /* inputs, raised things inside a card */
   --sunken:     #0B1613;   /* tracks and wells */
-  --panel:      #04100D;   /* the solid sheet. Darker than the lit ground on
+  --panel:      #081518;   /* the solid sheet. Darker than the lit ground on
                               purpose: the seam is what gives the screen its
                               structure, and cards on it read as raised. */
   --line:       rgba(255, 255, 255, .07);
@@ -27,7 +27,9 @@
 
   --ink:        #FFFFFF;
   --ink-2:      rgba(255, 255, 255, .58);
-  --ink-3:      rgba(255, 255, 255, .40);
+  --ink-3:      rgba(255, 255, 255, .52);   /* .40 measured 3.83 on the panel,
+                                               under the threshold. .46 is the
+                                               line; this keeps headroom. */
   --on-accent:  #04140A;
 
   /* ── data ink ──
@@ -118,13 +120,21 @@ body {
    nearly identical dark rectangle and still separate from the page. */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
-  /* Pulled back hard from the first attempt. The glow is meant to light the
-     top of the screen, not to be a picture: it now fades out well before the
-     panel starts, and the wash from below is gone entirely because the panel
-     covers that area anyway. */
+  /* Measured off the reference rather than guessed. Walking down its centre
+     column, the glow climbs from luminance 31 at the top to 139 just above the
+     panel, then drops to 17 in a single row. So the light source sits LOW,
+     brightening downward until the panel cuts it dead.
+
+     That cliff is the effect. The gradient is meant to be bright and obvious;
+     the panel is meant to stop it completely. */
   background:
-    radial-gradient(95% 42% at 18% -6%, rgba(58, 168, 106, .20) 0%, rgba(58, 168, 106, 0) 66%),
-    radial-gradient(75% 34% at 92% 2%,  rgba(37, 158, 168, .13) 0%, rgba(37, 158, 168, 0) 62%),
+    radial-gradient(125% 46% at 26% 13%,
+      rgba(79, 184, 148, .95) 0%,
+      rgba(52, 134, 110, .55) 38%,
+      rgba(20, 62, 52, .16) 66%,
+      rgba(12, 34, 30, 0) 82%),
+    radial-gradient(85% 40% at 97% 2%,
+      rgba(44, 172, 184, .38) 0%, rgba(44, 172, 184, 0) 62%),
     var(--canvas);
 }
 /* A faint grain, so large flat gradients do not band on cheap panels. */
@@ -171,7 +181,9 @@ svg { display: block; }
 .band-top { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-7); }
 .band-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .band-who b { font-size: 14px; font-weight: 500; color: var(--ink); }
-.band-who span { font-size: 11.5px; font-weight: 400; color: var(--ink-3); }
+/* The header sits on the brightest part of the glow, where 40 percent
+   white does not hold. Measured, not judged. */
+.band-who span { font-size: 11.5px; font-weight: 400; color: var(--ink-2); }
 
 /* Large and light. The reference sets its titles around 300, and that
    restraint is what makes them feel expensive rather than loud. */
@@ -182,10 +194,22 @@ svg { display: block; }
 }
 .band .big { font-size: 46px; font-weight: 300; letter-spacing: -.035em; line-height: 1.05; }
 
-.screen-body {
-  padding: var(--sp-3) var(--gutter) 0;
+/* Every screen has the same floor: the header sits on the lit ground and
+   everything below it is on an opaque panel. Without this, only Home would
+   cut the glow and every other screen would leave content floating on it. */
+.screen-body, .panel {
+  background: var(--panel);
+  border-top: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 30px 30px 0 0;
+  padding: var(--sp-7) var(--gutter) calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: var(--sp-5);
+  flex: 1 0 auto;
+  margin-bottom: calc((var(--nav-h) + 30px + env(safe-area-inset-bottom)) * -1);
 }
+/* Cards sit on the panel, so they are the lighter, raised things. */
+.screen-body .card, .screen-body .tile,
+.panel .card, .panel .tile { background: var(--surface); }
+
 
 /* ============================================================
    The hero and the panel.
@@ -216,7 +240,6 @@ svg { display: block; }
   background: var(--panel);
   border-top: 1px solid rgba(255, 255, 255, .10);
   border-radius: 30px 30px 0 0;
-  box-shadow: 0 -18px 40px rgba(0, 0, 0, .45);
   padding: var(--sp-7) var(--gutter) calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: var(--sp-5);
   flex: 1 0 auto;
