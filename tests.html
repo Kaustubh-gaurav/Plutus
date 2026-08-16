@@ -31,6 +31,15 @@
 <div id="out"></div>
 
 <script src="js/config.js"></script>
+<script src="js/money.js"></script>
+<script src="js/dates.js"></script>
+<script src="js/expenses.js"></script>
+<script src="js/budget.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/debts.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/alerts.js"></script>
+<script src="js/validate.js"></script>
 <script src="js/store.js"></script>
 
 <script>
@@ -323,6 +332,523 @@
       Store.reset();
       Store.importAll(again);
       eq(Store.exportAll().data.expenses, again.data.expenses);
+    });
+  });
+
+  /* ═══════════════ Phase 2: the logic layer ═══════════════
+     Every function below is pure and takes today as an argument, which is
+     what lets a month rollover and an overdue transition be a test rather
+     than something you wait for. */
+
+  var TODAY = "2026-08-16";            /* a Sunday */
+  var MONTH = Dates.monthPeriod(TODAY);
+  var WEEK = Dates.weekPeriod(TODAY, 1);
+
+  function exp(amount, date, categoryId, extra) {
+    var e = { id: "e" + Math.random().toString(36).slice(2, 8), amount: amount,
+              date: date, categoryId: categoryId || "cat_1" };
+    for (var k in (extra || {})) e[k] = extra[k];
+    return e;
+  }
+
+  describe("money: paise in, rupees out", function () {
+    it("converts and rounds half up", function () {
+      eq(Money.toPaise(1234.56), 123456);
+      eq(Money.toPaise(0.005), 1);
+      eq(Money.toPaise(10), 1000);
+    });
+    it("does not lose a paisa to binary floating point", function () {
+      /* 1234.565 * 100 is 123456.49999999999 in IEEE 754. A bare Math.round
+         gives 123456 and the paisa is gone. */
+      eq(Money.toPaise(1234.565), 123457);
+      eq(Money.toPaise(0.07 * 3), Money.toPaise(0.21));
+    });
+    it("stays exact over a thousand additions", function () {
+      var list = [];
+      for (var i = 0; i < 1000; i++) list.push({ amount: Money.toPaise(0.1) });
+      eq(Money.sum(list, function (x) { return x.amount; }), 10000);
+    });
+    it("returns zero rather than NaN when there is no whole", function () {
+      eq(Money.percentOf(500, 0), 0);
+      eq(Money.percentOf(0, 0), 0);
+    });
+    it("groups the Indian way", function () {
+      eq(Money.format(12500000, "₹", "IN"), "₹1,25,000");
+      eq(Money.format(100000000, "₹", "IN"), "₹10,00,000");
+      eq(Money.format(99900, "₹", "IN"), "₹999");
+    });
+    it("groups the international way when asked", function () {
+      eq(Money.format(12500000, "$", "INTL"), "$125,000");
+    });
+    it("shows decimals only when there are any", function () {
+      eq(Money.format(150000, "₹", "IN"), "₹1,500");
+      eq(Money.format(150050, "₹", "IN"), "₹1,500.50");
+      eq(Money.format(150005, "₹", "IN"), "₹1,500.05");
+    });
+    it("compacts to thousands, lakh and crore", function () {
+      eq(Money.formatCompact(1200000, "₹", "IN"), "₹12k");
+      eq(Money.formatCompact(1250000000, "₹", "IN"), "₹1.3Cr");
+      eq(Money.formatCompact(20000000, "₹", "IN"), "₹2L");
+    });
+    it("reads what a person actually types", function () {
+      eq(Money.parseInput("₹1,25,000"), 12500000);
+      eq(Money.parseInput(" 420 "), 42000);
+      eq(Money.parseInput("10.5"), 1050);
+      eq(Money.parseInput("10.005"), 1001);
+    });
+    it("refuses what is not a number", function () {
+      eq(Money.parseInput("abc"), null);
+      eq(Money.parseInput(""), null);
+      eq(Money.parseInput("."), null);
+      eq(Money.parseInput("1.2.3"), null);
+    });
+    it("never lets a balance go negative", function () {
+      eq(Money.clampToZero(-500), 0);
+    });
+  });
+
+  describe("dates: months, weeks and their edges", function () {
+    it("finds the month a date sits in", function () {
+      eq(MONTH.key, "2026-08");
+      eq(MONTH.start, "2026-08-01");
+      eq(MONTH.end, "2026-08-31");
+      eq(MONTH.totalDays, 31);
+    });
+    it("handles February, leap year and not", function () {
+      eq(Dates.monthPeriod("2026-02-10").end, "2026-02-28");
+      eq(Dates.monthPeriod("2028-02-10").end, "2028-02-29");
+    });
+    it("counts days elapsed from the first to the last day", function () {
+      eq(Dates.monthPeriod("2026-08-01").daysElapsed, 1);
+      eq(Dates.monthPeriod("2026-08-31").daysElapsed, 31);
+      eq(Dates.monthPeriod("2026-08-31").daysLeft, 0);
+      eq(MONTH.daysElapsed, 16);
+      eq(MONTH.daysLeft, 15);
+    });
+    it("starts the week on Monday by default", function () {
+      eq(WEEK.start, "2026-08-10");
+      eq(WEEK.end, "2026-08-16");
+    });
+    it("starts the week on Sunday when asked", function () {
+      var w = Dates.weekPeriod(TODAY, 0);
+      eq(w.start, "2026-08-16");
+      eq(w.end, "2026-08-22");
+    });
+    it("puts a date on a period edge inside that period", function () {
+      ok(Dates.isWithin("2026-08-01", MONTH));
+      ok(Dates.isWithin("2026-08-31", MONTH));
+      notOk(Dates.isWithin("2026-07-31", MONTH));
+      notOk(Dates.isWithin("2026-09-01", MONTH));
+    });
+    it("steps back a period, including across a year boundary", function () {
+      eq(Dates.previousPeriod(MONTH, 1).key, "2026-07");
+      eq(Dates.previousPeriod(Dates.monthPeriod("2026-01-10"), 1).key, "2025-12");
+    });
+    it("keeps the week key stable across new year", function () {
+      /* the Thursday rule: 1 January 2027 is a Friday, so it belongs to the
+         last ISO week of 2026, not the first of 2027 */
+      eq(Dates.weekPeriod("2027-01-01", 1).key, "2026-W53");
+    });
+    it("rejects a date that does not exist", function () {
+      notOk(Dates.isValid("2026-02-30"));
+      notOk(Dates.isValid("16-08-2026"));
+      ok(Dates.isValid("2026-08-16"));
+    });
+    it("reads dates the way a person says them", function () {
+      eq(Dates.formatRelativeDay(TODAY, TODAY), "Today");
+      eq(Dates.formatRelativeDay("2026-08-15", TODAY), "Yesterday");
+      eq(Dates.formatDisplay("2026-08-16", TODAY), "16 August");
+      eq(Dates.formatDisplay("2025-08-16", TODAY), "16 August 2025");
+    });
+  });
+
+  describe("budget: progress and its edges", function () {
+    var spend = [exp(1500000, "2026-08-05"), exp(1000000, "2026-08-12")]; /* 25,000 in total */
+
+    it("survives a brand new user with no budget", function () {
+      var p = Budget.progress(null, [], MONTH);
+      eq(p.hasBudget, false);
+      eq(p.status, "no_budget");
+      eq(p.percentUsed, 0);
+      eq(p.remaining, 0);
+      ok(isFinite(p.averageDailySpend), "no NaN anywhere");
+    });
+    it("treats a zero budget as no budget rather than dividing by it", function () {
+      var p = Budget.progress(0, spend, MONTH);
+      eq(p.hasBudget, false);
+      eq(p.percentUsed, 0);
+      eq(p.spent, 2500000);
+    });
+    it("computes the ordinary case", function () {
+      var p = Budget.progress(2500000, [exp(1500000, "2026-08-05")], MONTH);
+      eq(p.spent, 1500000);
+      eq(p.remaining, 1000000);
+      eq(Math.round(p.percentUsed), 60);
+      eq(p.status, "approaching");
+      eq(p.surface, "warn");
+    });
+    it("lands exactly on the band boundaries", function () {
+      function statusAt(pct) { return Budget.statusFromPercent(pct, true); }
+      eq(statusAt(0), "starting");
+      eq(statusAt(49), "on_track");
+      eq(statusAt(50), "approaching");
+      eq(statusAt(74), "approaching");
+      eq(statusAt(75), "near_limit");
+      eq(statusAt(99), "near_limit");
+      eq(statusAt(100), "at_limit");
+      eq(statusAt(101), "exceeded");
+    });
+    it("reports overspend rather than a negative remaining", function () {
+      var p = Budget.progress(2500000, [exp(2750000, "2026-08-05")], MONTH);
+      eq(p.remaining, 0);
+      eq(p.overspend, 250000);
+      eq(p.status, "exceeded");
+      eq(p.surface, "danger");
+    });
+    it("splits the bar into inside and overspend", function () {
+      var p = Budget.progress(2500000, [exp(2750000, "2026-08-05")], MONTH);
+      var seg = Budget.barSegments(p);
+      eq(Math.round(seg.inside + seg.over), 100);
+      ok(seg.over > 0, "there must be a hatched segment when over budget");
+    });
+    it("warns about pace while still inside the budget", function () {
+      /* 16 days in, 20,000 spent of 25,000: not over, but heading there */
+      var p = Budget.progress(2500000, [exp(2000000, "2026-08-05")], MONTH);
+      eq(p.status, "near_limit");
+      ok(p.isPaceRisky, "projected total must exceed the budget");
+      ok(p.projectedTotal > p.budget);
+    });
+    it("does not cry pace when spending is comfortable", function () {
+      var p = Budget.progress(2500000, [exp(500000, "2026-08-05")], MONTH);
+      notOk(p.isPaceRisky);
+    });
+    it("picks the budget that was in force, not the newest one", function () {
+      var budgets = [
+        { id: "b1", period: "monthly", amount: 2000000, effectiveFrom: "2026-06-01", createdAt: "1" },
+        { id: "b2", period: "monthly", amount: 2500000, effectiveFrom: "2026-08-01", createdAt: "2" },
+        { id: "b3", period: "monthly", amount: 9900000, effectiveFrom: "2026-09-01", createdAt: "3" }
+      ];
+      eq(Budget.resolveForPeriod(budgets, MONTH).amount, 2500000);
+      eq(Budget.resolveForPeriod(budgets, Dates.monthPeriod("2026-07-10")).amount, 2000000);
+    });
+    it("ignores a weekly budget when asked for a monthly one", function () {
+      var budgets = [{ id: "w", period: "weekly", amount: 700000, effectiveFrom: "2026-08-01", createdAt: "1" }];
+      eq(Budget.resolveForPeriod(budgets, MONTH), null);
+    });
+  });
+
+  describe("expenses: filtering, grouping and the edit that moves months", function () {
+    var cats = { cat_1: { id: "cat_1", name: "Food" }, cat_2: { id: "cat_2", name: "Transport" } };
+    var list = [
+      exp(50000, "2026-08-16", "cat_1", { note: "Lunch at Anand", paymentMethod: "upi" }),
+      exp(20000, "2026-08-16", "cat_2", { note: "Bus", paymentMethod: "cash" }),
+      exp(90000, "2026-08-14", "cat_1", { merchant: "Blue Tokai" }),
+      exp(10000, "2026-07-30", "cat_1", { note: "Old month" })
+    ];
+
+    it("keeps only the period asked for", function () {
+      eq(Expenses.inPeriod(list, MONTH).length, 3);
+    });
+    it("moves an expense between months when its date is edited", function () {
+      var edited = list.map(function (e) {
+        return e.note === "Old month" ? { id: e.id, amount: e.amount, date: "2026-08-02", categoryId: e.categoryId } : e;
+      });
+      eq(Expenses.inPeriod(edited, MONTH).length, 4);
+      eq(Expenses.inPeriod(edited, Dates.monthPeriod("2026-07-10")).length, 0);
+    });
+    it("searches notes, merchants and category names", function () {
+      eq(Expenses.query(list, { search: "anand" }, cats).length, 1);
+      eq(Expenses.query(list, { search: "blue tokai" }, cats).length, 1);
+      eq(Expenses.query(list, { search: "transport" }, cats).length, 1);
+    });
+    it("filters by category, method, range and amount", function () {
+      eq(Expenses.query(list, { categoryIds: ["cat_1"] }).length, 3);
+      eq(Expenses.query(list, { paymentMethods: ["upi"] }).length, 1);
+      eq(Expenses.query(list, { from: "2026-08-01", to: "2026-08-15" }).length, 1);
+      eq(Expenses.query(list, { minAmount: 50000 }).length, 2);
+    });
+    it("sorts newest first by default and by amount when asked", function () {
+      eq(Expenses.query(list, {})[0].date, "2026-08-16");
+      eq(Expenses.query(list, { sortBy: "amount" })[0].amount, 90000);
+      eq(Expenses.query(list, { sortBy: "amount", sortDir: "asc" })[0].amount, 10000);
+    });
+    it("groups by day with a day total, newest day first", function () {
+      var groups = Expenses.groupByDay(Expenses.inPeriod(list, MONTH));
+      eq(groups[0].date, "2026-08-16");
+      eq(groups[0].total, 70000);
+      eq(groups.length, 2);
+    });
+    it("gives every day of the period a bar, zeros included", function () {
+      var days = Expenses.dailyTotals(list, WEEK);
+      eq(days.length, 7);
+      eq(days[days.length - 1].total, 70000);
+      eq(days[0].total, 0, "Monday had nothing and must still be drawn");
+    });
+  });
+
+  describe("analytics: where the money went", function () {
+    var cats = [{ id: "cat_1", name: "Food" }, { id: "cat_2", name: "Transport" }];
+    var list = [exp(650000, "2026-08-04", "cat_1"), exp(210000, "2026-08-06", "cat_2"),
+                exp(140000, "2026-08-09", "cat_1")];
+    var a = Analytics.analyse(list, MONTH);
+
+    it("totals, counts and averages", function () {
+      eq(a.total, 1000000);
+      eq(a.count, 3);
+      eq(a.averageExpense, 333333);
+    });
+    it("ranks categories with their share", function () {
+      eq(a.byCategory[0].categoryId, "cat_1");
+      eq(a.byCategory[0].total, 790000);
+      eq(Math.round(a.byCategory[0].share), 79);
+      eq(a.topCategory.categoryId, "cat_1");
+    });
+    it("says nothing at all when there is nothing to say", function () {
+      eq(Analytics.insights(Analytics.analyse([], MONTH), null, cats).length, 0);
+    });
+    it("names the biggest category", function () {
+      var out = Analytics.insights(a, Budget.progress(2500000, list, MONTH), cats, "₹", "IN");
+      ok(out.some(function (i) { return i.id === "top-category" && i.text.indexOf("Food") === 0; }));
+    });
+    it("warns about pace before it warns about being over", function () {
+      var over = [exp(2750000, "2026-08-04", "cat_1")];
+      var out = Analytics.insights(Analytics.analyse(over, MONTH),
+                                   Budget.progress(2500000, over, MONTH), cats, "₹", "IN");
+      eq(out[0].id, "over-budget");
+      eq(out[0].tone, "danger");
+    });
+    it("has no comparison to make in a first month", function () {
+      eq(Analytics.analyse(list, MONTH, []).changeVsPrevious, null);
+    });
+  });
+
+  describe("debts: the rules that cannot be got wrong", function () {
+    var debt = { id: "d1", direction: "lent", personName: "Rahul",
+                 originalAmount: 500000, date: "2026-07-12", dueDate: "2026-09-10" };
+
+    it("starts pending with the full amount outstanding", function () {
+      var v = Debts.view(debt, [], TODAY);
+      eq(v.status, "pending");
+      eq(v.remaining, 500000);
+      eq(v.totalRepaid, 0);
+    });
+    it("goes partially paid and keeps the original amount", function () {
+      var v = Debts.view(debt, [{ id: "r1", debtId: "d1", amount: 200000, date: "2026-08-01" }], TODAY);
+      eq(v.status, "partially_paid");
+      eq(v.remaining, 300000);
+      eq(v.originalAmount, 500000, "the original must never be rewritten");
+      eq(Math.round(v.repaidPercent), 40);
+    });
+    it("settles to exactly zero and marks itself paid", function () {
+      var v = Debts.view(debt, [
+        { id: "r1", debtId: "d1", amount: 200000, date: "2026-08-01" },
+        { id: "r2", debtId: "d1", amount: 300000, date: "2026-08-14" }
+      ], TODAY);
+      eq(v.remaining, 0);
+      eq(v.status, "paid");
+      eq(v.repayments.length, 2, "the history is kept");
+    });
+    it("goes back to partially paid when a repayment is deleted", function () {
+      var both = [{ id: "r1", debtId: "d1", amount: 200000, date: "2026-08-01" },
+                  { id: "r2", debtId: "d1", amount: 300000, date: "2026-08-14" }];
+      eq(Debts.view(debt, both, TODAY).status, "paid");
+      var afterDelete = both.filter(function (r) { return r.id !== "r2"; });
+      eq(Debts.view(debt, afterDelete, TODAY).status, "partially_paid");
+      eq(Debts.view(debt, afterDelete, TODAY).remaining, 300000);
+    });
+    it("refuses a repayment one paisa over the balance", function () {
+      var v = Debts.view(debt, [], TODAY);
+      eq(Debts.canAcceptRepayment(v, 500001).ok, false);
+      eq(Debts.canAcceptRepayment(v, 500000).ok, true);
+    });
+    it("refuses a repayment on a settled debt", function () {
+      var v = Debts.view(debt, [{ id: "r", debtId: "d1", amount: 500000, date: "2026-08-01" }], TODAY);
+      eq(Debts.canAcceptRepayment(v, 100).ok, false);
+    });
+    it("refuses a repayment dated before the debt", function () {
+      var v = Debts.view(debt, [], TODAY);
+      eq(Debts.canAcceptRepayment(v, 1000, "2026-07-01").ok, false);
+      eq(Debts.canAcceptRepayment(v, 1000, "2026-07-12").ok, true);
+    });
+    it("never calls a debt without a due date overdue", function () {
+      var noDue = { id: "d2", direction: "lent", personName: "X", originalAmount: 1000, date: "2020-01-01" };
+      var v = Debts.view(noDue, [], TODAY);
+      eq(v.isOverdue, false);
+      eq(v.status, "pending");
+      eq(v.daysUntilDue, null);
+    });
+    it("marks a passed due date overdue, and un marks it once paid", function () {
+      var late = { id: "d3", direction: "lent", personName: "Ananya",
+                   originalAmount: 120000, date: "2026-07-01", dueDate: "2026-08-10" };
+      eq(Debts.view(late, [], TODAY).status, "overdue");
+      eq(Debts.view(late, [{ id: "r", debtId: "d3", amount: 120000, date: "2026-08-15" }], TODAY).status, "paid");
+    });
+    it("keeps the two directions apart in the summary", function () {
+      var all = [
+        { id: "a", direction: "lent", personName: "Rahul", originalAmount: 500000, date: "2026-07-12" },
+        { id: "b", direction: "borrowed", personName: "Priya", originalAmount: 300000, date: "2026-08-01" }
+      ];
+      var reps = [{ id: "r", debtId: "a", amount: 200000, date: "2026-08-01" }];
+      var s = Debts.summary(Debts.views(all, reps, TODAY));
+      eq(s.totalOwedToMe, 300000);
+      eq(s.totalIOwe, 300000);
+      eq(s.netPosition, 0);
+    });
+    it("puts what needs attention at the top and settled at the bottom", function () {
+      var all = [
+        { id: "settled", direction: "lent", personName: "Meera", originalAmount: 80000, date: "2026-07-01" },
+        { id: "late", direction: "lent", personName: "Ananya", originalAmount: 120000, date: "2026-07-01", dueDate: "2026-08-10" },
+        { id: "open", direction: "lent", personName: "Rahul", originalAmount: 500000, date: "2026-07-12" }
+      ];
+      var reps = [{ id: "r", debtId: "settled", amount: 80000, date: "2026-08-02" }];
+      var ordered = Debts.views(all, reps, TODAY).map(function (v) { return v.id; });
+      eq(ordered[0], "late");
+      eq(ordered[2], "settled");
+    });
+  });
+
+  describe("goals: a debt turned around", function () {
+    var goal = { id: "g1", name: "New laptop", targetAmount: 8000000, targetDate: "2026-12-01" };
+    var cons = [{ id: "c1", goalId: "g1", amount: 3000000, date: "2026-07-01" },
+                { id: "c2", goalId: "g1", amount: 1500000, date: "2026-08-01" }];
+
+    it("adds up the contributions and keeps them", function () {
+      var v = Goals.view(goal, cons, TODAY);
+      eq(v.saved, 4500000);
+      eq(v.remaining, 3500000);
+      eq(Math.round(v.percent), 56);
+      eq(v.contributions.length, 2);
+    });
+    it("caps progress at a hundred and allows saving past the target", function () {
+      var over = cons.concat([{ id: "c3", goalId: "g1", amount: 9000000, date: "2026-08-10" }]);
+      var v = Goals.view(goal, over, TODAY);
+      eq(v.percent, 100);
+      eq(v.remaining, 0);
+      eq(v.isComplete, true);
+      eq(Goals.canAcceptContribution(v, 100000).ok, true, "saving more than planned is not an error");
+    });
+    it("works with no target date at all", function () {
+      var v = Goals.view({ id: "g2", name: "Rainy day", targetAmount: 100000 }, [], TODAY);
+      eq(v.daysLeft, null);
+      eq(v.perMonthNeeded, null);
+      eq(v.isOverdue, false);
+    });
+  });
+
+  describe("alerts: fire once, and only once", function () {
+    var settings = { notifications: true, budgetAlerts: true, thresholds: [50, 75, 90, 100],
+                     dueReminders: true, dueReminderDays: 3 };
+
+    function ctxAt(spentPaise, fired) {
+      return {
+        monthly: Budget.progress(2500000, [exp(spentPaise, "2026-08-05")], MONTH),
+        weekly: null, debtViews: [], goalViews: [],
+        settings: settings, today: TODAY, fired: fired || {}
+      };
+    }
+
+    it("announces the highest threshold crossed, not every one below it", function () {
+      var out = Alerts.evaluate(ctxAt(2000000));
+      eq(out.length, 1);
+      eq(out[0].type, "budget_threshold_75");
+    });
+    it("does not fire the same alert twice in one period", function () {
+      var fired = {};
+      var first = Alerts.evaluate(ctxAt(2000000, fired));
+      first.forEach(function (a) { fired[a.fingerprint] = TODAY; });
+      eq(Alerts.evaluate(ctxAt(2000000, fired)).length, 0);
+    });
+    it("does not refire after dropping below and crossing again", function () {
+      var fired = {};
+      Alerts.evaluate(ctxAt(2000000, fired)).forEach(function (a) { fired[a.fingerprint] = TODAY; });
+      Alerts.evaluate(ctxAt(500000, fired));            /* an expense was deleted */
+      eq(Alerts.evaluate(ctxAt(2000000, fired)).length, 0, "crossing 75 again in the same month is silent");
+    });
+    it("fires again in the next period", function () {
+      var fired = {};
+      Alerts.evaluate(ctxAt(2000000, fired)).forEach(function (a) { fired[a.fingerprint] = TODAY; });
+      var nextMonth = Dates.monthPeriod("2026-09-16");
+      var ctx = {
+        monthly: Budget.progress(2500000, [exp(2000000, "2026-09-05")], nextMonth),
+        settings: settings, today: "2026-09-16", fired: fired, debtViews: [], goalViews: []
+      };
+      eq(Alerts.evaluate(ctx).length, 1, "the fingerprint carries the period key");
+    });
+    it("says over budget rather than a threshold once past it", function () {
+      var out = Alerts.evaluate(ctxAt(2750000));
+      eq(out[0].type, "budget_exceeded");
+      eq(out[0].tone, "danger");
+    });
+    it("goes quiet when notifications are switched off", function () {
+      var ctx = ctxAt(2750000);
+      ctx.settings = { notifications: false };
+      eq(Alerts.evaluate(ctx).length, 0);
+    });
+    it("reminds about a debt due soon, once per due date", function () {
+      var soon = { id: "d9", direction: "lent", personName: "Rahul",
+                   originalAmount: 100000, date: "2026-08-01", dueDate: "2026-08-18" };
+      var fired = {};
+      var ctx = { monthly: null, weekly: null, goalViews: [], settings: settings, today: TODAY,
+                  fired: fired, debtViews: [Debts.view(soon, [], TODAY)] };
+      var out = Alerts.evaluate(ctx);
+      eq(out.length, 1);
+      eq(out[0].type, "debt_due_soon");
+      fired[out[0].fingerprint] = TODAY;
+      eq(Alerts.evaluate(ctx).length, 0, "it must not nag every refresh");
+    });
+    it("stays silent about a debt with no due date", function () {
+      var noDue = { id: "d8", direction: "lent", personName: "X", originalAmount: 100000, date: "2020-01-01" };
+      var ctx = { monthly: null, weekly: null, goalViews: [], settings: settings, today: TODAY,
+                  fired: {}, debtViews: [Debts.view(noDue, [], TODAY)] };
+      eq(Alerts.evaluate(ctx).length, 0);
+    });
+  });
+
+  describe("validation: every rule, passing and failing", function () {
+    var cats = [{ id: "cat_1", name: "Food" }, { id: "cat_2", name: "Transport" }];
+
+    it("accepts a good expense and rejects a bad one", function () {
+      eq(Validate.expense({ amount: 42000, categoryId: "cat_1", date: TODAY }, cats, TODAY).ok, true);
+      eq(Validate.expense({ amount: 0, categoryId: "cat_1", date: TODAY }, cats, TODAY).ok, false);
+      eq(Validate.expense({ amount: 100, categoryId: "nope", date: TODAY }, cats, TODAY).ok, false);
+      eq(Validate.expense({ amount: 100, categoryId: "cat_1", date: "2026-09-01" }, cats, TODAY).ok, false);
+    });
+    it("keeps a note within its limit", function () {
+      var long = new Array(220).join("x");
+      eq(Validate.expense({ amount: 100, categoryId: "cat_1", date: TODAY, note: long }, cats, TODAY).ok, false);
+    });
+    it("refuses a duplicate category name, case insensitively", function () {
+      eq(Validate.category({ name: "food" }, cats).ok, false);
+      eq(Validate.category({ name: "Fuel" }, cats).ok, true);
+      eq(Validate.category({ name: "" }, cats).ok, false);
+    });
+    it("refuses a due date before the loan itself", function () {
+      var base = { personName: "Rahul", direction: "lent", originalAmount: 5000, date: "2026-08-01" };
+      base.dueDate = "2026-07-01";
+      eq(Validate.debt(base, TODAY).ok, false);
+      base.dueDate = "2026-09-01";
+      eq(Validate.debt(base, TODAY).ok, true);
+    });
+    it("refuses a goal target date in the past", function () {
+      eq(Validate.goal({ name: "Laptop", targetAmount: 100000, targetDate: "2020-01-01" }, TODAY).ok, false);
+      eq(Validate.goal({ name: "Laptop", targetAmount: 100000 }, TODAY).ok, true);
+    });
+    it("refuses a recurring rule that ends before it starts", function () {
+      eq(Validate.recurring({ amount: 1000, categoryId: "cat_1", frequency: "monthly",
+                              startDate: "2026-08-01", endDate: "2026-07-01" }, cats).ok, false);
+      eq(Validate.recurring({ amount: 1000, categoryId: "cat_1", frequency: "monthly",
+                              startDate: "2026-08-01" }, cats).ok, true);
+    });
+    it("uses one definition of a valid repayment, not two", function () {
+      var v = Debts.view({ id: "d1", direction: "lent", personName: "R",
+                           originalAmount: 500000, date: "2026-07-12" }, [], TODAY);
+      eq(Validate.repayment({ amount: 600000, date: TODAY }, v).ok, false);
+      eq(Validate.repayment({ amount: 500000, date: TODAY }, v).ok, true);
+    });
+    it("refuses an unknown currency or a nonsense week start", function () {
+      eq(Validate.profile({ currencyCode: "XYZ" }).ok, false);
+      eq(Validate.profile({ weekStartsOn: 3 }).ok, false);
+      eq(Validate.profile({ currencyCode: "INR", weekStartsOn: 1 }).ok, true);
     });
   });
 

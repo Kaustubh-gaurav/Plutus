@@ -70,6 +70,9 @@ Status: done for the layout decision, and Phase 0 is built.
 **REQ 013.** "Contribution history, Indian grouping, and Monday." Plus the repository: `https://github.com/Kaustubh-gaurav/Plutus`.
 Status: done. All three settled as D062 to D064, Phase 1 built and pushed.
 
+**REQ 014.** "Done." (GitHub Pages enabled.) Then: build Phase 2.
+Status: done. The site is live and the logic layer is built and tested.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -344,6 +347,27 @@ Why: it makes goals and debts the same idea in two directions, so one mental mod
 
 **D065. The repository is `Kaustubh-gaurav/Plutus`.** Answers Q008. Pages will serve it at `kaustubh-gaurav.github.io/Plutus/`, which is also the TWA scope if that route is taken later.
 
+### Phase 2, the logic layer, 16 August 2026
+
+**D066. Only the highest budget threshold actually crossed is announced.**
+Recording one large expense that jumps from 40 to 105 percent produces one alert saying you are over budget, not four in a row saying 50, 75, 90 and 100.
+Why: the spec asks for no duplicate or excessive notifications, and four alerts from one action is exactly that.
+
+**D067. A debt alert's fingerprint is scoped to the due date, not to today.**
+`debt_overdue:d1:2026-09-10` rather than anything carrying today's date.
+Why: scoping it to today would make an overdue debt announce itself every single morning, which trains people to ignore notifications.
+
+**D068. Goal contributions may take a goal past its target, unlike repayments.**
+A repayment above the outstanding balance is refused. A contribution above the target is not.
+Why: overpaying a debt is a mistake, saving more than you planned is not.
+
+**D069. `Dates.today()` is the only clock read in the codebase, and it is the one impure function in the logic layer.**
+Every other function takes today as an argument, which is what makes month rollover, week rollover and overdue transitions testable directly. The tests exercise 31 December to 1 January, February in a leap year and not, and both week start days.
+
+**D070. Calendar dates are local date strings, never UTC timestamps.**
+`new Date("2026-08-16")` parses as UTC and lands on the 15th west of Greenwich. Every date is parsed to local midnight instead.
+Why: an expense recorded at 11pm on the 31st must belong to that month wherever the phone is.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -407,6 +431,16 @@ Why: it makes goals and debts the same idea in two directions, so one mental mod
 **C029.** Wired the store into boot, and surfaced its two failure states in the interface: a corrupt value and a device that will not accept writes both raise a banner that stays up.
 
 **C030.** Initialised the repository, committed Phase 0 and Phase 1, and pushed to `Kaustubh-gaurav/Plutus`.
+
+**C031.** Built Phase 2, the whole logic layer: `money.js`, `dates.js`, `expenses.js`, `budget.js`, `analytics.js`, `debts.js`, `goals.js`, `alerts.js`, `validate.js`. All pure, no DOM, no storage, no clock.
+
+**C032.** Grew `tests.html` from 33 cases to **107**, all passing. Covers paise rounding against binary floating point drift, Indian grouping, month and week boundaries including a leap year and a new year crossing, every status band boundary, budget resolution by `effectiveFrom`, the full debt lifecycle including deleting a repayment to reverse a settlement, alert deduplication across periods, and every validation rule in both directions.
+
+**C033.** Cleaned three things before committing rather than after: a positional `arguments[3]` in `analytics.js` became a named parameter, and two test expectations that were clever rather than readable were rewritten.
+
+**C034.** Wired all nine logic files into `index.html` in dependency order and into the service worker shell, bumped `CACHE` to `plutus-v2` and `VERSION` to `0.2.0`, and verified every shell entry exists before pushing.
+
+**C035.** GitHub Pages is live at `https://kaustubh-gaurav.github.io/Plutus/`.
 
 ## Open questions
 
