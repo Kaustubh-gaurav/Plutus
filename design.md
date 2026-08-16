@@ -4,42 +4,48 @@
 > Anything on screen that is not in this file does not exist.
 
 Last updated: 17 August 2026
-**Version 4, dark brutalist.** Source: the four DoMORE reference images in the Plutus Figma file. Earlier boards are no longer referenced.
+**Version 5: ambient dark, bento, data as the hero.** Source: the fitness dashboard reference in the Plutus Figma file. It is the only reference in scope.
 
-**Why there is a version 4.** Version 3 read the reference as "dark plus lime" and then used lime for a full screen band, the tiles, the nav and the toast. The reference uses it for roughly five percent of a screen: one button, one underline, one small banner. Version 4 cuts it back to that, and leans into the brutalism the board actually carries.
+## 0. What the reference actually does
 
-**What changed from v3**
+Three things, and they are what make it feel expensive:
 
-* **The accent is now rare.** Measured: it covers under 2 percent of the Home screen. It appears on the primary button, the add button, the bar fill, an active tab rule, a card's left edge, and nothing else.
-* **The Home band is dark under the limit.** State is carried by the bar, a pill and one hairline. It fills solid red only when you are over budget, because that is rare and should interrupt. D053 survives in the form that matters: the screen still changes when your state changes.
-* **Hard edges.** Cards drop from 14px to 4px, buttons to 2px, sheets to 0. Nothing is a pill. The nav is a full width bar with a hard top edge rather than a floating capsule.
-* **Structure is visible.** Rows are separated by rules, headers sit over hairlines, card titles are uppercase and tracked.
-* **New typefaces.** See section 4.
+1. **The ground is lit, not flat.** A deep green black with a soft light source above and left, a colder one to the right, and a glow from below. Nothing in the app is pure black, and every card can therefore be a nearly identical dark rectangle and still separate from the page.
+2. **Bento.** A modular grid where a tile's size is how important the thing inside it is. One tall tile, two small ones, each holding a single figure and a small piece of data drawing.
+3. **Data is the decoration.** A ring gauge, a sweeping curve with a lit endpoint, small bars bleeding to a tile's edge. There is no ornament that is not also information.
 
-## 0. The palette, sampled not guessed
+Type is **light and large**: headline figures sit around weight 300, not 800. That restraint is most of why the numbers read as expensive rather than shouty. This reverses version 4 completely and deliberately.
 
-## 0. The palette, sampled not guessed
-
-Taken from the reference pixels rather than estimated.
+## 0a. The palette, sampled from the reference
 
 ```
---canvas    #121416    behind every screen
---surface   #1E2021    every card
---surface-2 #282A2C    sheets, inputs, raised things
---line      #34383A    the only border
---ink       #FFFFFF    --ink-2 #A7ADB0    --ink-3 #8D9295
---on-accent #101314    text on any bright fill
+--void      #050B09    behind everything
+--canvas    #071110    the lit ground
+--surface   #0E1B17    every tile and card
+--surface-2 #142320    inputs and raised things
+--line      rgba(255,255,255,.07)
 
---s-ok      #C2F854    the brand AND the healthy state
---s-warn    #FFC24B    approaching
---s-danger  #FF5C5C    at or past the limit, overdue
---s-owe     #A99BFF    money you owe
+--ink   #FFFFFF   --ink-2 rgba(255,255,255,.58)   --ink-3 rgba(255,255,255,.40)
+
+--s-ok     #A9F04E    progress and health, and the brand
+--s-teal   #35D6BE    the second data series
+--s-warn   #F5C451    approaching
+--s-danger #FF6B6B    at or past the limit, overdue
+--s-owe    #9D8CFF    money you owe
 ```
 
-Every pairing was measured, not eyeballed. Lime on canvas is 14.8 to 1, ink on lime 15.0, ink on amber 11.6, ink on danger 6.2, ink on periwinkle 7.8, and `--ink-3` is 5.9. The first `--ink-3` tried measured 4.26 and was rejected for being under the threshold for small text.
+The accent is **data ink**. It draws rings, curves, bars and the one primary action, and it is not used as a background anywhere except that action.
 
-**Category colour moved.** On cream, a category was a pastel circle. On dark, pastel circles turn to mud, so the category hue is now the **icon** and the badge behind it stays neutral. Ten hues, unchanged in meaning.
+## 0b. Components the reference gave us
 
+* **Bento tile.** Radius 20, one dark surface, a hairline border. A tall variant spans two rows, a wide one spans two columns.
+* **Ring gauge.** A 270 degree arc, stroked twice, with a soft bloom filter on the value. The gap at the bottom is what makes it a gauge rather than a pie.
+* **Sweeping arc.** A curve that rises left to right, ending in a haloed dot placed at the fraction given. The curve carries the meaning; the dot is where you are now.
+* **Spark bars.** Small blocks bleeding to a tile's edge, scaled to the tallest, with the peak picked out in the accent.
+* **Day strip.** Seven days with a tick over each, lit when something was recorded, the selected day ringed. Tapping one reads that day.
+* **Pill button.** A small bordered capsule with a blur behind it, from the reference's "+ Add".
+
+## 1. What the board actually does
 ## 1. What the board actually does
 ## 1. What the board actually does
 
@@ -232,13 +238,13 @@ The day by day chart was lifted from layout L3 at the user's request. It sits di
 
 Loud surfaces make drift easier, so these carry more weight than in version 1. A design review is these twelve, in order, against the screen.
 
-1. **Home opens with a bright band; every other screen opens flat.** On cream a dark band read as a block. On near black a dark band on a dark canvas is an invisible rectangle, so only Home, where the budget state is worth shouting, carries a colour block. Everywhere else it is a hairline under a title.
-2. **The accent is rare, and it is earned.** Under 2 percent of a screen, measured. Primary buttons, the add button, the bar fill, the active tab rule, a card's left edge. Nothing else. A status is an edge and a text colour, never a slab of paint. The single exception is the over budget band, which fills solid red because it has to interrupt.
+1. **Every screen opens on the ambient ground.** The header is transparent: the lit gradient runs to the top of the screen and the status bar matches it. No screen has a coloured header block.
+2. **The accent is data ink.** It draws the ring, the curve, the bars and the one primary action. It is never a background except on that action. A status is a hue and an edge: the ring turns amber then red, the tall tile takes a red border when you are over.
 3. **A surface colour means one thing.** Periwinkle is money you owe, everywhere, always.
 4. **Only the Home band changes colour.** Teal, mustard, rose, driven by the budget. Every other block keeps its colour forever.
 5. **Text colour follows the surface.** Dark on mustard, cream and periwinkle. Light on teal, rose and ink.
 6. **Every bar carries its numbers**, and overspend is always the hatch, never a different colour.
-7. **Hard edges.** 4 on cards and tiles, 3 on badges, 2 on buttons and pills, 0 on sheets. The only genuinely round things in the app are the avatar and the notification dot.
+7. **Soft again, but not pillowy.** 20 on tiles and cards, 12 on badges, 26 on sheets, full round on buttons, pills and chips.
 8. **Figures are weight 800**, tabular, no exceptions.
 9. **Every form is a sheet.**
 10. **Direction is never colour alone.** Owed to you and you owe carry a word, an arrow and a colour, all three.

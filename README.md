@@ -26,10 +26,10 @@ privacy.html             required for the Play listing, and true from day one
 manifest.webmanifest
 sw.js                    offline shell. read the two rules at the top
 css/styles.css           tokens first, then components. surfaces last, on purpose
-fonts/                   Space Grotesk for the interface, JetBrains Mono for every figure, 97KB.
-                         The rupee comes from Grotesk even inside mono runs: JetBrains has no such glyph
+fonts/                   Inter, two variable subsets, 133KB. Both needed: the rupee is in latin-ext
 icons/
 js/config.js             constants. loaded first
+js/viz.js                ring gauge, sweeping arc, spark bars, day strip
 js/ui.js                 DOM helpers, sheets, toasts, confirms
 js/app.js                boot and hash router. loaded last
 ```

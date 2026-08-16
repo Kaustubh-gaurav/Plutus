@@ -94,6 +94,9 @@ Four new reference images from the DoMORE case study: near black, one acid lime 
 **REQ 021.** "The green is too much and too heavy, don't use the earlier inspirations, use only this one now, as you can see it has kind of a brutalism theme to it, you can also change the fonts to fit the theme better."
 Status: done as 2.2.0. Accent cut to under 2 percent of a screen, measured. Hard edges throughout. New typefaces.
 
+**REQ 022.** "This is also not good, I've pasted a new design inspiration, please go through it and redo the design, also you can make the components that look like that in the inspiration and change the layout if needed as well."
+A single new reference: a fitness dashboard, ambient dark green, bento tiles, data as the hero. Status: done as 3.0.0, including a new Home layout.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -540,6 +543,23 @@ This is the third time the rupee has needed specific handling across three typef
 **D108. Earlier inspiration boards are no longer referenced.**
 The education app collage that drove versions 1 and 2 is out of scope. `design.md` keeps one paragraph of it only where it explains a decision still in force.
 
+### Version 5, ambient bento, 17 August 2026
+
+**D109. The ground is lit, not flat.** Three fixed radial washes, a green light source above and left, a colder one right, a glow from below, plus a faint grain so large gradients do not band on cheap panels. Nothing in the app is pure black.
+Why: it is the single thing that makes the reference feel expensive, and it is what lets every card be a nearly identical dark rectangle and still separate from the page. Flat black cannot do that, which is why version 4 needed hard borders everywhere.
+
+**D110. Home is a bento grid, and the layout changed with it.**
+A tall tile for what is left, with the month drawn underneath as spark bars. A small tile for what is spent. A ring gauge for how much of the budget is gone. Then a day strip for the week, and the list of what you spent on the day you tap.
+Why: a tile's size is how important the thing inside it is, and "what can I still spend" is the question the product exists to answer, so it gets the tall one. The day strip also replaces a passive list with something you can interrogate.
+
+**D111. Data is the decoration.** New in `viz.js`: a ring gauge with a bloom filter, a sweeping arc with a haloed endpoint, spark bars that bleed to a tile edge, and the day strip. There is no ornament in the app that is not also information.
+
+**D112. Type reverses: light and large.** Headline figures sit at weight 300, not 800, and Inter comes back for its neutrality. This undoes D106 entirely. Version 4's brutalist weight was right for that board and wrong for this one.
+
+**D113. The accent is data ink.** Lime draws the ring, the curve, the bars and the one primary action, and is a background nowhere else. A status is a hue and an edge, not a slab.
+
+**D114. Every screen opens on the ambient ground.** The header is transparent, the gradient runs to the top of the screen, and the status bar matches the canvas in every state. No coloured header block anywhere, which retires the last of the band colour idea from D042 and D098. D053 now lives in the ring and the tall tile's border instead.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -675,6 +695,20 @@ The education app collage that drove versions 1 and 2 is out of scope. `design.m
 **C065.** Verified: accent coverage under 2 percent, both faces loading rather than falling back, digits genuinely monospaced, the rupee served from Grotesk, the band dark under the limit and red over it, the status bar following it, every control named, no target under 36px, and all six screens rendering. 130 unit tests still pass.
 
 **C066.** Still stale and flagged rather than quietly left: `design-preview.html`, `design-directions.html` and `design-layouts.html` all render the cream version 2 system. They are historical records of a direction that is now two versions old.
+
+**C067.** Read the new reference, sampled its palette, and rewrote the stylesheet from scratch for the ambient bento direction rather than patching the brutalist one.
+
+**C068.** Built `js/viz.js`: ring gauge, sweeping arc, spark bars and day strip, so every screen draws them identically.
+
+**C069.** Rebuilt Home as a bento grid with a day strip, which is a layout change rather than a re-skin.
+
+**C070.** Switched back to Inter at light weights, and removed the mono. The rupee handling is unchanged and still verified.
+
+**C071.** Found and fixed a real latent bug while verifying: `data-onboarding` was set by the gate but only cleared by `leaveOnboarding`, so any other route to being onboarded, such as restoring a backup, would leave the navigation hidden for good. It is now cleared in `render`.
+
+**C072.** Also fixed: Home called `appendChild` with sections that legitimately return null, which throws where `UI.el` would have skipped them. That is what a null direction tile does on a device with no debts.
+
+**C073.** Verified: bento renders three tiles, the ring draws, the spark draws, the day strip has seven days and tapping one switches the list, the ambient layer is present, headline figures compute at weight 300, the nav is on screen, every control is named, nothing is under 36px, no NaN anywhere. 130 unit tests still pass.
 
 ## Open questions
 

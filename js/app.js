@@ -54,6 +54,11 @@ var App = (function () {
   function render() {
     if (needsOnboarding()) { showOnboarding(); return; }
 
+    /* Clear the flag here, not only in leaveOnboarding. Any other route to
+       being onboarded, such as restoring a backup, would otherwise leave the
+       body marked and the navigation hidden for good. */
+    document.body.removeAttribute("data-onboarding");
+
     var route = routeFor(location.hash);
     current = route;
 
@@ -118,10 +123,9 @@ var App = (function () {
       band.classList.remove("band--ok", "band--warn", "band--danger");
       band.classList.add(cls);
     }
-    /* Only the over budget band is filled, so only it changes the status bar. */
-    var colour = getComputedStyle(document.documentElement)
-      .getPropertyValue(state === "danger" ? "--s-danger" : "--canvas")
-      .trim();
+    /* The header is transparent now: the ambient ground runs to the top of
+       the screen, so the status bar matches the canvas in every state. */
+    var colour = getComputedStyle(document.documentElement).getPropertyValue("--canvas").trim();
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta && colour) meta.setAttribute("content", colour);
   }
