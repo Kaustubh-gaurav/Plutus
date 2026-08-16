@@ -87,12 +87,14 @@ var Money = (function () {
       if (rupees >= 1e9) return sign + sym + trim(rupees / 1e9) + "B";
       if (rupees >= 1e6) return sign + sym + trim(rupees / 1e6) + "M";
       if (rupees >= 1e3) return sign + sym + trim(rupees / 1e3) + "K";
-      return format(paise, sym, grouping);
+      return format(Math.round(n / 100) * 100, sym, grouping);
     }
     if (rupees >= 1e7) return sign + sym + trim(rupees / 1e7) + "Cr";
     if (rupees >= 1e5) return sign + sym + trim(rupees / 1e5) + "L";
     if (rupees >= 1e3) return sign + sym + trim(rupees / 1e3) + "k";
-    return format(paise, sym, grouping);
+    /* Under a thousand there is nothing to abbreviate, but the paise still go:
+       this is the compact form, and "829.67" next to "5k" reads as a bug. */
+    return format(Math.round(n / 100) * 100, sym, grouping);
   }
 
   /* What someone typed, turned into paise, or null if it is not a number.

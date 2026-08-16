@@ -72,6 +72,7 @@ var App = (function () {
       : route.title + " · " + CONFIG.APP_NAME;
 
     if (route.id !== "screen-expenses" && typeof ScreenExpenses !== "undefined") ScreenExpenses.reset();
+    if (route.id !== "screen-insights" && typeof ScreenInsights !== "undefined") ScreenInsights.reset();
 
     window.scrollTo(0, 0);
     refresh();
@@ -89,14 +90,21 @@ var App = (function () {
        guarantees no screen can show a stale figure: there is nothing cached to
        go stale. Screens arrive phase by phase; until one exists, its static
        empty state stands. */
-    if (current && current.id === "screen-home" && typeof ScreenHome !== "undefined") {
-      ScreenHome.render();
-      return;
-    }
-    if (current && current.id === "screen-expenses" && typeof ScreenExpenses !== "undefined") {
-      ScreenExpenses.render();
-      return;
-    }
+    /* Alerts are evaluated after every change, and the engine is idempotent,
+       so this can run on every refresh without ever producing a duplicate. */
+    if (typeof Notifications !== "undefined") Notifications.evaluate();
+
+    var SCREENS = {
+      "screen-home": typeof ScreenHome !== "undefined" ? ScreenHome : null,
+      "screen-expenses": typeof ScreenExpenses !== "undefined" ? ScreenExpenses : null,
+      "screen-people": typeof ScreenPeople !== "undefined" ? ScreenPeople : null,
+      "screen-insights": typeof ScreenInsights !== "undefined" ? ScreenInsights : null,
+      "screen-goals": typeof ScreenGoals !== "undefined" ? ScreenGoals : null,
+      "screen-settings": typeof ScreenSettings !== "undefined" ? ScreenSettings : null
+    };
+    var screen = current ? SCREENS[current.id] : null;
+    if (screen) { screen.render(); return; }
+
     setBandColour();
   }
 
@@ -135,6 +143,10 @@ var App = (function () {
   function boot() {
     Store.load();
     reportStorageState();
+
+    /* Anything that fell due while the app was closed is created now. The
+       generator is idempotent, so a second boot creates nothing. */
+    if (typeof Actions !== "undefined" && typeof Recurring !== "undefined") Actions.runRecurring();
 
     if (!location.hash) location.replace("#/");
 

@@ -9,7 +9,7 @@
       stranded on the previous version.
 */
 
-const CACHE = "plutus-v4";
+const CACHE = "plutus-v5";
 
 const SHELL = [
   "./",
@@ -28,14 +28,22 @@ const SHELL = [
   "js/debts.js",
   "js/goals.js",
   "js/alerts.js",
+  "js/recurring.js",
   "js/validate.js",
   "js/store.js",
   "js/actions.js",
   "js/ui.js",
+  "js/notifications.js",
   "js/onboarding.js",
   "js/sheet_expense.js",
   "js/screen_home.js",
   "js/screen_expenses.js",
+  "js/notifications.js",
+  "js/sheet_debt.js",
+  "js/screen_people.js",
+  "js/screen_insights.js",
+  "js/screen_goals.js",
+  "js/screen_settings.js",
   "js/app.js",
   "icons/icon-192.png",
   "icons/icon-512.png",

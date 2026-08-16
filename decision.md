@@ -79,6 +79,9 @@ Status: done. 47 icons drawn into a new "Icons for build" page in the Figma file
 **REQ 016.** "Next phase." Build Phase 4, expenses.
 Status: done. Add, edit, delete, categories and history, with 127 tests passing.
 
+**REQ 017.** "Make all the phases now, don't stop to ask."
+Status: done. Phases 5 to 9 built in one pass. Phase 10, Android packaging, needs a Play account and a signing key, so it stays with the user.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -414,6 +417,36 @@ Someone halfway through recording a coffee should not have to abandon it, go to 
 **D080. A history row's title is the most specific thing available, and the subtitle carries only what the title did not already say.**
 Found by looking at a render: rows were printing "Lunch at Anand" as the title and "Lunch at Anand · Food · UPI" underneath it. Repeating the note on both lines reads as a bug because it is one.
 
+### Phases 5 to 9, 16 August 2026
+
+**D081. Debt detail and goal detail are sheets, not routes.**
+The list stays behind them and closing feels like putting something down rather than navigating back.
+Why: law 7 already puts every form in a sheet, and a detail view that leads straight into a form belongs in the same place.
+
+**D082. The direction tiles on Home appear only once a debt exists.**
+Two tiles reading zero are noise for someone who has never lent anyone anything. Discovery happens through the People tab instead.
+
+**D083. Only the tallest bars carry a value, and a long period labels every fifth day.**
+Found by rendering a month: 31 bars produced a solid line of digits nobody could read, with a second line of figures above it.
+
+**D084. The compact money format drops paise.**
+`₹829.67` sitting beside `₹5k` in the same row of tiles reads as a bug. The compact form exists to be short.
+
+**D085. A goal's monthly figure rounds up, where a budget's daily allowance rounds down.**
+Both are amounts to act on, and both round in the direction that makes following them work: round the savings figure down and you miss the target, round the spending allowance up and you go over budget.
+
+**D086. Repayment and contribution history have a stable tiebreak.**
+Two repayments on the same day were coming back in whichever order the sort happened to produce, so the list could reshuffle between renders and "delete the first one" meant something different each time.
+
+**D087. Deleting a debt takes its repayments with it; deleting a recurring rule leaves its expenses alone.**
+A repayment without its debt is unreachable and uncorrectable. An expense created by a rule was real spending and stays.
+
+**D088. Export offers a download and a copy, and neither is the only way out.**
+An installed PWA on iOS handles downloads inconsistently, and export is the only safety net this app has.
+
+**D089. Segmented control buttons are 44px minimum.**
+They were 34px. Caught by measuring every control on every screen rather than by looking at them.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -503,6 +536,20 @@ Found by looking at a render: rows were printing "Lunch at Anand" as the title a
 **C042.** Fixed two rendering defects found in that pass: history rows printed the note twice, and payment methods rendered lowercase.
 
 **C043.** Tests up to **127**, adding the write path: valid writes persist, invalid ones are refused and write nothing, a refused edit leaves the record alone, an edit moves every dependent figure, category deletion never orphans, defaults archive rather than delete, and budgets stay append only.
+
+**C044.** Built Phase 5: the full dashboard (direction tiles, day by day chart, category card, insight card) and the Settings screen with budgets, profile, and budget history.
+
+**C045.** Built Phase 6: `screen_people.js` and `sheet_debt.js`, the two direction tiles, the segmented control, debt cards with status, debt detail with full repayment history, repayment entry with a settle in full shortcut, and the debt and repayment actions.
+
+**C046.** Built Phase 7: `screen_insights.js` with a period stepper that walks real periods, and `notifications.js` wiring the pure alert engine into every refresh with a bell, an unread dot, a notification centre and preference toggles.
+
+**C047.** Built Phase 8: search and category filtering on history, savings goals with a ring and contribution history, recurring rules with idempotent catch up generation at boot, and export, import and erase.
+
+**C048.** Built Phase 9: measured every control on every screen for an accessible name and a 44px target, verified focus trapping, escape, and the Android back gesture on sheets, confirmed an empty state on every screen for a new user, and checked a crore scale figure does not overflow a 390px screen.
+
+**C049.** Ran every acceptance flow from `context.md` section 16 end to end through the real interface. All 28 checks pass. Three failures in that run turned out to be wrong expectations in the harness rather than app defects, and one of them surfaced the ordering weakness in D086.
+
+**C050.** Tests at **128**. Deploy checklist clean: every shell file exists, every script is in the shell, `CACHE` at `plutus-v5`, `VERSION` at `1.0.0`, no absolute paths, no unloaded files.
 
 ## Open questions
 

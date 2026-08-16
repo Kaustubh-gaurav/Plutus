@@ -17,7 +17,15 @@ var Debts = (function () {
   function repaymentsFor(debtId, repayments) {
     return (repayments || [])
       .filter(function (r) { return r.debtId === debtId; })
-      .sort(function (a, b) { return Dates.compare(b.date, a.date); });
+      .sort(function (a, b) {
+        var byDate = Dates.compare(b.date, a.date);
+        if (byDate !== 0) return byDate;
+        /* Two repayments on the same day must always come back in the same
+           order, or the history list reshuffles itself between renders and
+           "delete the first one" means something different each time. */
+        var ak = String(a.createdAt || a.id), bk = String(b.createdAt || b.id);
+        return ak < bk ? 1 : ak > bk ? -1 : 0;
+      });
   }
 
   function view(debt, repayments, todayISO) {

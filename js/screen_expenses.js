@@ -66,6 +66,109 @@ var ScreenExpenses = (function () {
     return card;
   }
 
+  /* ── search and filtering ───────────────────────────────────
+     One query object, handed to the same Expenses.query the rest of the app
+     uses. If this screen filtered on its own the totals here would eventually
+     disagree with the totals everywhere else. */
+
+  var query = { search: "", categoryIds: [], sortBy: "date", sortDir: "desc" };
+
+  function activeFilterCount() {
+    return (query.search ? 1 : 0) + query.categoryIds.length + (query.sortBy !== "date" ? 1 : 0);
+  }
+
+  function filterBar(cats) {
+    var searchInput = el("input.field-input.search-input", {
+      type: "search", value: query.search, placeholder: "Search notes, places, categories",
+      "aria-label": "Search expenses"
+    });
+    searchInput.addEventListener("input", function () {
+      query.search = searchInput.value;
+      renderList();
+    });
+
+    var chips = el("div.chip-row");
+    var allOn = query.categoryIds.length === 0;
+    chips.appendChild(el("button.chip" + (allOn ? ".is-on" : ""), {
+      type: "button", "aria-pressed": allOn ? "true" : "false",
+      onclick: function () { query.categoryIds = []; render(); }
+    }, "All"));
+
+    Object.keys(cats).forEach(function (id) {
+      var c = cats[id];
+      if (c.isArchived) return;
+      var on = query.categoryIds.indexOf(id) !== -1;
+      chips.appendChild(el("button.chip" + (on ? ".is-on" : ""), {
+        type: "button", "aria-pressed": on ? "true" : "false",
+        onclick: function () {
+          if (on) query.categoryIds = query.categoryIds.filter(function (x) { return x !== id; });
+          else query.categoryIds = query.categoryIds.concat([id]);
+          render();
+        }
+      },
+        el("span.chip-dot", { style: { background: "var(--cat-" + c.tint + ")" } }, UI.icon(c.icon, 13)),
+        el("span", { text: c.name })
+      ));
+    });
+
+    var sortBtn = el("button.chip", {
+      type: "button",
+      onclick: function () {
+        query.sortBy = query.sortBy === "date" ? "amount" : "date";
+        render();
+      }
+    }, UI.icon("ic-sort", 13), el("span", { text: query.sortBy === "date" ? "Newest" : "Largest" }));
+
+    return el("div.filter-bar",
+      el("div.field", searchInput),
+      chips,
+      el("div.filter-foot", sortBtn,
+        activeFilterCount()
+          ? el("button.chip", {
+              type: "button",
+              onclick: function () { query = { search: "", categoryIds: [], sortBy: "date", sortDir: "desc" }; render(); }
+            }, "Clear filters")
+          : null
+      )
+    );
+  }
+
+  var listHost = null;
+
+  function renderList() {
+    if (!listHost) return;
+    var s = Store.get();
+    var today = Dates.today();
+    var cats = categoriesById();
+    var results = Expenses.query(s.expenses, query, cats);
+
+    UI.clear(listHost);
+
+    if (!results.length) {
+      listHost.appendChild(el("div.empty",
+        el("h2", { text: "Nothing matches" }),
+        el("p", { text: "Try a different search, or clear the filters." })
+      ));
+      return;
+    }
+
+    var total = Money.sum(results, function (e) { return e.amount; });
+    listHost.appendChild(el("div.result-line",
+      el("span", { text: results.length + (results.length === 1 ? " entry" : " entries") }),
+      el("b", { text: money(total) })
+    ));
+
+    var page = results.slice(0, shown);
+    Expenses.groupByDay(page).forEach(function (g) { listHost.appendChild(dayGroup(g, cats, today)); });
+
+    if (results.length > shown) {
+      listHost.appendChild(el("button.btn.btn--soft", {
+        type: "button",
+        onclick: function () { shown += PAGE; renderList(); }
+      }, "Show older, " + (results.length - shown) + " left"));
+    }
+  }
+
   function render() {
     var host = document.getElementById("screen-expenses");
     if (!host) return;
@@ -74,7 +177,7 @@ var ScreenExpenses = (function () {
     var today = Dates.today();
     var cats = categoriesById();
 
-    var all = Expenses.query(s.expenses, { sortBy: "date", sortDir: "desc" }, cats);
+    var all = s.expenses;
     var monthPeriod = Dates.monthPeriod(today);
     var monthTotal = Money.sum(Expenses.inPeriod(s.expenses, monthPeriod), function (e) { return e.amount; });
 
@@ -110,24 +213,22 @@ var ScreenExpenses = (function () {
       return;
     }
 
-    /* Paging keeps two years of history from building thousands of rows at
-       once. It counts entries, not days, so a heavy day cannot blow past it. */
-    var page = all.slice(0, shown);
-    Expenses.groupByDay(page).forEach(function (g) { body.appendChild(dayGroup(g, cats, today)); });
-
-    if (all.length > shown) {
-      body.appendChild(el("button.btn.btn--soft", {
-        type: "button",
-        onclick: function () { shown += PAGE; render(); }
-      }, "Show older, " + (all.length - shown) + " left"));
-    }
-
+    body.appendChild(filterBar(cats));
+    listHost = el("div.result-list");
+    body.appendChild(listHost);
     host.appendChild(body);
+    renderList();
+    App.setBandColour("ok");
+    return;
   }
 
-  /* Leaving the screen resets paging, so coming back does not silently render
-     a thousand rows because you once tapped "show older". */
-  function reset() { shown = PAGE; }
+  /* Leaving the screen resets paging and the filters, so coming back does not
+     silently render a thousand rows, or hide most of them behind a search you
+     forgot you typed. */
+  function reset() {
+    shown = PAGE;
+    query = { search: "", categoryIds: [], sortBy: "date", sortDir: "desc" };
+  }
 
   return { render: render, reset: reset };
 })();

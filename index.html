@@ -62,74 +62,13 @@
   <!-- ══ History. Rendered by js/screen_expenses.js ══ -->
   <section class="screen" id="screen-expenses" hidden></section>
 
-  <!-- ══ People ════════════════════════════════════════════ -->
-  <section class="screen" id="screen-people" hidden>
-    <header class="band band--ok">
-      <div class="band-top"><span class="band-who"></span></div>
-      <h1 class="band-title">People</h1>
-    </header>
-    <div class="screen-body">
-      <div class="empty">
-        <h2>Nobody owes you anything</h2>
-        <p>Money you lend and money you borrow both live here, with every repayment kept.</p>
-      </div>
-    </div>
-  </section>
+  <section class="screen" id="screen-people" hidden></section>
 
-  <!-- ══ Insights ══════════════════════════════════════════ -->
-  <section class="screen" id="screen-insights" hidden>
-    <header class="band band--ok">
-      <div class="band-top"><span class="band-who"></span></div>
-      <h1 class="band-title">Insights</h1>
-    </header>
-    <div class="screen-body">
-      <div class="empty">
-        <h2>Nothing to show yet</h2>
-        <p>Once there are a few expenses, this is where the pattern in them shows up.</p>
-      </div>
-    </div>
-  </section>
+  <section class="screen" id="screen-insights" hidden></section>
 
-  <!-- ══ Goals ═════════════════════════════════════════════ -->
-  <section class="screen" id="screen-goals" hidden>
-    <header class="band band--ok">
-      <div class="band-top">
-        <button class="circle-btn" type="button" aria-label="Back" onclick="App.go('#/')"><svg width="17" height="17" aria-hidden="true"><use href="#ic-back"/></svg></button>
-      </div>
-      <h1 class="band-title">Goals</h1>
-    </header>
-    <div class="screen-body">
-      <div class="empty">
-        <h2>No goals yet</h2>
-        <p>Saving for something specific makes it much easier to leave the money alone.</p>
-      </div>
-    </div>
-  </section>
+  <section class="screen" id="screen-goals" hidden></section>
 
-  <!-- ══ Settings ══════════════════════════════════════════ -->
-  <section class="screen" id="screen-settings" hidden>
-    <header class="band band--ok">
-      <div class="band-top">
-        <button class="circle-btn" type="button" aria-label="Back" onclick="App.go('#/')"><svg width="17" height="17" aria-hidden="true"><use href="#ic-back"/></svg></button>
-      </div>
-      <h1 class="band-title">Settings</h1>
-    </header>
-    <div class="screen-body">
-      <div class="card surf--white">
-        <div class="card-head"><b>About</b></div>
-        <div class="row">
-          <span class="row-tx"><b>Version</b><span id="version-line">Plutus</span></span>
-        </div>
-        <div class="row">
-          <span class="row-tx"><b>Your data</b><span>Everything stays on this device. Nothing is sent anywhere.</span></span>
-        </div>
-        <a class="row" href="privacy.html">
-          <span class="row-tx"><b>Privacy</b><span>What is stored, and where</span></span>
-          <span class="circle-btn circle-btn--sunken"><svg width="16" height="16" aria-hidden="true"><use href="#ic-right"/></svg></span>
-        </a>
-      </div>
-    </div>
-  </section>
+  <section class="screen" id="screen-settings" hidden></section>
 
 </div>
 
@@ -158,14 +97,21 @@
 <script src="js/debts.js"></script>
 <script src="js/goals.js"></script>
 <script src="js/alerts.js"></script>
+<script src="js/recurring.js"></script>
 <script src="js/validate.js"></script>
 <script src="js/store.js"></script>
 <script src="js/actions.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/notifications.js"></script>
 <script src="js/onboarding.js"></script>
 <script src="js/sheet_expense.js"></script>
 <script src="js/screen_home.js"></script>
 <script src="js/screen_expenses.js"></script>
+<script src="js/sheet_debt.js"></script>
+<script src="js/screen_people.js"></script>
+<script src="js/screen_insights.js"></script>
+<script src="js/screen_goals.js"></script>
+<script src="js/screen_settings.js"></script>
 <script src="js/app.js"></script>
 <script>
   document.getElementById("version-line").textContent =

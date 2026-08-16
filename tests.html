@@ -390,6 +390,7 @@
       eq(Money.formatCompact(1200000, "₹", "IN"), "₹12k");
       eq(Money.formatCompact(1250000000, "₹", "IN"), "₹1.3Cr");
       eq(Money.formatCompact(20000000, "₹", "IN"), "₹2L");
+      eq(Money.formatCompact(82967, "₹", "IN"), "₹830", "the compact form drops paise");
     });
     it("reads what a person actually types", function () {
       eq(Money.parseInput("₹1,25,000"), 12500000);
@@ -666,6 +667,16 @@
       eq(Debts.view(debt, afterDelete, TODAY).status, "partially_paid");
       eq(Debts.view(debt, afterDelete, TODAY).remaining, 300000);
     });
+    it("orders two repayments on the same day deterministically", function () {
+      var reps = [
+        { id: "r1", debtId: "d1", amount: 100000, date: "2026-08-01", createdAt: "2026-08-01T09:00:00Z" },
+        { id: "r2", debtId: "d1", amount: 150000, date: "2026-08-01", createdAt: "2026-08-01T17:00:00Z" }
+      ];
+      eq(Debts.view(debt, reps, TODAY).repayments.map(function (r) { return r.id; }), ["r2", "r1"]);
+      eq(Debts.view(debt, reps.slice().reverse(), TODAY).repayments.map(function (r) { return r.id; }), ["r2", "r1"],
+         "the input order must not change the output order");
+    });
+
     it("refuses a repayment one paisa over the balance", function () {
       var v = Debts.view(debt, [], TODAY);
       eq(Debts.canAcceptRepayment(v, 500001).ok, false);

@@ -10,7 +10,12 @@ var Goals = (function () {
   function contributionsFor(goalId, contributions) {
     return (contributions || [])
       .filter(function (c) { return c.goalId === goalId; })
-      .sort(function (a, b) { return Dates.compare(b.date, a.date); });
+      .sort(function (a, b) {
+        var byDate = Dates.compare(b.date, a.date);
+        if (byDate !== 0) return byDate;
+        var ak = String(a.createdAt || a.id), bk = String(b.createdAt || b.id);
+        return ak < bk ? 1 : ak > bk ? -1 : 0;
+      });
   }
 
   function view(goal, contributions, todayISO) {
@@ -30,7 +35,9 @@ var Goals = (function () {
        the screen shows nothing instead of nonsense. */
     var perMonthNeeded = null;
     if (hasTargetDate && daysLeft > 0 && remaining > 0) {
-      perMonthNeeded = Math.round(remaining / Math.max(daysLeft / 30, 1));
+      /* Rounded UP to whole rupees: this is what you must put aside to arrive
+         on time, so rounding down would quietly miss the target. */
+      perMonthNeeded = Math.ceil(remaining / Math.max(daysLeft / 30, 1) / 100) * 100;
     }
 
     return {
