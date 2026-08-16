@@ -48,73 +48,71 @@ var ScreenHome = (function () {
           type: "button", "aria-label": unread ? unread + " unread notifications" : "Notifications",
           onclick: function () { Notifications.open(); }
         }, UI.icon("ic-bell", 17))
-      ),
-      el("h1.band-title", { text: Dates.monthName(Dates.monthPeriod(today).key) })
+      )
     );
   }
 
-  /* ── the bento ──────────────────────────────────────────────
-     Three tiles: what is left, what is spent, and how far through the
-     budget you are. The left tile is tall because "what can I still
-     spend" is the question the product exists to answer. */
+  /* ── the hero ───────────────────────────────────────────────
+     Screen one of the reference: the headline figure sits on the lit
+     ground with a bar under it, and everything else lives in the panel
+     below. What you have spent is the headline, because that is the
+     figure that changes when you act; what is left follows it. */
 
-  function bento(monthly, dailyTotals) {
+  function hero(monthly) {
     if (!monthly.hasBudget) {
-      return el("div.bento",
-        el("div.bento-tile.bento-tile--wide",
-          el("span.tile-label", { text: "Monthly budget" }),
-          el("span.tile-figure", { text: "Not set" }),
-          el("p.note", { style: { "margin-top": "6px" } },
-            "Set a budget and every figure in the app starts working."),
-          el("button.btn-pill", {
-            type: "button", style: { "margin-top": "12px", "align-self": "flex-start" },
-            onclick: function () { App.go("#/settings"); }
-          }, UI.icon("ic-plus", 15), el("span", { text: "Set a budget" }))
-        )
+      /* Still show what was actually spent. Showing zero because no budget
+         exists would be stating something false. */
+      return el("section.hero",
+        el("span.hero-label", { text: "Spent in " + Dates.monthName(monthly.period.key) }),
+        el("span.hero-figure", { text: money(monthly.spent) }),
+        el("p.note", { style: { "margin-top": "4px" } },
+          "Set a monthly budget and every figure in the app starts working."),
+        el("button.btn-pill", {
+          type: "button", style: { "margin-top": "10px", "align-self": "flex-start" },
+          onclick: function () { App.go("#/settings"); }
+        }, UI.icon("ic-plus", 15), el("span", { text: "Set a budget" }))
       );
     }
 
+    var seg = Budget.barSegments(monthly);
+    var fill = "fill--" + Budget.fillForStatus(monthly.status);
     var over = monthly.overspend > 0;
 
-    var leftTile = el("div.bento-tile.bento-tile--tall" + (over ? ".surf--danger" : ""),
-      el("span.tile-mark", { style: over ? { color: "var(--s-danger)" } : null },
-         UI.icon(over ? "ic-alert" : "ic-wallet", 18)),
-      el("span.tile-label", { text: over ? "Over budget" : "Left to spend" }),
-      el("span.tile-figure", {
-        text: over ? money(monthly.overspend) : money(monthly.remaining),
-        style: over ? { color: "var(--s-danger)" } : null
+    return el("section.hero",
+      el("span.hero-label", {
+        text: "Spent in " + Dates.monthName(monthly.period.key)
       }),
-      el("span.tile-label", {
-        text: over
-          ? monthly.period.daysLeft + " day" + (monthly.period.daysLeft === 1 ? "" : "s") + " still to go"
-          : money(monthly.safeDailyRemaining) + " a day for " + monthly.period.daysLeft +
-            " day" + (monthly.period.daysLeft === 1 ? "" : "s")
-      }),
-      el("div.tile-foot.tile-bleed", Viz.spark(dailyTotals.map(function (d) { return d.total; })))
-    );
+      el("span.hero-figure", { text: money(monthly.spent) }),
 
-    var spentTile = el("div.bento-tile",
-      el("span.tile-mark", UI.icon("ic-chart", 17)),
-      el("span.tile-label", { text: "Spent" }),
-      el("span.tile-figure", { text: compact(monthly.spent) }),
-      el("span.tile-label", {
-        text: monthly.transactionCount + (monthly.transactionCount === 1 ? " entry" : " entries")
-      })
-    );
+      el("div.bar.hero-bar", {
+        role: "progressbar",
+        "aria-valuenow": String(Math.round(monthly.percentUsed)),
+        "aria-valuemin": "0", "aria-valuemax": "100",
+        "aria-label": "Monthly budget used"
+      },
+        el("i." + fill, { style: { width: seg.inside + "%" } }),
+        seg.over > 0 ? el("i." + fill + ".fill--over", { style: { width: seg.over + "%" } }) : null
+      ),
 
-    var ringColour = monthly.status === "exceeded" || monthly.status === "at_limit" ? "var(--s-danger)"
-                   : monthly.status === "near_limit" ? "var(--s-warn)" : "var(--s-ok)";
-    var ringTile = el("div.bento-tile",
-      el("div.ring-wrap", { style: { margin: "2px 0" } },
-        Viz.ring(Math.min(monthly.percentUsed, 100), { colour: ringColour, width: 13 }),
-        el("div.ring-mid",
-          el("b", { text: Math.round(monthly.percentUsed) + "%" }),
-          el("span", { text: "used" })
-        )
+      el("div.hero-foot",
+        el("span", {},
+          over ? el("b", { text: money(monthly.overspend) + " over" })
+               : el("b", { text: money(monthly.remaining) + " left" }),
+          el("span", { text: " of " + money(monthly.budget) })
+        ),
+        el("span", { text: Math.round(monthly.percentUsed) + "% used" })
+      ),
+
+      el("div.hero-foot", { style: { "margin-top": "-2px" } },
+        el("span", {
+          text: over
+            ? monthly.period.daysLeft + " day" + (monthly.period.daysLeft === 1 ? "" : "s") + " still to go"
+            : money(monthly.safeDailyRemaining) + " a day for the " + monthly.period.daysLeft +
+              " day" + (monthly.period.daysLeft === 1 ? "" : "s") + " left"
+        }),
+        el("span", { text: monthly.transactionCount + (monthly.transactionCount === 1 ? " entry" : " entries") })
       )
     );
-
-    return el("div.bento", leftTile, spentTile, ringTile);
   }
 
   /* ── the week, and the day you tapped ── */
@@ -254,7 +252,11 @@ var ScreenHome = (function () {
     );
   }
 
-  /* ── render ── */
+  /* ── render ──────────────────────────────────────────────────
+     Header and hero on the lit ground, then one opaque panel with
+     rounded top corners carrying everything else to the bottom of the
+     screen. Tiles floating on a gradient never covered it convincingly,
+     and the seam is what gives the screen its structure. */
 
   function render() {
     var host = document.getElementById("screen-home");
@@ -282,13 +284,10 @@ var ScreenHome = (function () {
 
     UI.clear(host);
     host.appendChild(header(s.profile, today, unread));
+    host.appendChild(hero(monthly));
 
-    var body = el("div.screen-body");
-    /* Several of these sections return null when they have nothing to say,
-       and appendChild(null) throws where UI.el would simply skip it. */
-    function add(node) { if (node) body.appendChild(node); }
-
-    add(bento(monthly, Expenses.dailyTotals(s.expenses, monthPeriod)));
+    var panel = el("section.panel");
+    function add(node) { if (node) panel.appendChild(node); }
 
     if (s.expenses.length) {
       weekSection(s, weekPeriod, today, cats).forEach(add);
@@ -305,7 +304,7 @@ var ScreenHome = (function () {
     add(insightCard(insights));
     add(installCard());
 
-    host.appendChild(body);
+    host.appendChild(panel);
     App.setBandColour(monthly.hasBudget ? monthly.surface : "ok");
   }
 

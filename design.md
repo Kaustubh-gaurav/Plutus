@@ -36,6 +36,43 @@ Type is **light and large**: headline figures sit around weight 300, not 800. Th
 
 The accent is **data ink**. It draws rings, curves, bars and the one primary action, and it is not used as a background anywhere except that action.
 
+## 0aa. Home: hero on the ground, everything else on a panel
+
+Screen one of the reference does two things that the first attempt at this
+direction missed.
+
+**The glow lights the top of the screen. It is not a picture.** The first pass
+had three heavy washes including one from below, and it read as a background
+rather than as light. It is now two, at roughly half the opacity, fading out
+before the panel starts.
+
+**A solid rounded panel carries the content.** Tiles floating on a gradient
+never cover it convincingly: you see the wash between and behind them, and the
+screen has no floor. So Home is now:
+
+```
+   header      avatar, greeting, bell          on the lit ground
+   hero        SPENT IN AUGUST                 on the lit ground
+               9,168          the headline
+               bar
+               15,832 left of 25,000, 37% used
+   +--------------------------------------+
+   | day strip                            |   the panel: opaque, radius 30,
+   | the day you tapped, as a list        |   darker than the lit ground, and
+   | owed to you / you owe                |   always runs to the bottom of the
+   | where it went                        |   screen whatever the content
+   | one insight                          |
+   +--------------------------------------+
+```
+
+Spent is the headline rather than remaining, because spent is the figure that
+moves when you act. What is left sits directly under it, in the same breath.
+
+The panel is **darker** than the ground above it, not lighter, so the seam
+reads and the cards on it are the raised things. It also grows to fill the
+screen, because a panel that stops where its content ends leaves the wash
+showing underneath, which is the whole problem it exists to solve.
+
 ## 0b. Components the reference gave us
 
 * **Bento tile.** Radius 20, one dark surface, a hairline border. A tall variant spans two rows, a wide one spans two columns.

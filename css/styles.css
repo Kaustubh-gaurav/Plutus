@@ -19,6 +19,9 @@
   --surface:    #0E1B17;   /* every tile and card */
   --surface-2:  #142320;   /* inputs, raised things inside a card */
   --sunken:     #0B1613;   /* tracks and wells */
+  --panel:      #04100D;   /* the solid sheet. Darker than the lit ground on
+                              purpose: the seam is what gives the screen its
+                              structure, and cards on it read as raised. */
   --line:       rgba(255, 255, 255, .07);
   --line-2:     rgba(255, 255, 255, .12);
 
@@ -115,16 +118,19 @@ body {
    nearly identical dark rectangle and still separate from the page. */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  /* Pulled back hard from the first attempt. The glow is meant to light the
+     top of the screen, not to be a picture: it now fades out well before the
+     panel starts, and the wash from below is gone entirely because the panel
+     covers that area anyway. */
   background:
-    radial-gradient(120% 65% at 12% -8%,  rgba(58, 168, 106, .40) 0%, rgba(58, 168, 106, 0) 62%),
-    radial-gradient(95% 55% at 96% 6%,    rgba(37, 158, 168, .26) 0%, rgba(37, 158, 168, 0) 60%),
-    radial-gradient(120% 70% at 50% 108%, rgba(30, 92, 74, .35) 0%,  rgba(30, 92, 74, 0) 70%),
+    radial-gradient(95% 42% at 18% -6%, rgba(58, 168, 106, .20) 0%, rgba(58, 168, 106, 0) 66%),
+    radial-gradient(75% 34% at 92% 2%,  rgba(37, 158, 168, .13) 0%, rgba(37, 158, 168, 0) 62%),
     var(--canvas);
 }
 /* A faint grain, so large flat gradients do not band on cheap panels. */
 body::after {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  opacity: .035;
+  opacity: .022;
   background-image: radial-gradient(rgba(255,255,255,.9) .5px, transparent .5px);
   background-size: 3px 3px;
 }
@@ -148,6 +154,10 @@ svg { display: block; }
 .screen {
   min-height: 100svh;
   padding-bottom: calc(var(--nav-h) + 30px + env(safe-area-inset-bottom));
+  /* A column, so a panel can take whatever height is left. Without this the
+     panel stops wherever its content ends and the lit ground shows through
+     underneath, which is the thing the panel exists to prevent. */
+  display: flex; flex-direction: column;
 }
 
 /* The header is transparent: the ambient glow is the header. */
@@ -176,6 +186,47 @@ svg { display: block; }
   padding: var(--sp-3) var(--gutter) 0;
   display: flex; flex-direction: column; gap: var(--sp-5);
 }
+
+/* ============================================================
+   The hero and the panel.
+
+   From screen one of the reference: the headline figure sits on the lit
+   ground at the top, and everything else lives in a solid rounded panel
+   that starts under it and runs to the bottom of the screen.
+
+   The panel is opaque on purpose. Tiles floating on a gradient never
+   cover it convincingly, and the seam between lit ground and solid panel
+   is what gives the screen its structure.
+   ============================================================ */
+
+.hero { padding: 0 var(--gutter) var(--sp-8); display: flex; flex-direction: column; gap: var(--sp-3); }
+.hero-label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.hero-figure {
+  font-size: 52px; font-weight: 300; letter-spacing: -.04em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hero-bar { margin-top: var(--sp-3); }
+.hero-foot {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12.5px; color: var(--ink-2);
+}
+.hero-foot b { color: var(--ink); font-weight: 500; }
+
+.panel {
+  background: var(--panel);
+  border-top: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 30px 30px 0 0;
+  box-shadow: 0 -18px 40px rgba(0, 0, 0, .45);
+  padding: var(--sp-7) var(--gutter) calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: var(--sp-5);
+  flex: 1 0 auto;
+  /* The panel is the page below the fold, so the screen's own bottom
+     padding would double up. */
+  margin-bottom: calc((var(--nav-h) + 30px + env(safe-area-inset-bottom)) * -1);
+}
+/* Inside the panel the tiles sit on a slightly lighter ground, so they
+   still read as objects on a surface rather than holes in it. */
+.panel .card, .panel .tile { background: var(--surface); }
 
 /* ============================================================
    Bento. The layout idea of the reference: a modular grid where a
@@ -412,8 +463,8 @@ a.row { color: inherit; text-decoration: none; }
   height: calc(var(--nav-h) + env(safe-area-inset-bottom));
   padding: 0 var(--sp-8) env(safe-area-inset-bottom);
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(to top, var(--canvas) 42%, rgba(7, 17, 16, 0));
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: var(--panel);
+  border-top: 1px solid var(--line);
 }
 .nav-tab { width: 44px; height: 44px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--ink-3); }
 .nav-tab[aria-current="page"] { color: var(--s-ok); }

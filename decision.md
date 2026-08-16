@@ -97,6 +97,9 @@ Status: done as 2.2.0. Accent cut to under 2 percent of a screen, measured. Hard
 **REQ 022.** "This is also not good, I've pasted a new design inspiration, please go through it and redo the design, also you can make the components that look like that in the inspiration and change the layout if needed as well."
 A single new reference: a fitness dashboard, ambient dark green, bento tiles, data as the hero. Status: done as 3.0.0, including a new Home layout.
 
+**REQ 023.** "The gradient looks too much in the bg and the boxes in front of it don't cover it well enough. For the home screen take inspiration from the first screen in the inspiration image: keep the main monthly spent at the top with a bar, and then the rest of the things in that rounded box below it."
+Status: done as 3.1.0.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -560,6 +563,30 @@ Why: a tile's size is how important the thing inside it is, and "what can I stil
 
 **D114. Every screen opens on the ambient ground.** The header is transparent, the gradient runs to the top of the screen, and the status bar matches the canvas in every state. No coloured header block anywhere, which retires the last of the band colour idea from D042 and D098. D053 now lives in the ring and the tall tile's border instead.
 
+### The hero and the panel, 17 August 2026
+
+**D115. The glow lights the top of the screen. It is not a picture.**
+Three washes including one from below became two, at roughly half the opacity, fading out before the panel starts. The grain dropped from 3.5 to 2.2 percent.
+Why: at the first strength it read as a background rather than as light, and it competed with the content instead of lifting it.
+
+**D116. Home is a hero on the lit ground, then one solid panel.**
+Header and hero sit on the glow. Everything else lives in an opaque panel with a 30px rounded top that runs to the bottom of the screen: the day strip, the day you tapped, the direction tiles, where it went, and one insight.
+Why: tiles floating on a gradient never cover it convincingly. You see the wash between and behind them and the screen has no floor. The seam between lit ground and solid panel is what gives the screen its structure, and it is what screen one of the reference does.
+
+**D117. The panel is darker than the ground above it, not lighter.**
+The first attempt made it a shade lighter and its edge was invisible. Darker makes the seam read, and makes the cards on it the raised things.
+
+**D118. The panel grows to fill whatever height is left.**
+Caught by testing a nearly empty month: with one expense the panel stopped mid screen and the wash showed underneath, which is the exact problem the panel exists to solve. `.screen` is a flex column and the panel takes the remaining space.
+
+**D119. Spent is the headline, not remaining.**
+The hero reads "Spent in August", the figure, the bar, then "left of budget" and the percentage.
+Why: spent is the figure that moves when you act, so it is the one that rewards looking. What is left follows immediately, in the same breath, so nothing is lost.
+This also retires the ring from Home: the bar already says what the ring said, and one representation of budget progress is better than two. The ring component stays, and Goals still uses it.
+
+**D120. With no budget, the hero still shows real spending.**
+It showed zero, which is false the moment anything has been recorded. Rule R2 again.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -709,6 +736,14 @@ Why: a tile's size is how important the thing inside it is, and "what can I stil
 **C072.** Also fixed: Home called `appendChild` with sections that legitimately return null, which throws where `UI.el` would have skipped them. That is what a null direction tile does on a device with no debts.
 
 **C073.** Verified: bento renders three tiles, the ring draws, the spark draws, the day strip has seven days and tapping one switches the list, the ambient layer is present, headline figures compute at weight 300, the nav is on screen, every control is named, nothing is under 36px, no NaN anywhere. 130 unit tests still pass.
+
+**C074.** Pulled the ambient wash back to roughly half strength and removed the one from below entirely, since the panel covers that area now.
+
+**C075.** Rebuilt Home as hero plus panel, per screen one of the reference. Removed the ring from Home as redundant against the bar.
+
+**C076.** Three fixes found by rendering rather than reading: the panel was a shade lighter than the ground so its edge was invisible, the panel stopped where its content ended on a sparse month and let the wash show underneath, and the no budget hero displayed zero when money had been spent.
+
+**C077.** 19 checks pass, including that the panel is opaque, has its rounded corners, contains the day strip and the list, and runs past the fold on a nearly empty month. 130 unit tests still pass.
 
 ## Open questions
 
