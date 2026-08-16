@@ -99,6 +99,20 @@ var Budget = (function () {
     };
   }
 
+  /* Which fill a progress bar uses. Like the surface mapping above, this
+     lives in exactly one place so the bar, the pill and the alert copy can
+     never disagree about what "at the limit" looks like.
+
+     Reaching the limit turns the bar red, on every surface. Overspend is
+     still marked with the hatch on top of that, so the two facts stay
+     separable: red says you are at or past the budget, the hatch says how
+     much of what you spent was past it. */
+  function fillForStatus(status) {
+    if (status === "exceeded" || status === "at_limit") return "danger";
+    if (status === "near_limit") return "warn";
+    return "ok";
+  }
+
   /* How much of the bar is inside the budget, and how much is overspend.
      The overspend segment carries the hatch. Both are percentages of the
      drawn bar, not of the budget, so they always add up to 100. */
@@ -113,6 +127,7 @@ var Budget = (function () {
     resolveForPeriod: resolveForPeriod,
     statusFromPercent: statusFromPercent,
     surfaceForStatus: surfaceForStatus,
+    fillForStatus: fillForStatus,
     progress: progress,
     barSegments: barSegments,
     LABELS: LABELS

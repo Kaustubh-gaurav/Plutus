@@ -82,6 +82,9 @@ Status: done. Add, edit, delete, categories and history, with 127 tests passing.
 **REQ 017.** "Make all the phases now, don't stop to ask."
 Status: done. Phases 5 to 9 built in one pass. Phase 10, Android packaging, needs a Play account and a signing key, so it stays with the user.
 
+**REQ 018.** "Add a download like an app option, also the bar should become red when the limit has been reached for the weekly/monthly budget."
+Status: done. Both shipped as 1.1.0.
+
 **REQ 005.** "First we will deploy it on github and then we might go on playstore, so keep the stack decision like that."
 Read as: keep the static PWA stack, and make sure the Play Store remains reachable later without a rewrite.
 Status: done. Portability rules added to all four documents and a Phase 10 added to `implementation.md`.
@@ -447,6 +450,25 @@ An installed PWA on iOS handles downloads inconsistently, and export is the only
 **D089. Segmented control buttons are 44px minimum.**
 They were 34px. Caught by measuring every control on every screen rather than by looking at them.
 
+### Install and the red bar, 16 August 2026
+
+**D090. A progress bar turns red at the limit, not merely past it.**
+`Budget.fillForStatus` is the single mapping: ok below 75, warn to 99, danger at 100 and above. `at_limit` is exactly 100 percent, and it is red, because reaching the budget is the event worth flagging rather than the first rupee past it.
+The hatch still marks overspend on top of that, so the two facts stay separable: red says you are at or past the budget, the hatch says how much of what you spent was past it.
+
+**D091. On the mustard weekly card the fill stays ink below the limit.**
+The shared mapping's warning colour IS mustard, so following it on a mustard surface produced an almost invisible bar at 80 percent. Caught by rendering four levels side by side. Law 5 again: marks follow the surface they sit on.
+Only red is the exception there, because that is the one state that must interrupt.
+
+**D092. The monthly bar inside the band keeps `currentColor`.**
+The band is already the status colour, so at the limit the whole band is red and a red bar on it would be invisible. The comment sits in the code so nobody "fixes" it later.
+
+**D093. Installing is offered in two places and nagged in neither.**
+A dismissible card on Home, and a permanent row in Settings. Dismissal is stored in settings, so it is offered once and then never again unless asked for.
+
+**D094. The install offer branches by platform, because the platforms genuinely differ.**
+Chrome and Edge fire `beforeinstallprompt`, which is captured, held and spent on a real tap. iOS Safari fires nothing and offers no API, so there it shows the three Share menu steps instead of a button that could not work. Verified with a spoofed iPhone user agent: three steps, no button.
+
 ## Changes applied
 
 ### 2026 08 15
@@ -550,6 +572,14 @@ They were 34px. Caught by measuring every control on every screen rather than by
 **C049.** Ran every acceptance flow from `context.md` section 16 end to end through the real interface. All 28 checks pass. Three failures in that run turned out to be wrong expectations in the harness rather than app defects, and one of them surfaced the ordering weakness in D086.
 
 **C050.** Tests at **128**. Deploy checklist clean: every shell file exists, every script is in the shell, `CACHE` at `plutus-v5`, `VERSION` at `1.0.0`, no absolute paths, no unloaded files.
+
+**C051.** Added `js/install.js` and the two entry points, plus `settings.installDismissed` in the store, which needed no migration because a missing field already defaults.
+
+**C052.** Made bars turn red at the limit, from one shared mapping in `budget.js` so the bar, the pill and the alert copy cannot drift apart. Two tests added, including one asserting exactly 100 percent lands in the red band and that at the limit is not the same as over it.
+
+**C053.** Caught and fixed a regression the change introduced: mustard fill on the mustard weekly card was nearly invisible at 80 percent. Found by rendering 43, 80, 100 and 130 percent side by side rather than by looking at one.
+
+**C054.** 130 tests passing. `CACHE` at `plutus-v6`, `VERSION` at `1.1.0`.
 
 ## Open questions
 

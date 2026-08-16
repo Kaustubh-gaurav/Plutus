@@ -162,6 +162,8 @@ var App = (function () {
       add.addEventListener("click", function () { SheetExpense.open(); });
     }
 
+    if (typeof Install !== "undefined") Install.listen();
+
     registerServiceWorker();
     render();
     document.body.removeAttribute("data-booting");

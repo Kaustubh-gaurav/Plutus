@@ -500,6 +500,23 @@
       eq(statusAt(100), "at_limit");
       eq(statusAt(101), "exceeded");
     });
+    it("turns the bar red the moment the limit is reached", function () {
+      /* The user's rule: at the limit, not merely past it. */
+      eq(Budget.fillForStatus("on_track"), "ok");
+      eq(Budget.fillForStatus("approaching"), "ok");
+      eq(Budget.fillForStatus("near_limit"), "warn");
+      eq(Budget.fillForStatus("at_limit"), "danger");
+      eq(Budget.fillForStatus("exceeded"), "danger");
+    });
+
+    it("puts exactly 100 percent into the red band, not the amber one", function () {
+      var p = Budget.progress(2500000, [exp(2500000, "2026-08-05")], MONTH);
+      eq(p.status, "at_limit");
+      eq(Budget.fillForStatus(p.status), "danger");
+      eq(p.remaining, 0);
+      eq(p.overspend, 0, "at the limit is not the same as over it");
+    });
+
     it("reports overspend rather than a negative remaining", function () {
       var p = Budget.progress(2500000, [exp(2750000, "2026-08-05")], MONTH);
       eq(p.remaining, 0);

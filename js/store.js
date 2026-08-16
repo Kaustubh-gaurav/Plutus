@@ -60,7 +60,8 @@ var Store = (function () {
         budgetAlerts: true,
         thresholds: CONFIG.DEFAULT_THRESHOLDS.slice(),
         dueReminders: true,
-        dueReminderDays: CONFIG.DEFAULT_DUE_REMINDER_DAYS
+        dueReminderDays: CONFIG.DEFAULT_DUE_REMINDER_DAYS,
+        installDismissed: false
       },
       categories: [],
       expenses: [],
@@ -119,7 +120,8 @@ var Store = (function () {
         thresholds: Array.isArray(t.thresholds) && t.thresholds.length
           ? t.thresholds.slice() : b.settings.thresholds,
         dueReminders: bool(t.dueReminders, true),
-        dueReminderDays: num(t.dueReminderDays, b.settings.dueReminderDays)
+        dueReminderDays: num(t.dueReminderDays, b.settings.dueReminderDays),
+        installDismissed: bool(t.installDismissed, false)
       },
       categories: arr(s.categories),
       expenses: arr(s.expenses),

@@ -647,6 +647,9 @@ var ScreenSettings = (function () {
 
       el("div.card.surf--cream",
         el("div.card-head", el("b", { text: "About" })),
+        row("Install as an app",
+            typeof Install !== "undefined" && Install.isStandalone() ? "Already installed" : "Add it to your home screen",
+            function () { Install.open(); }),
         el("div.row", el("span.row-tx",
           el("b", { text: "Version" }),
           el("span", { text: "Plutus " + CONFIG.VERSION })

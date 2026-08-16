@@ -61,6 +61,10 @@ var ScreenHome = (function () {
     }));
 
     var seg = Budget.barSegments(monthly);
+    /* This bar sits inside the band, and the band is already the status
+       colour: teal, then mustard, then red at the limit. A red bar on a red
+       band would be invisible, so here the fill stays currentColor and the
+       whole band carries the warning instead. */
     nodes.push(el("div.bar-wrap", { style: { "margin-top": "12px" } },
       el("div.bar-label", { style: { opacity: ".85" } },
         el("span", { text: money(monthly.spent) + " of " + money(monthly.budget) }),
@@ -97,10 +101,20 @@ var ScreenHome = (function () {
   function weeklyCard(weekly) {
     if (!weekly.hasBudget) return null;
     var seg = Budget.barSegments(weekly);
+    var atLimit = weekly.status === "at_limit" || weekly.status === "exceeded";
+    /* The card keeps its mustard identity, per law 4, and the bar inside it
+       carries the state: red the moment the limit is reached.
+
+       Below the limit the fill stays ink rather than following the shared
+       status mapping, because that mapping's warning colour IS mustard, and
+       mustard on mustard is an invisible bar. Law 5: text and marks follow
+       the surface they sit on. */
+    var fill = atLimit ? "fill--danger" : "fill--ink";
     return el("div.card.surf--warn",
       el("div.card-head",
         el("b", { text: "This week" }),
-        el("span.pill.pill--dark", { text: Math.round(weekly.percentUsed) + "% used" })
+        el("span.pill." + (atLimit ? "pill--danger" : "pill--dark"),
+           { text: Math.round(weekly.percentUsed) + "% used" })
       ),
       el("div.bar-wrap",
         el("div.bar-label",
@@ -111,8 +125,8 @@ var ScreenHome = (function () {
           role: "progressbar", "aria-valuenow": String(Math.round(weekly.percentUsed)),
           "aria-valuemin": "0", "aria-valuemax": "100", "aria-label": "Weekly budget used"
         },
-          el("i.fill--ink", { style: { width: seg.inside + "%" } }),
-          seg.over > 0 ? el("i.fill--ink.fill--over", { style: { width: seg.over + "%" } }) : null
+          el("i." + fill, { style: { width: seg.inside + "%" } }),
+          seg.over > 0 ? el("i." + fill + ".fill--over", { style: { width: seg.over + "%" } }) : null
         )
       )
     );
@@ -209,6 +223,27 @@ var ScreenHome = (function () {
     return card;
   }
 
+  /* ── install ────────────────────────────────────────────────
+     Offered once, dismissible for good. An app that nags to be installed is
+     an app people uninstall. */
+
+  function installCard() {
+    if (typeof Install === "undefined") return null;
+    if (!Install.available() || Install.isDismissed()) return null;
+    return el("div.card.surf--ink.install-card",
+      el("div.card-head",
+        el("b", { text: "Keep Plutus on your home screen" }),
+        el("button.circle-btn", {
+          type: "button", "aria-label": "Not now",
+          onclick: function () { Install.dismiss(); }
+        }, UI.icon("ic-close", 15))
+      ),
+      el("p.note", { text: "Its own icon, no browser bars, and it opens with no signal." }),
+      el("button.btn.btn--onink", { type: "button", onclick: function () { Install.open(); } },
+        "Add it")
+    );
+  }
+
   /* ── one insight, the most useful thing the app can say right now ── */
 
   function insightCard(insights) {
@@ -268,6 +303,7 @@ var ScreenHome = (function () {
 
     var body = el("div.screen-body",
       weeklyCard(weekly),
+      installCard(),
       directionTiles(summary),
       dayChart(s.expenses, weekPeriod, weekly, today),
       categoryCard(analysis, s.categories, monthPeriod),

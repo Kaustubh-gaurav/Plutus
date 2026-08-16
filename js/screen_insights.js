@@ -152,8 +152,7 @@ var ScreenInsights = (function () {
             el("span", { text: Math.round(progress.percentUsed) + "%" })
           ),
           el("div.bar",
-            el("i." + (progress.status === "exceeded" ? "fill--danger" : progress.status === "near_limit" ? "fill--warn" : "fill--ok"),
-               { style: { width: seg2.inside + "%" } }),
+            el("i.fill--" + Budget.fillForStatus(progress.status), { style: { width: seg2.inside + "%" } }),
             seg2.over > 0 ? el("i.fill--danger.fill--over", { style: { width: seg2.over + "%" } }) : null
           )
         )
